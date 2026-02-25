@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+/* ── Nation colour palette ──────────────────────────────────────────────────── */
+:root {
+	--color-minoa: #7cb342;
+	--color-saba: #e57373;
+	--color-assyria: #42a5f5;
+	--color-maurya: #f44336;
+	--color-celt: #388e3c;
+	--color-babylon: #757575;
+	--color-carthage: #ff9800;
+	--color-dravidia: #1a237e;
+	--color-hatti: #e91e63;
+	--color-kushan: #8d6e63;
+	--color-rome: #e91e63;
+	--color-persia: #673ab7;
+	--color-iberia: #757575;
+	--color-nubia: #26a69a;
+	--color-hellas: #ffeb3b;
+	--color-indus: #2e7d32;
+	--color-egypt: #d7ccc8;
+	--color-parthia: #689f38;
+}
