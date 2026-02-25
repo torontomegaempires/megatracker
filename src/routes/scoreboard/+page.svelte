@@ -2,6 +2,7 @@
 	import { gameStore } from '$lib/stores/game.svelte.js';
 	import { goto } from '$app/navigation';
 	import { calcVictoryPoints } from '$lib/utils/vp.js';
+	import { CARD_MAP } from '$lib/data/cards.js';
 
 	$effect(() => {
 		if (!gameStore.session) goto('/');
@@ -9,7 +10,7 @@
 
 	const ranked = $derived(
 		(gameStore.session?.players ?? [])
-			.map((p) => ({ p, vp: calcVictoryPoints(p, new Map(), false) }))
+			.map((p) => ({ p, vp: calcVictoryPoints(p, CARD_MAP, false) }))
 			.sort((a, b) => b.vp.total - a.vp.total || a.p.astRanking - b.p.astRanking)
 	);
 </script>

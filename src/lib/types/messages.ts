@@ -74,6 +74,12 @@ export interface PlayerFieldUpdatePayload {
 	description: string;
 }
 
+export interface CardPurchasePayload {
+	cardId: string;
+	/** Client-calculated net cost — host re-validates independently */
+	netCost: number;
+}
+
 // ─── Typed Messages ───────────────────────────────────────────────────────────
 
 export type ActionMessage = Message & { type: 'ACTION'; payload: unknown };

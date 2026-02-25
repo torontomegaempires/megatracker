@@ -180,6 +180,14 @@ export const clientNet = {
 	},
 
 	/**
+	 * Send a card purchase action to the host for validation.
+	 * The host re-validates net cost independently before applying.
+	 */
+	sendCardPurchase(cardId: string, netCost: number): void {
+		this.sendAction('PURCHASE_CARD', { cardId, netCost });
+	},
+
+	/**
 	 * Send a civilisation change to the host (lobby only).
 	 */
 	sendSetCiv(civId: string): void {

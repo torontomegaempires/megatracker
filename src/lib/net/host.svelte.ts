@@ -11,6 +11,8 @@ import { CIVILISATIONS } from '../data/civilisations.js';
 import { COMMODITY_TYPES } from '../types/game.js';
 import { createDefaultTokenPool } from '../utils/token-pool.js';
 import type { GameSession, Player, GameVariant } from '../types/game.js';
+import { CARD_MAP } from '../data/cards.js';
+import { calcNetCardCost } from '../utils/vp.js';
 import type {
 	TypedMessage,
 	StatePatchPayload,
@@ -18,7 +20,8 @@ import type {
 	PhaseChangePayload,
 	JoinRequestPayload,
 	TokenTransferActionPayload,
-	PlayerFieldUpdatePayload
+	PlayerFieldUpdatePayload,
+	CardPurchasePayload
 } from '../types/messages.js';
 import type { TokenTransfer } from '../types/game.js';
 
@@ -107,6 +110,10 @@ function handleMessage(conn: DataConnection, msg: TypedMessage): void {
 		const senderId = _peerToPlayer.get(conn.peer);
 		if (!senderId) return;
 		handleSetCiv(senderId, payload as { civId: string });
+	} else if (actionType === 'PURCHASE_CARD') {
+		const senderId = _peerToPlayer.get(conn.peer);
+		if (!senderId) return;
+		handleCardPurchase(senderId, payload as unknown as CardPurchasePayload);
 	} else if (actionType === 'SET_READY') {
 		const senderId = _peerToPlayer.get(conn.peer);
 		if (!senderId) return;
@@ -285,6 +292,88 @@ function handlePlayerFieldUpdate(playerId: string, payload: PlayerFieldUpdatePay
 	const patchPayload: StatePatchPayload = {
 		affectedPlayerId: playerId,
 		patch: payload.patch,
+		actionEntry
+	};
+	peerNet.broadcast(makeStatePatch(patchPayload));
+}
+
+function handleCardPurchase(playerId: string, payload: CardPurchasePayload): void {
+	const session = gameStore.session;
+	if (!session || session.status !== 'active') return;
+	if (session.currentPhase !== 12) {
+		const peerId = _playerToPeer.get(playerId);
+		if (peerId) peerNet.sendTo(peerId, makeBroadcast('Card purchases are only allowed during Phase 12.'));
+		return;
+	}
+
+	const player = session.players.find((p) => p.playerId === playerId);
+	if (!player) return;
+
+	const card = CARD_MAP.get(payload.cardId);
+	if (!card) {
+		const peerId = _playerToPeer.get(playerId);
+		if (peerId) peerNet.sendTo(peerId, makeBroadcast(`Unknown card: ${payload.cardId}`));
+		return;
+	}
+
+	if (player.ownedCardIds.includes(payload.cardId)) {
+		const peerId = _playerToPeer.get(playerId);
+		if (peerId) peerNet.sendTo(peerId, makeBroadcast(`You already own ${card.name}.`));
+		return;
+	}
+
+	// Host re-validates net cost independently — ignores client's claimed value
+	const ownedCards = player.ownedCardIds
+		.map((id) => CARD_MAP.get(id))
+		.filter((c): c is NonNullable<typeof c> => c !== undefined);
+	const trueNetCost = calcNetCardCost(card, ownedCards);
+
+	if (player.inTreasury < trueNetCost) {
+		const peerId = _playerToPeer.get(playerId);
+		if (peerId)
+			peerNet.sendTo(
+				peerId,
+				makeBroadcast(
+					`Insufficient treasury for ${card.name}: need ${trueNetCost}, have ${player.inTreasury}.`
+				)
+			);
+		return;
+	}
+
+	const previousTreasury = player.inTreasury;
+	const previousOwnedCardIds = [...player.ownedCardIds];
+
+	// Apply treasury payment (inTreasury → inStock)
+	if (trueNetCost > 0) {
+		gameStore.applyPlayerTransfers(playerId, [
+			{ from: 'inTreasury', to: 'populationInStock', amount: trueNetCost }
+		]);
+	}
+
+	// Add card to owned list
+	gameStore.updatePlayerFields(playerId, {
+		ownedCardIds: [...player.ownedCardIds, payload.cardId]
+	});
+
+	const updatedPlayer = session.players.find((p) => p.playerId === playerId)!;
+
+	const actionEntry = buildActionEntry({
+		actionType: 'PURCHASE_CARD',
+		description: `${player.playerName} purchased ${card.name} for ${trueNetCost} treasury.`,
+		initiatedBy: playerId,
+		affectedPlayerId: playerId,
+		previousValue: { inTreasury: previousTreasury, ownedCardIds: previousOwnedCardIds },
+		newValue: { inTreasury: updatedPlayer.inTreasury, ownedCardIds: updatedPlayer.ownedCardIds }
+	});
+	gameStore.appendActionEntry(actionEntry);
+
+	const patchPayload: StatePatchPayload = {
+		affectedPlayerId: playerId,
+		patch: {
+			inTreasury: updatedPlayer.inTreasury,
+			populationInStock: updatedPlayer.populationInStock,
+			ownedCardIds: [...updatedPlayer.ownedCardIds]
+		},
 		actionEntry
 	};
 	peerNet.broadcast(makeStatePatch(patchPayload));
@@ -489,6 +578,73 @@ export const hostNet = {
 				populationOnBoard: updated.populationOnBoard,
 				populationInStock: updated.populationInStock,
 				inTreasury: updated.inTreasury
+			},
+			actionEntry
+		};
+		peerNet.broadcast(makeStatePatch(patchPayload));
+		return null;
+	},
+
+	/**
+	 * Apply a card purchase initiated by the host player themselves.
+	 * Same validation as handleCardPurchase but uses the host's own playerId.
+	 */
+	applyHostCardPurchase(cardId: string): string | null {
+		const playerId = gameStore.myPlayerId;
+		if (!playerId) return 'Not in a session.';
+
+		const session = gameStore.session;
+		if (!session) return 'No active session.';
+		if (session.status !== 'active') return 'Session is not active.';
+		if (session.currentPhase !== 12) return 'Card purchases are only allowed during Phase 12.';
+
+		const player = session.players.find((p) => p.playerId === playerId);
+		if (!player) return 'Player not found.';
+
+		const card = CARD_MAP.get(cardId);
+		if (!card) return `Unknown card: ${cardId}`;
+
+		if (player.ownedCardIds.includes(cardId)) return `You already own ${card.name}.`;
+
+		const ownedCards = player.ownedCardIds
+			.map((id) => CARD_MAP.get(id))
+			.filter((c): c is NonNullable<typeof c> => c !== undefined);
+		const trueNetCost = calcNetCardCost(card, ownedCards);
+
+		if (player.inTreasury < trueNetCost)
+			return `Insufficient treasury for ${card.name}: need ${trueNetCost}, have ${player.inTreasury}.`;
+
+		const previousTreasury = player.inTreasury;
+		const previousOwnedCardIds = [...player.ownedCardIds];
+
+		if (trueNetCost > 0) {
+			gameStore.applyPlayerTransfers(playerId, [
+				{ from: 'inTreasury', to: 'populationInStock', amount: trueNetCost }
+			]);
+		}
+
+		gameStore.updatePlayerFields(playerId, {
+			ownedCardIds: [...player.ownedCardIds, cardId]
+		});
+
+		const updatedPlayer = session.players.find((p) => p.playerId === playerId)!;
+
+		const actionEntry = buildActionEntry({
+			actionType: 'PURCHASE_CARD',
+			description: `${player.playerName} purchased ${card.name} for ${trueNetCost} treasury.`,
+			initiatedBy: playerId,
+			affectedPlayerId: playerId,
+			previousValue: { inTreasury: previousTreasury, ownedCardIds: previousOwnedCardIds },
+			newValue: { inTreasury: updatedPlayer.inTreasury, ownedCardIds: updatedPlayer.ownedCardIds }
+		});
+		gameStore.appendActionEntry(actionEntry);
+
+		const patchPayload: StatePatchPayload = {
+			affectedPlayerId: playerId,
+			patch: {
+				inTreasury: updatedPlayer.inTreasury,
+				populationInStock: updatedPlayer.populationInStock,
+				ownedCardIds: [...updatedPlayer.ownedCardIds]
 			},
 			actionEntry
 		};

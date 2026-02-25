@@ -566,9 +566,14 @@
 
 	{:else if phase === 12}
 		<!-- Civilisation Advances -->
-		<p class="mb-3 text-sm text-slate-300">
-			Pay for civilisation advances from treasury (moved to stock).
-		</p>
+		<a
+			href="/market"
+			class="mb-3 flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 active:scale-95"
+		>
+			<span>🛒</span>
+			Go to Card Market →
+		</a>
+		<p class="mb-3 mt-1 text-xs text-slate-500">Or pay treasury manually:</p>
 		<div class="mb-3 flex items-center gap-2">
 			<button
 				onclick={() => (cardPayment = Math.max(0, cardPayment - 1))}

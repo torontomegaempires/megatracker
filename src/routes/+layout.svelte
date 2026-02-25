@@ -9,8 +9,10 @@
 	let { children } = $props();
 
 	const tabs = [
-		{ href: '/dashboard', icon: '⚔', label: 'My Nation' },
+		{ href: '/dashboard', icon: '⚔', label: 'Nation' },
 		{ href: '/nations', icon: '⊞', label: 'Nations' },
+		{ href: '/market', icon: '🛒', label: 'Market' },
+		{ href: '/my-cards', icon: '📜', label: 'Cards' },
 		{ href: '/scoreboard', icon: '★', label: 'Scores' },
 		{ href: '/action-log', icon: '☰', label: 'Log' }
 	];
@@ -32,7 +34,7 @@
 	<!-- Bottom tab navigation (game active only) -->
 	{#if gameStore.isActive}
 		<nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900">
-			<div class="grid grid-cols-4">
+			<div class="grid grid-cols-6">
 				{#each tabs as tab (tab.href)}
 					<a
 						href={tab.href}
