@@ -300,9 +300,9 @@ function handlePlayerFieldUpdate(playerId: string, payload: PlayerFieldUpdatePay
 function handleCardPurchase(playerId: string, payload: CardPurchasePayload): void {
 	const session = gameStore.session;
 	if (!session || session.status !== 'active') return;
-	if (session.currentPhase !== 12) {
+	if (session.currentPhase !== 11) {
 		const peerId = _playerToPeer.get(playerId);
-		if (peerId) peerNet.sendTo(peerId, makeBroadcast('Card purchases are only allowed during Phase 12.'));
+		if (peerId) peerNet.sendTo(peerId, makeBroadcast('Card purchases are only allowed during Phase 11.'));
 		return;
 	}
 
@@ -596,7 +596,7 @@ export const hostNet = {
 		const session = gameStore.session;
 		if (!session) return 'No active session.';
 		if (session.status !== 'active') return 'Session is not active.';
-		if (session.currentPhase !== 12) return 'Card purchases are only allowed during Phase 12.';
+		if (session.currentPhase !== 11) return 'Card purchases are only allowed during Phase 11.';
 
 		const player = session.players.find((p) => p.playerId === playerId);
 		if (!player) return 'Player not found.';

@@ -68,7 +68,7 @@
 		const session = gameStore.session;
 		const player = gameStore.myPlayer;
 		if (!session || !player) return false;
-		if (session.currentPhase !== 12) return false;
+		if (session.currentPhase !== 11) return false;
 		if (player.ownedCardIds.includes(card.cardId)) return false;
 		return player.inTreasury >= getNetCost(card);
 	}
@@ -138,8 +138,8 @@
 			<h1 class="text-xl font-bold text-white">Card Market</h1>
 			<div class="text-right">
 				<span class="text-xs text-slate-400">Phase {gameStore.currentPhase}</span>
-				{#if gameStore.currentPhase !== 12}
-					<p class="text-xs text-amber-400">Available in Phase 12</p>
+				{#if gameStore.currentPhase !== 11}
+					<p class="text-xs text-amber-400">Available in Phase 11</p>
 				{/if}
 			</div>
 		</div>
@@ -245,8 +245,8 @@
 								onclick={() => purchaseCard(card)}
 								disabled={!canBuy(card)}
 								class="mt-auto {btnPrimary}"
-								title={gameStore.currentPhase !== 12
-									? 'Only available in Phase 12'
+								title={gameStore.currentPhase !== 11
+									? 'Only available in Phase 11'
 									: `Cost: ${netCost} treasury`}
 							>
 								Buy for {netCost}

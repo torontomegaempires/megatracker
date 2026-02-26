@@ -57,7 +57,7 @@
 	let calamityTreasuryLoss = $state(0);
 	let calamityCityLoss = $state(0);
 
-	// ── Phase 12 — Civ Advances ──────────────────────────────────────────────────
+	// ── Phase 11 — Civ Advances ──────────────────────────────────────────────────
 	let cardPayment = $state(0);
 
 	// ── Helpers ───────────────────────────────────────────────────────────────────
@@ -557,14 +557,6 @@
 		</div>
 
 	{:else if phase === 11}
-		<!-- AST Advancement -->
-		<p class="mb-3 text-sm text-slate-300">Advance your position on the AST track.</p>
-		<p class="mb-3 text-sm text-slate-400">
-			Current position: <span class="font-bold text-white">{player.astPosition}</span>
-		</p>
-		<button onclick={phase11AdvanceAst} class={btnPrimary}>+1 AST Step</button>
-
-	{:else if phase === 12}
 		<!-- Civilisation Advances -->
 		<a
 			href="/market"
@@ -601,5 +593,13 @@
 			disabled={cardPayment <= 0 || player.inTreasury < cardPayment}
 			class={btnPrimary}
 		>Pay {cardPayment} for Advances</button>
+
+	{:else if phase === 12}
+		<!-- AST Advancement -->
+		<p class="mb-3 text-sm text-slate-300">Advance your position on the AST track.</p>
+		<p class="mb-3 text-sm text-slate-400">
+			Current position: <span class="font-bold text-white">{player.astPosition}</span>
+		</p>
+		<button onclick={phase11AdvanceAst} class={btnPrimary}>+1 AST Step</button>
 	{/if}
 </div>

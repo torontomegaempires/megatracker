@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+/* ── iOS Safari mobile fixes ────────────────────────────────────────────────── */
+* {
+	-webkit-tap-highlight-color: transparent;
+	touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+	font-size: 1rem; /* prevents iOS auto-zoom on focus */
+}
+
 /* ── Nation colour palette ──────────────────────────────────────────────────── */
 :root {
 	--color-minoa: #7cb342;

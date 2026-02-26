@@ -71,13 +71,16 @@
 	</div>
 
 	<!-- Main content — padded at bottom when nav is visible -->
-	<div class:pb-16={gameStore.isActive}>
+	<div class:pb-20={gameStore.isActive}>
 		{@render children()}
 	</div>
 
 	<!-- Bottom tab navigation (game active only) -->
 	{#if gameStore.isActive}
-		<nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900">
+		<nav
+			class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900"
+			style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+		>
 			<div class="grid grid-cols-7">
 				{#each gameTabs as tab (tab.href)}
 					<a
