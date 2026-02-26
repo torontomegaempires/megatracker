@@ -57,10 +57,10 @@ describe('isTokenPoolValid', () => {
 // ─── createDefaultTokenPool ───────────────────────────────────────────────────
 
 describe('createDefaultTokenPool', () => {
-	it('creates pool with all 55 tokens in stock', () => {
+	it('creates pool with 1 on board and 54 in stock', () => {
 		const p = createDefaultTokenPool();
-		expect(p.populationInStock).toBe(TOKEN_POOL_TOTAL);
-		expect(p.populationOnBoard).toBe(0);
+		expect(p.populationOnBoard).toBe(1);
+		expect(p.populationInStock).toBe(TOKEN_POOL_TOTAL - 1);
 		expect(p.inTreasury).toBe(0);
 	});
 
@@ -239,7 +239,7 @@ describe('buildCardPurchaseTransfer', () => {
 
 describe('bucketLabel', () => {
 	it('returns readable labels for all buckets', () => {
-		expect(bucketLabel('populationOnBoard')).toBe('On Board');
+		expect(bucketLabel('populationOnBoard')).toBe('Population');
 		expect(bucketLabel('populationInStock')).toBe('In Stock');
 		expect(bucketLabel('inTreasury')).toBe('Treasury');
 	});

@@ -38,7 +38,7 @@
 	}
 
 	const BUCKETS: { key: TokenBucket; label: string; color: string }[] = [
-		{ key: 'populationOnBoard', label: 'On Board', color: 'bg-blue-600' },
+		{ key: 'populationOnBoard', label: 'Population', color: 'bg-blue-600' },
 		{ key: 'populationInStock', label: 'In Stock', color: 'bg-slate-500' },
 		{ key: 'inTreasury', label: 'Treasury', color: 'bg-amber-500' }
 	];

@@ -122,7 +122,7 @@ export function buildCardPurchaseTransfer(cost: number): TokenTransfer {
 export function bucketLabel(bucket: TokenBucket): string {
 	switch (bucket) {
 		case 'populationOnBoard':
-			return 'On Board';
+			return 'Population';
 		case 'populationInStock':
 			return 'In Stock';
 		case 'inTreasury':
@@ -135,8 +135,8 @@ export function bucketLabel(bucket: TokenBucket): string {
  */
 export function createDefaultTokenPool(): Pick<Player, 'populationOnBoard' | 'populationInStock' | 'inTreasury'> {
 	return {
-		populationOnBoard: 0,
-		populationInStock: TOKEN_POOL_TOTAL,
+		populationOnBoard: 1,
+		populationInStock: TOKEN_POOL_TOTAL - 1,
 		inTreasury: 0
 	};
 }
