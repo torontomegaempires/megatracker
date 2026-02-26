@@ -8,13 +8,57 @@
 
 	let { children } = $props();
 
-	const tabs = [
+	// ── Screen Wake Lock ─────────────────────────────────────────────────────
+	let wakeLock = $state<WakeLockSentinel | null>(null);
+
+	async function requestWakeLock() {
+		if (!('wakeLock' in navigator)) return;
+		try {
+			wakeLock = await navigator.wakeLock.request('screen');
+			// Re-acquire when the document becomes visible again (e.g. after tab switch)
+			wakeLock.addEventListener('release', () => {
+				if (gameStore.isActive && document.visibilityState === 'visible') {
+					requestWakeLock();
+				}
+			});
+		} catch {
+			// Fail gracefully — iOS < 16.4, Firefox, or permission denied
+		}
+	}
+
+	function releaseWakeLock() {
+		wakeLock?.release().catch(() => {});
+		wakeLock = null;
+	}
+
+	$effect(() => {
+		if (gameStore.isActive) {
+			requestWakeLock();
+		} else {
+			releaseWakeLock();
+		}
+	});
+
+	// Re-acquire on visibility change (required by spec when tab is re-focused)
+	$effect(() => {
+		function onVisibilityChange() {
+			if (document.visibilityState === 'visible' && gameStore.isActive && !wakeLock) {
+				requestWakeLock();
+			}
+		}
+		document.addEventListener('visibilitychange', onVisibilityChange);
+		return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+	});
+
+	// ── Bottom nav tabs ───────────────────────────────────────────────────────
+	const gameTabs = [
 		{ href: '/dashboard', icon: '⚔', label: 'Nation' },
 		{ href: '/nations', icon: '⊞', label: 'Nations' },
 		{ href: '/market', icon: '🛒', label: 'Market' },
 		{ href: '/my-cards', icon: '📜', label: 'Cards' },
 		{ href: '/scoreboard', icon: '★', label: 'Scores' },
-		{ href: '/action-log', icon: '☰', label: 'Log' }
+		{ href: '/action-log', icon: '☰', label: 'Log' },
+		{ href: '/rules', icon: '📖', label: 'Rules' }
 	];
 </script>
 
@@ -34,15 +78,15 @@
 	<!-- Bottom tab navigation (game active only) -->
 	{#if gameStore.isActive}
 		<nav class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-800 bg-slate-900">
-			<div class="grid grid-cols-6">
-				{#each tabs as tab (tab.href)}
+			<div class="grid grid-cols-7">
+				{#each gameTabs as tab (tab.href)}
 					<a
 						href={tab.href}
-						class="flex flex-col items-center py-2 text-xs transition-colors"
+						class="flex flex-col items-center py-1.5 text-[10px] transition-colors"
 						class:text-blue-400={$page.url.pathname === tab.href}
 						class:text-slate-500={$page.url.pathname !== tab.href}
 					>
-						<span class="mb-0.5 text-lg leading-none">{tab.icon}</span>
+						<span class="mb-0.5 text-base leading-none">{tab.icon}</span>
 						{tab.label}
 					</a>
 				{/each}

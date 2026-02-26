@@ -139,6 +139,13 @@
 				>
 					Quick Demo (offline)
 				</button>
+
+				<a
+					href="/rules"
+					class="block w-full pt-2 text-center text-xs text-slate-600 hover:text-slate-400"
+				>
+					📖 Rules Reference
+				</a>
 			</div>
 
 		<!-- ── Create Session ── -->

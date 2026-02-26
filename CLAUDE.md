@@ -98,14 +98,15 @@ interface GameSession {
 interface Player {
   playerId: string;
   playerName: string;
-  civilisationId: string;
-  civilisationName: string;
+  civilizationId: string;
+  civilizationName: string;
   astRanking: number;      // 1–18, fixed, used as tiebreaker (lower = higher priority)
   colorHex: string;
   isHost: boolean;
   peerJsId: string;        // changes on reconnect
 
   // Token pool — INVARIANT: populationOnBoard + populationInStock + inTreasury === 55
+  // Starting distribution: populationOnBoard=1, populationInStock=54, inTreasury=0
   populationOnBoard: number;
   populationInStock: number;
   inTreasury: number;
@@ -118,16 +119,17 @@ interface Player {
 
   commodityHand: Record<CommodityType, number>;  // quantity per commodity (0–9 each)
   ownedCardIds: string[];
+  calamityHand: string[];   // calamityIds of cards currently held (acquired Phase 7, resolved Phase 8–9)
   astPosition: number;
   victoryPoints: number;
   connectionStatus: 'connected' | 'disconnected' | 'removed';
 }
 ```
 
-### CivilisationCard
+### CivilizationCard
 
 ```ts
-interface CivilisationCard {
+interface CivilizationCard {
   cardId: string;
   name: string;
   deck: 'Western' | 'Eastern';
@@ -155,6 +157,9 @@ interface Calamity {
   mitigatingCardIds: string[];
 }
 ```
+
+> **Major Calamity** = `type: 'non-tradeable'`. Minor Calamity = `type: 'tradeable'`.
+> The Phase 8 limit of "max 2 Major Calamities" refers to non-tradeable calamities.
 
 ### ActionEntry
 
@@ -186,16 +191,20 @@ Cities and ships are separate — they are NOT counted in the 55.
 
 ### Token Movements by Phase
 
-| Phase | Transfer |
-|---|---|
-| 1 — Tax Collection | `inStock → inTreasury` (2 per city). Pre-fill amount. If inStock insufficient → tax revolt flag. |
-| 2 — Population Expansion | `inStock → onBoard`. Player enters count; must expand as many as possible. |
-| 3 — Ship Construction | (a) 2 `inTreasury→inStock`; (b) 1 `inTreasury→inStock` + 1 `onBoard→inStock`; (c) 2 `onBoard→inStock`. Maintenance: 1 per ship. |
-| 4 — Conflict | Losses: `onBoard→inStock`. City attack win: defender 6 `inStock→onBoard`; attacker up to 3 `inStock→inTreasury`. |
-| 5 — City Construction | Tokens in area: `onBoard→inStock`; `citiesInStock→citiesOnBoard`. Surplus: `onBoard→inStock`. |
-| 6 — Trade Card Acquisition | Extra cards: 15 `inTreasury→inStock` per card. Block if `inTreasury < 15`. |
-| 9 — Calamity Resolution | Population loss: `onBoard→inStock`. Treasury loss: `inTreasury→inStock`. City loss: `citiesOnBoard→citiesInStock`. |
-| 12 — Civ Advances | Cost paid: `inTreasury→inStock`. Cannot overpay; excess commodity value forfeited. |
+| Phase | Description | Transfer |
+|---|---|---|
+| 1 — Tax Collection | Skip if no player has any cities | `inStock → inTreasury` (2 per city). Tax revolt flag if inStock insufficient. |
+| 2 — Population Expansion | Default expand amount = `populationOnBoard`; max = min(populationOnBoard, populationInStock) | `inStock → onBoard` |
+| 3 — Movement | Per ship: Build (2 pop / 1 pop + 1 treasury / 2 treasury), Maintain (1 pop / 1 treasury), Destroy (ship → stock, no token cost). Rules: built ships MUST maintain or destroy; cannot build then maintain/destroy; cannot maintain then destroy. | Varies per ship action (see Phase 3 detail) |
+| 4 — Conflict | Preset loss buttons: 1–6; variable; Plunder (+3 treasury via inStock→inTreasury); City Loss (−1 city). All pending, shown as running totals; applied on Confirm. | `populationOnBoard → inStock` (losses); `inStock → inTreasury` (plunder) |
+| 5 — Build Cities | Build City: 6 `populationOnBoard → inStock` + 1 city. Wilderness City: 12 `populationOnBoard → inStock` + 1 city. | Fixed-cost variants only |
+| 6 — Trade Card Acquisition | Eligible cards = citiesOnBoard. "Buy Gold": 15 `inTreasury → inStock` + 1 Gold added to commodityHand. | `inTreasury → inStock` (15 per Gold bought) |
+| 7 — Trade | Players update commodity hand and record calamity cards held (stored in `calamityHand`). Display shows commodity rank (1–9) and running set value per commodity. | Field updates only |
+| 8 — Calamity Selection | Skip if all players ≤ calamity limit. Limit: 1–8 players = 2 calamities; 9–18 players = 3 calamities (max 2 non-tradeable / Major). Players over limit discard until at limit; others see waiting dialog. | No token movement |
+| 9 — Calamity Resolution | Population loss: `onBoard → inStock`. Treasury loss: `inTreasury → inStock`. City loss: `citiesOnBoard → citiesInStock`. | As entered by player |
+| 10 — AST Advancement Eligibility | Check requirements — no token movement. | None |
+| 11 — Civilization Advances | Cost paid: `inTreasury → inStock`. Cannot overpay; excess commodity value forfeited. | `inTreasury → inStock` |
+| 12 — AST Advancement | Player advances AST position if eligible. | Field update only |
 
 ### Credit System
 
@@ -218,13 +227,15 @@ Treasury and commodity sets do NOT contribute to final score.
 
 A set of `n` identical commodities with face value `f` is worth `f × n²`.
 
+The commodity display shows, per commodity type: quantity (n), face value (f), set value (f × n²), and the running total value across all commodities in hand.
+
 ### Trade Card Dealing Order
 
 Phase 6/7: lowest `citiesOnBoard` first; `astRanking` (lower = higher priority) breaks ties.
 
 ---
 
-## Civilisations Reference
+## Civilizations Reference
 
 Odd AST-Ranking = West; Even = East. Colour variables are CSS custom properties on `:root`.
 
@@ -249,7 +260,7 @@ Odd AST-Ranking = West; Even = East. Colour variables are CSS custom properties 
 | 17 | Egypt | #D7CCC8 | --color-egypt |
 | 18 | Parthia | #689F38 | --color-parthia |
 
-**Convention**: every UI element identifying a nation (dashboard headers, scoreboard rows, action log entries, token pool displays, list items) MUST use the nation's `--color-*` CSS variable as its primary visual identifier.
+**Convention**: every UI element identifying a nation (dashboard headers, scoreboard rows, action log entries, token pool displays, list items) MUST use the nation's `--color-{civilizationId}` CSS custom property as its primary visual identifier.
 
 ---
 
@@ -258,11 +269,11 @@ Odd AST-Ranking = West; Even = East. Colour variables are CSS custom properties 
 | Screen | Notes |
 |---|---|
 | Home / Landing | Create or join session; recent sessions from IndexedDB |
-| Lobby | Room code + QR, civilisation assignments, ready states, Host starts game |
+| Lobby | Room code + QR, civilization assignments, ready states, Host starts game |
 | Nation Dashboard | Primary screen. Token pool (onBoard/inStock/inTreasury + running total), cities, ships, commodity hand, owned cards, VP. Phase-appropriate action buttons trigger bucket transfers directly. |
 | Phase Banner | Persistent top bar — current phase + turn. Tappable for detail. |
 | Other Nations | Full state view for every other player (all values visible to all) |
-| Card Market | Grid of civ cards, costs with real-time credits, group filters. Purchase active only during phase 12. |
+| Card Market | Grid of civ cards, costs with real-time credits, group filters. Purchase active only during phase 11 (Civilization Advances). |
 | My Cards | Owned cards with ability descriptions |
 | Scoreboard | Live VP leaderboard |
 | Action Log | Append-only, filterable by player/phase. Export via Web Share API or download at session end. |
@@ -281,6 +292,7 @@ Odd AST-Ranking = West; Even = East. Colour variables are CSS custom properties 
 - **Action log is append-only** — never delete or edit entries.
 - **All reference data** (civ cards, calamities, AST table, commodity values) is static JSON bundled with the app, not fetched at runtime.
 - **Nation colours** always via CSS custom properties — never hardcode hex in component markup.
+- **`populationOnBoard` is labelled "Population"** in all UI displays (not "On Board"). The code field name is unchanged.
 - **Reconnection**: preserve player slot for 10 minutes; on reconnect Host sends `STATE_SNAPSHOT`; Host may manually remove absent player.
 - **Screen Wake Lock**: request on session join; fail gracefully on iOS < 16.4.
 - **18 copies of each civ card** — no need to track market stock; only track which cards each player owns.
