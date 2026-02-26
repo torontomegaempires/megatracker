@@ -20,7 +20,7 @@
 	let { player, phase, onTransfer, onFieldUpdate }: Props = $props();
 
 	// ── Phase 2 — Population Expansion ──────────────────────────────────────────
-	let expandAmount = $state(0);
+	let expandAmount = $state(player.populationOnBoard);
 	$effect(() => {
 		// Reset when phase or player changes — default = populationOnBoard
 		void phase;
