@@ -8,7 +8,7 @@
 	import { CARDS, CARD_MAP } from '$lib/data/cards.js';
 	import { calcNetCardCost } from '$lib/utils/vp.js';
 	import { buildActionEntry } from '$lib/utils/action-builder.js';
-	import type { CardGroup, CivilisationCard } from '$lib/types/game.js';
+	import type { CardGroup, CivilizationCard } from '$lib/types/game.js';
 
 	// Redirect if no active session
 	$effect(() => {
@@ -55,16 +55,16 @@
 		});
 	});
 
-	function getNetCost(card: CivilisationCard): number {
+	function getNetCost(card: CivilizationCard): number {
 		const player = gameStore.myPlayer;
 		if (!player) return card.baseCost;
 		const ownedCards = player.ownedCardIds
 			.map((id) => CARD_MAP.get(id))
-			.filter((c): c is CivilisationCard => c !== undefined);
+			.filter((c): c is CivilizationCard => c !== undefined);
 		return calcNetCardCost(card, ownedCards);
 	}
 
-	function canBuy(card: CivilisationCard): boolean {
+	function canBuy(card: CivilizationCard): boolean {
 		const session = gameStore.session;
 		const player = gameStore.myPlayer;
 		if (!session || !player) return false;
@@ -77,7 +77,7 @@
 		return gameStore.myPlayer?.ownedCardIds.includes(cardId) ?? false;
 	}
 
-	function purchaseCard(card: CivilisationCard) {
+	function purchaseCard(card: CivilizationCard) {
 		const netCost = getNetCost(card);
 		const role = sessionMetaStore.role;
 

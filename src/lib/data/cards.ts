@@ -1,7 +1,7 @@
-import type { CivilisationCard } from '../types/game.js';
+import type { CivilizationCard } from '../types/game.js';
 
 /**
- * Full Mega Empires civilisation advance card database.
+ * Full Mega Empires civilization advance card database.
  *
  * NOTE: Credit amounts and calamity mitigation details should be verified
  * against physical cards — this data is based on available knowledge of the
@@ -12,7 +12,7 @@ import type { CivilisationCard } from '../types/game.js';
  * irrigation, banking, coinage, philosophy, theology, naval-power, education
  */
 
-export const CARDS: CivilisationCard[] = [
+export const CARDS: CivilizationCard[] = [
 	// ═══════════════════════════════════════════════════════════════════════════
 	// WESTERN DECK
 	// ═══════════════════════════════════════════════════════════════════════════
@@ -281,7 +281,7 @@ export const CARDS: CivilisationCard[] = [
 		baseCost: 240,
 		vpTier: 6,
 		description: 'Mastery of painting, sculpture, and decorative craft.',
-		specialAbilityDescription: 'Gain 1 bonus VP for each group of 3 or more civilisation advance cards you own.',
+		specialAbilityDescription: 'Gain 1 bonus VP for each group of 3 or more civilization advance cards you own.',
 		credits: [],
 		calamityModifiers: []
 	},
@@ -744,7 +744,7 @@ export const CARDS: CivilisationCard[] = [
 		group: 'Arts',
 		baseCost: 120,
 		vpTier: 3,
-		description: 'Written narratives, histories, and epics of civilisation.',
+		description: 'Written narratives, histories, and epics of civilization.',
 		specialAbilityDescription: 'You may look at the top 3 cards of the calamity deck at the start of each turn.',
 		credits: [
 			{ targetCardId: 'drama-poetry', creditAmount: 10 },
@@ -1051,6 +1051,6 @@ export const CARDS: CivilisationCard[] = [
 	}
 ] as const;
 
-export const CARD_MAP: Map<string, CivilisationCard> = new Map(
-	CARDS.map((c) => [c.cardId, c as CivilisationCard])
+export const CARD_MAP: Map<string, CivilizationCard> = new Map(
+	CARDS.map((c) => [c.cardId, c as CivilizationCard])
 );

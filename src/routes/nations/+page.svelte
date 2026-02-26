@@ -25,7 +25,7 @@
 				{#each players as p (p.playerId)}
 					<div
 						class="overflow-hidden rounded-lg bg-slate-800"
-						style:border-left="4px solid var(--color-{p.civilisationId})"
+						style:border-left="4px solid var(--color-{p.civilizationId})"
 					>
 						<!-- Header -->
 						<div class="flex items-center gap-2 px-3 py-2">
@@ -39,7 +39,7 @@
 										<span class="rounded bg-amber-600 px-1.5 py-0.5 text-xs font-medium text-white">Host</span>
 									{/if}
 								</div>
-								<p class="text-xs text-slate-400">{p.civilisationName}</p>
+								<p class="text-xs text-slate-400">{p.civilizationName}</p>
 							</div>
 
 							<!-- Connection status -->

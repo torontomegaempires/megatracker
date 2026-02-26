@@ -19,7 +19,7 @@ export const CALAMITIES: readonly Calamity[] = [
 		name: 'Civil War',
 		type: 'non-tradeable',
 		severity: 2,
-		description: 'Internal conflict tears your civilisation apart.',
+		description: 'Internal conflict tears your civilization apart.',
 		resolutionSteps:
 			'The player with the most tokens on the board may take up to half of your treasury tokens (round down). If tied, the player with the lowest AST ranking takes. Those tokens move to treasury of the winning player.',
 		affectedStats: ['inTreasury'],
@@ -112,7 +112,7 @@ export const CALAMITIES: readonly Calamity[] = [
 		severity: 1,
 		description: 'Religious fear grips your people.',
 		resolutionSteps:
-			'Lose 1 city (citiesOnBoard → citiesInStock). Lose 5 treasury tokens to inStock. You may not purchase Civilisation Advances this turn.',
+			'Lose 1 city (citiesOnBoard → citiesInStock). Lose 5 treasury tokens to inStock. You may not purchase Civilization Advances this turn.',
 		affectedStats: ['citiesOnBoard', 'inTreasury'],
 		mitigatingCardIds: ['philosophy', 'theology']
 	},
@@ -165,7 +165,7 @@ export const CALAMITIES: readonly Calamity[] = [
 		name: 'Tribal Conflict',
 		type: 'tradeable',
 		severity: 1,
-		description: 'Internal tribal conflicts weaken your civilisation.',
+		description: 'Internal tribal conflicts weaken your civilization.',
 		resolutionSteps:
 			'Lose 4 population tokens from board (onBoard → inStock). Lose 2 treasury tokens to inStock.',
 		affectedStats: ['populationOnBoard', 'inTreasury'],
@@ -176,9 +176,9 @@ export const CALAMITIES: readonly Calamity[] = [
 		name: 'Regression',
 		type: 'tradeable',
 		severity: 2,
-		description: 'Your civilisation loses a step on the AST track.',
+		description: 'Your civilization loses a step on the AST track.',
 		resolutionSteps:
-			'Reduce astPosition by 1 (minimum 0). Lose any Civilisation Advance cards purchased this turn.',
+			'Reduce astPosition by 1 (minimum 0). Lose any Civilization Advance cards purchased this turn.',
 		affectedStats: ['astPosition'],
 		mitigatingCardIds: ['philosophy', 'education']
 	}

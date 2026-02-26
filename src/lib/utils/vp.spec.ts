@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { calcNetCardCost, cardVpTier, calcVictoryPoints } from './vp.js';
-import type { CivilisationCard } from '../types/game.js';
+import type { CivilizationCard } from '../types/game.js';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function makeCard(overrides: Partial<CivilisationCard> = {}): CivilisationCard {
+function makeCard(overrides: Partial<CivilizationCard> = {}): CivilizationCard {
 	return {
 		cardId: 'test-card',
 		name: 'Test Card',
@@ -20,7 +20,7 @@ function makeCard(overrides: Partial<CivilisationCard> = {}): CivilisationCard {
 	};
 }
 
-function cardLookupFrom(cards: CivilisationCard[]): Map<string, CivilisationCard> {
+function cardLookupFrom(cards: CivilizationCard[]): Map<string, CivilizationCard> {
 	return new Map(cards.map((c) => [c.cardId, c]));
 }
 

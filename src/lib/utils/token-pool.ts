@@ -111,7 +111,7 @@ export function buildCityConstructionTransfer(tokensInArea: number): TokenTransf
 }
 
 /**
- * Phase 12 — Civilisation Advances: pay cost from inTreasury → inStock.
+ * Phase 12 — Civilization Advances: pay cost from inTreasury → inStock.
  */
 export function buildCardPurchaseTransfer(cost: number): TokenTransfer {
 	return { from: 'inTreasury', to: 'populationInStock', amount: cost };

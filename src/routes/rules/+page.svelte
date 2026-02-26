@@ -4,7 +4,7 @@
 	import { CARD_MAP } from '$lib/data/cards.js';
 	import { CALAMITIES } from '$lib/data/calamities.js';
 	import { COMMODITIES, calcCommoditySetValue } from '$lib/data/commodities.js';
-	import type { CivilisationCard } from '$lib/types/game.js';
+	import type { CivilizationCard } from '$lib/types/game.js';
 
 	// ── Search & Filters ───────────────────────────────────────────────────────
 	let query = $state('');
@@ -112,7 +112,7 @@
 
 	// ── Card credit inverse lookup ─────────────────────────────────────────────
 	// creditedBy[cardId] = list of { fromCard, amount } — owned cards that reduce cost
-	const creditedBy: Record<string, Array<{ fromCard: CivilisationCard; amount: number }>> = {};
+	const creditedBy: Record<string, Array<{ fromCard: CivilizationCard; amount: number }>> = {};
 	for (const card of CARDS) {
 		for (const credit of card.credits) {
 			if (!creditedBy[credit.targetCardId]) creditedBy[credit.targetCardId] = [];

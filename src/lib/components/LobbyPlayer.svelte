@@ -21,7 +21,7 @@
 
 <div
 	class="flex items-center gap-3 rounded-lg border px-3 py-2.5 {isMe ? 'border-blue-500 bg-slate-800/80' : 'border-slate-700 bg-slate-800'}"
-	style="border-left-color: var(--color-{player.civilisationId}, {player.colorHex}); border-left-width: 4px"
+	style="border-left-color: var(--color-{player.civilizationId}, {player.colorHex}); border-left-width: 4px"
 >
 	<!-- Connection dot -->
 	<span class="h-2 w-2 flex-shrink-0 rounded-full {statusColor}"></span>
@@ -37,7 +37,7 @@
 				<span class="rounded bg-purple-700 px-1 py-0.5 text-[10px] font-bold text-white">HOST</span>
 			{/if}
 		</div>
-		<p class="text-xs text-slate-400">{player.civilisationName} · #{player.astRanking}</p>
+		<p class="text-xs text-slate-400">{player.civilizationName} · #{player.astRanking}</p>
 	</div>
 
 	<!-- Remove button (host only) -->

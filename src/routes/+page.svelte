@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { gameStore } from '$lib/stores/game.svelte.js';
 	import { hostNet } from '$lib/net/host.svelte.js';
-	import { CIVILISATIONS } from '$lib/data/civilisations.js';
+	import { CIVILIZATIONS } from '$lib/data/civilizations.js';
 	import type { GameSession, Player, GameVariant } from '$lib/types/game.js';
 	import { COMMODITY_TYPES } from '$lib/types/game.js';
 	import { createDefaultTokenPool } from '$lib/utils/token-pool.js';
@@ -16,16 +16,16 @@
 	let sessionName = $state('');
 	let hostVariant = $state<GameVariant>('Western');
 	let hostPlayerName = $state('');
-	let hostCivId = $state(CIVILISATIONS[0].id);
+	let hostCivId = $state(CIVILIZATIONS[0].id);
 	let creating = $state(false);
 	let createError = $state<string | null>(null);
 
 	// ── Demo fields
 	let demoPlayerName = $state('');
-	let demoCivId = $state(CIVILISATIONS[0].id);
+	let demoCivId = $state(CIVILIZATIONS[0].id);
 
-	const hostCivDef = $derived(CIVILISATIONS.find((c) => c.id === hostCivId)!);
-	const demoCivDef = $derived(CIVILISATIONS.find((c) => c.id === demoCivId)!);
+	const hostCivDef = $derived(CIVILIZATIONS.find((c) => c.id === hostCivId)!);
+	const demoCivDef = $derived(CIVILIZATIONS.find((c) => c.id === demoCivId)!);
 
 	const canCreate = $derived(
 		sessionName.trim().length > 0 && hostPlayerName.trim().length > 0 && !creating
@@ -64,8 +64,8 @@
 		const player: Player = {
 			playerId,
 			playerName: demoPlayerName.trim(),
-			civilisationId: civ.id,
-			civilisationName: civ.name,
+			civilizationId: civ.id,
+			civilizationName: civ.name,
 			astRanking: civ.astRanking,
 			colorHex: civ.colorHex,
 			isHost: true,
@@ -77,7 +77,7 @@
 			shipsInStock: 4,
 			commodityHand: defaultHand,
 			ownedCardIds: [],
-			astPosition: 0,
+			astPosition: 1,
 			victoryPoints: 1,
 			connectionStatus: 'connected'
 		};
@@ -189,12 +189,12 @@
 				</label>
 
 				<label class="mb-4 block">
-					<span class="mb-1 block text-xs font-medium text-slate-400">Your Civilisation</span>
+					<span class="mb-1 block text-xs font-medium text-slate-400">Your Civilization</span>
 					<select
 						bind:value={hostCivId}
 						class="w-full rounded bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 					>
-						{#each CIVILISATIONS as civ (civ.id)}
+						{#each CIVILIZATIONS as civ (civ.id)}
 							<option value={civ.id}>{civ.name} (#{civ.astRanking} · {civ.deck})</option>
 						{/each}
 					</select>
@@ -248,12 +248,12 @@
 				</label>
 
 				<label class="mb-4 block">
-					<span class="mb-1 block text-xs font-medium text-slate-400">Civilisation</span>
+					<span class="mb-1 block text-xs font-medium text-slate-400">Civilization</span>
 					<select
 						bind:value={demoCivId}
 						class="w-full rounded bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 					>
-						{#each CIVILISATIONS as civ (civ.id)}
+						{#each CIVILIZATIONS as civ (civ.id)}
 							<option value={civ.id}>{civ.name} (#{civ.astRanking})</option>
 						{/each}
 					</select>

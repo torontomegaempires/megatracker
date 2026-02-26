@@ -89,7 +89,12 @@ test.describe('Demo flow', () => {
 		await page.getByRole('button', { name: 'Quick Demo (offline)' }).click();
 		await page.getByPlaceholder('Enter your name').fill('Test Player');
 		await page.getByRole('button', { name: 'Start Demo' }).click();
-		await page.goto('/action-log');
+		await expect(page).toHaveURL('/dashboard');
+
+		// Use SPA nav to preserve game state
+		const nav = page.locator('nav').last();
+		await nav.getByRole('link', { name: /Log/ }).click();
+		await expect(page).toHaveURL('/action-log');
 
 		await expect(page.getByRole('heading', { name: /Action Log/ })).toBeVisible();
 	});

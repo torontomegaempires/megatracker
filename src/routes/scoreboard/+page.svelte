@@ -33,7 +33,7 @@
 				{#each ranked as { p, vp }, i (p.playerId)}
 					<div
 						class="relative overflow-hidden rounded-lg bg-slate-800"
-						style:border-left="4px solid var(--color-{p.civilisationId})"
+						style:border-left="4px solid var(--color-{p.civilizationId})"
 					>
 						<div class="flex items-center gap-3 p-3">
 							<!-- Rank -->
@@ -42,7 +42,7 @@
 							<!-- Nation info -->
 							<div class="flex-1 min-w-0">
 								<p class="font-semibold text-white truncate">{p.playerName}</p>
-								<p class="text-xs text-slate-400 truncate">{p.civilisationName}</p>
+								<p class="text-xs text-slate-400 truncate">{p.civilizationName}</p>
 							</div>
 
 							<!-- VP breakdown chips -->
@@ -70,7 +70,7 @@
 							</div>
 
 							<!-- Total VP -->
-							<span class="ml-2 text-2xl font-bold" style:color="var(--color-{p.civilisationId})">
+							<span class="ml-2 text-2xl font-bold" style:color="var(--color-{p.civilizationId})">
 								{vp.total}
 							</span>
 						</div>

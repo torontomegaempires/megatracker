@@ -17,8 +17,8 @@ function makePlayer(overrides: Partial<Player> = {}): Player {
 	return {
 		playerId: 'player-1',
 		playerName: 'Alice',
-		civilisationId: 'minoa',
-		civilisationName: 'Minoa',
+		civilizationId: 'minoa',
+		civilizationName: 'Minoa',
 		astRanking: 1,
 		colorHex: '#7CB342',
 		isHost: false,

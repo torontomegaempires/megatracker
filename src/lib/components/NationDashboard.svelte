@@ -24,13 +24,13 @@
 	}
 
 	const nationColorStyle = $derived(
-		`border-color: var(${player.civilisationId ? `--color-${player.civilisationId}` : '--color-minoa'})`
+		`border-color: var(${player.civilizationId ? `--color-${player.civilizationId}` : '--color-minoa'})`
 	);
 </script>
 
 <div
 	class="flex min-h-0 flex-1 flex-col overflow-y-auto"
-	style="--nation-color: var(--color-{player.civilisationId}, #7CB342)"
+	style="--nation-color: var(--color-{player.civilizationId}, #7CB342)"
 >
 	<!-- Nation header -->
 	<div
@@ -39,7 +39,7 @@
 	>
 		<div class="flex items-start justify-between">
 			<div>
-				<h1 class="text-lg font-bold text-white">{player.civilisationName}</h1>
+				<h1 class="text-lg font-bold text-white">{player.civilizationName}</h1>
 				<p class="text-sm text-slate-400">{player.playerName}</p>
 			</div>
 			<div class="flex items-center gap-2">
@@ -128,7 +128,7 @@
 		{#if player.ownedCardIds.length > 0}
 			<div class="rounded-lg border border-slate-700 bg-slate-800 p-3">
 				<p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-					Civilisation Cards ({player.ownedCardIds.length})
+					Civilization Cards ({player.ownedCardIds.length})
 				</p>
 				<p class="text-xs text-slate-500">{player.ownedCardIds.length} card(s) owned</p>
 			</div>

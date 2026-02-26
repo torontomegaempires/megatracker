@@ -30,7 +30,7 @@
 	}
 
 	function playerCivId(playerId: string): string {
-		return players.find((p) => p.playerId === playerId)?.civilisationId ?? '';
+		return players.find((p) => p.playerId === playerId)?.civilizationId ?? '';
 	}
 
 	function downloadLog() {
@@ -83,7 +83,7 @@
 			>
 				<option value="">All Players</option>
 				{#each players as p (p.playerId)}
-					<option value={p.playerId}>{p.playerName} ({p.civilisationName})</option>
+					<option value={p.playerId}>{p.playerName} ({p.civilizationName})</option>
 				{/each}
 			</select>
 		</div>

@@ -2,16 +2,16 @@
 	import { goto } from '$app/navigation';
 	import { clientNet } from '$lib/net/client.svelte.js';
 	import { sessionMetaStore } from '$lib/stores/session-meta.svelte.js';
-	import { CIVILISATIONS } from '$lib/data/civilisations.js';
+	import { CIVILIZATIONS } from '$lib/data/civilizations.js';
 	import { normalizeRoomCode, isValidRoomCode } from '$lib/utils/room-code.js';
 
 	let roomCode = $state('');
 	let playerName = $state('');
-	let selectedCiv = $state(CIVILISATIONS[0].id);
+	let selectedCiv = $state(CIVILIZATIONS[0].id);
 	let joining = $state(false);
 	let errorMsg = $state<string | null>(null);
 
-	const selectedCivDef = $derived(CIVILISATIONS.find((c) => c.id === selectedCiv)!);
+	const selectedCivDef = $derived(CIVILIZATIONS.find((c) => c.id === selectedCiv)!);
 	const normalizedCode = $derived(normalizeRoomCode(roomCode));
 	const codeValid = $derived(isValidRoomCode(normalizedCode));
 	const canJoin = $derived(codeValid && playerName.trim().length > 0 && !joining);
@@ -86,14 +86,14 @@
 				/>
 			</label>
 
-			<!-- Civilisation -->
+			<!-- Civilization -->
 			<label class="mb-4 block">
-				<span class="mb-1 block text-xs font-medium text-slate-400">Civilisation</span>
+				<span class="mb-1 block text-xs font-medium text-slate-400">Civilization</span>
 				<select
 					bind:value={selectedCiv}
 					class="w-full rounded bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
-					{#each CIVILISATIONS as civ (civ.id)}
+					{#each CIVILIZATIONS as civ (civ.id)}
 						<option value={civ.id}>{civ.name} (#{civ.astRanking} · {civ.deck})</option>
 					{/each}
 				</select>

@@ -7,7 +7,7 @@ import { buildActionEntry } from '../utils/action-builder.js';
 import { generateRoomCode, roomCodeToPeerId, playerPeerId } from '../utils/room-code.js';
 import { generateId } from '../utils/uuid.js';
 import { applyTransfers } from '../utils/token-pool.js';
-import { CIVILISATIONS } from '../data/civilisations.js';
+import { CIVILIZATIONS } from '../data/civilizations.js';
 import { COMMODITY_TYPES } from '../types/game.js';
 import { createDefaultTokenPool } from '../utils/token-pool.js';
 import type { GameSession, Player, GameVariant } from '../types/game.js';
@@ -142,7 +142,7 @@ function handleJoinRequest(conn: DataConnection, req: JoinRequestPayload): void 
 		return;
 	}
 
-	const civDef = CIVILISATIONS.find((c) => c.id === req.civId) ?? CIVILISATIONS[0];
+	const civDef = CIVILIZATIONS.find((c) => c.id === req.civId) ?? CIVILIZATIONS[0];
 	const defaultHand = Object.fromEntries(COMMODITY_TYPES.map((t) => [t, 0])) as Record<
 		(typeof COMMODITY_TYPES)[number],
 		number
@@ -151,8 +151,8 @@ function handleJoinRequest(conn: DataConnection, req: JoinRequestPayload): void 
 	const player: Player = {
 		playerId: req.playerId,
 		playerName: req.playerName,
-		civilisationId: civDef.id,
-		civilisationName: civDef.name,
+		civilizationId: civDef.id,
+		civilizationName: civDef.name,
 		astRanking: civDef.astRanking,
 		colorHex: civDef.colorHex,
 		isHost: false,
@@ -178,7 +178,7 @@ function handleJoinRequest(conn: DataConnection, req: JoinRequestPayload): void 
 
 	const actionEntry = buildActionEntry({
 		actionType: 'JOIN',
-		description: `${player.playerName} joined as ${player.civilisationName}.`,
+		description: `${player.playerName} joined as ${player.civilizationName}.`,
 		initiatedBy: player.playerId,
 		affectedPlayerId: player.playerId,
 		previousValue: null,
@@ -383,15 +383,15 @@ function handleSetCiv(playerId: string, payload: { civId: string }): void {
 	const session = gameStore.session;
 	if (!session || session.status !== 'lobby') return;
 
-	const civDef = CIVILISATIONS.find((c) => c.id === payload.civId);
+	const civDef = CIVILIZATIONS.find((c) => c.id === payload.civId);
 	if (!civDef) return;
 
 	const player = session.players.find((p) => p.playerId === playerId);
 	if (!player) return;
 
 	const patch: Partial<Player> = {
-		civilisationId: civDef.id,
-		civilisationName: civDef.name,
+		civilizationId: civDef.id,
+		civilizationName: civDef.name,
 		astRanking: civDef.astRanking,
 		colorHex: civDef.colorHex
 	};
@@ -401,7 +401,7 @@ function handleSetCiv(playerId: string, payload: { civId: string }): void {
 		description: `${player.playerName} chose ${civDef.name}.`,
 		initiatedBy: playerId,
 		affectedPlayerId: playerId,
-		previousValue: player.civilisationId,
+		previousValue: player.civilizationId,
 		newValue: civDef.id
 	});
 
@@ -449,7 +449,7 @@ export const hostNet = {
 		}
 
 		const hostPlayerId = generateId();
-		const civDef = CIVILISATIONS.find((c) => c.id === hostCivId) ?? CIVILISATIONS[0];
+		const civDef = CIVILIZATIONS.find((c) => c.id === hostCivId) ?? CIVILIZATIONS[0];
 		const defaultHand = Object.fromEntries(COMMODITY_TYPES.map((t) => [t, 0])) as Record<
 			(typeof COMMODITY_TYPES)[number],
 			number
@@ -458,8 +458,8 @@ export const hostNet = {
 		const hostPlayer: Player = {
 			playerId: hostPlayerId,
 			playerName: hostPlayerName,
-			civilisationId: civDef.id,
-			civilisationName: civDef.name,
+			civilizationId: civDef.id,
+			civilizationName: civDef.name,
 			astRanking: civDef.astRanking,
 			colorHex: civDef.colorHex,
 			isHost: true,

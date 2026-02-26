@@ -1,4 +1,4 @@
-export interface CivilisationDef {
+export interface CivilizationDef {
 	/** AST ranking 1–18; odd = Western, even = Eastern */
 	astRanking: number;
 	id: string;
@@ -9,8 +9,8 @@ export interface CivilisationDef {
 	deck: 'Western' | 'Eastern';
 }
 
-/** All 18 civilisations ordered by AST ranking. */
-export const CIVILISATIONS: readonly CivilisationDef[] = [
+/** All 18 civilizations ordered by AST ranking. */
+export const CIVILIZATIONS: readonly CivilizationDef[] = [
 	{ astRanking: 1, id: 'minoa', name: 'Minoa', colorHex: '#7CB342', cssVar: '--color-minoa', deck: 'Western' },
 	{ astRanking: 2, id: 'saba', name: 'Saba', colorHex: '#E57373', cssVar: '--color-saba', deck: 'Eastern' },
 	{ astRanking: 3, id: 'assyria', name: 'Assyria', colorHex: '#42A5F5', cssVar: '--color-assyria', deck: 'Western' },
@@ -31,10 +31,10 @@ export const CIVILISATIONS: readonly CivilisationDef[] = [
 	{ astRanking: 18, id: 'parthia', name: 'Parthia', colorHex: '#689F38', cssVar: '--color-parthia', deck: 'Eastern' }
 ] as const;
 
-export const CIVILISATION_MAP: ReadonlyMap<string, CivilisationDef> = new Map(
-	CIVILISATIONS.map((c) => [c.id, c])
+export const CIVILIZATION_MAP: ReadonlyMap<string, CivilizationDef> = new Map(
+	CIVILIZATIONS.map((c) => [c.id, c])
 );
 
-export function getCivilisation(id: string): CivilisationDef | undefined {
-	return CIVILISATION_MAP.get(id);
+export function getCivilization(id: string): CivilizationDef | undefined {
+	return CIVILIZATION_MAP.get(id);
 }

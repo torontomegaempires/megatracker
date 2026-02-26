@@ -2,7 +2,7 @@
 	import { gameStore } from '$lib/stores/game.svelte.js';
 	import { goto } from '$app/navigation';
 	import { CARD_MAP } from '$lib/data/cards.js';
-	import type { CardGroup, CivilisationCard } from '$lib/types/game.js';
+	import type { CardGroup, CivilizationCard } from '$lib/types/game.js';
 
 	$effect(() => {
 		if (!gameStore.session) goto('/');
@@ -34,7 +34,7 @@
 
 	interface GroupedCards {
 		group: CardGroup;
-		cards: CivilisationCard[];
+		cards: CivilizationCard[];
 	}
 
 	const ownedGroups = $derived.by((): GroupedCards[] => {
@@ -43,7 +43,7 @@
 
 		const ownedCards = player.ownedCardIds
 			.map((id) => CARD_MAP.get(id))
-			.filter((c): c is CivilisationCard => c !== undefined);
+			.filter((c): c is CivilizationCard => c !== undefined);
 
 		return groupOrder
 			.map((group) => ({

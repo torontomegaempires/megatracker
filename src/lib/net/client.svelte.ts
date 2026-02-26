@@ -188,7 +188,7 @@ export const clientNet = {
 	},
 
 	/**
-	 * Send a civilisation change to the host (lobby only).
+	 * Send a civilization change to the host (lobby only).
 	 */
 	sendSetCiv(civId: string): void {
 		this.sendAction('SET_CIV', { civId });

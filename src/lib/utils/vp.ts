@@ -1,4 +1,4 @@
-import type { Player, CivilisationCard } from '../types/game.js';
+import type { Player, CivilizationCard } from '../types/game.js';
 
 // ─── Credit System ────────────────────────────────────────────────────────────
 
@@ -7,7 +7,7 @@ import type { Player, CivilisationCard } from '../types/game.js';
  * Net cost = baseCost − sum(creditAmount for each owned card that credits this card).
  * Minimum net cost is 0.
  */
-export function calcNetCardCost(card: CivilisationCard, ownedCards: CivilisationCard[]): number {
+export function calcNetCardCost(card: CivilizationCard, ownedCards: CivilizationCard[]): number {
 	let discount = 0;
 	for (const owned of ownedCards) {
 		for (const credit of owned.credits) {
@@ -57,7 +57,7 @@ export interface VpBreakdown {
  */
 export function calcVictoryPoints(
 	player: Pick<Player, 'citiesOnBoard' | 'ownedCardIds' | 'astPosition'>,
-	cardLookup: Map<string, CivilisationCard>,
+	cardLookup: Map<string, CivilizationCard>,
 	hasLateIronAgeBonus: boolean
 ): VpBreakdown {
 	const cities = player.citiesOnBoard;

@@ -74,8 +74,8 @@ export interface GameSession {
 export interface Player {
 	playerId: string;
 	playerName: string;
-	civilisationId: string;
-	civilisationName: string;
+	civilizationId: string;
+	civilizationName: string;
 	/** 1–18, fixed, lower = higher priority (tiebreaker) */
 	astRanking: number;
 	colorHex: string;
@@ -101,7 +101,7 @@ export interface Player {
 	connectionStatus: ConnectionStatus;
 }
 
-// ─── Civilisation Card ────────────────────────────────────────────────────────
+// ─── Civilization Card ────────────────────────────────────────────────────────
 
 export interface CardCredit {
 	targetCardId: string;
@@ -113,7 +113,7 @@ export interface CalamityModifier {
 	description: string;
 }
 
-export interface CivilisationCard {
+export interface CivilizationCard {
 	cardId: string;
 	name: string;
 	deck: CardDeck;
@@ -179,7 +179,7 @@ export interface PhaseDefinition {
 export const PHASES: readonly PhaseDefinition[] = [
 	{ phase: 1, name: 'Tax Collection', description: 'Collect 2 treasury per city.' },
 	{ phase: 2, name: 'Population Expansion', description: 'Move tokens from stock to board.' },
-	{ phase: 3, name: 'Ship Construction', description: 'Build and maintain ships.' },
+	{ phase: 3, name: 'Movement', description: 'Build, maintain, and destroy ships.' },
 	{ phase: 4, name: 'Conflict', description: 'Resolve battles and losses.' },
 	{ phase: 5, name: 'City Construction', description: 'Build cities on board.' },
 	{
@@ -195,6 +195,6 @@ export const PHASES: readonly PhaseDefinition[] = [
 		name: 'AST Advancement Eligibility',
 		description: 'Check eligibility for AST advancement.'
 	},
-	{ phase: 11, name: 'AST Advancement', description: 'Advance on the AST track.' },
-	{ phase: 12, name: 'Civilisation Advances', description: 'Purchase civilisation cards.' }
+	{ phase: 11, name: 'Civilization Advances', description: 'Purchase civilization cards.' },
+	{ phase: 12, name: 'AST Advancement', description: 'Advance on the AST track.' }
 ] as const;
