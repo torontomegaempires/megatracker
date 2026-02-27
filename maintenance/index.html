@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MegaTracker — Down for Maintenance</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        min-height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #020617;
+        color: #f8fafc;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        padding: 1.5rem;
+      }
+
+      .card {
+        max-width: 28rem;
+        width: 100%;
+        text-align: center;
+      }
+
+      .icon {
+        font-size: 3rem;
+        line-height: 1;
+        margin-bottom: 1.25rem;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #f8fafc;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid #1e293b;
+        margin: 1.5rem 0;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: #64748b;
+      }
+
+      .dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: #f59e0b;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="icon">⚔</div>
+      <h1>MegaTracker is down for maintenance</h1>
+      <p>We'll be back shortly. Thanks for your patience.</p>
+      <hr class="divider" />
+      <span class="status">
+        <span class="dot"></span>
+        Maintenance in progress
+      </span>
+    </div>
+  </body>
+</html>
