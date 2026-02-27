@@ -100,6 +100,7 @@
 			<div class="flex items-center gap-2">
 				<button
 					onclick={() => (transferAmount = Math.max(1, transferAmount - 1))}
+					aria-label="Decrease amount"
 					class="rounded bg-slate-600 px-2 py-1 text-sm font-bold text-white hover:bg-slate-500 active:scale-95"
 				>−</button>
 				<input
@@ -107,10 +108,12 @@
 					bind:value={transferAmount}
 					min="1"
 					max={TOKEN_POOL_TOTAL}
+					aria-label="Transfer amount"
 					class="w-16 rounded bg-slate-700 px-2 py-1 text-center text-sm text-white"
 				/>
 				<button
 					onclick={() => (transferAmount = transferAmount + 1)}
+					aria-label="Increase amount"
 					class="rounded bg-slate-600 px-2 py-1 text-sm font-bold text-white hover:bg-slate-500 active:scale-95"
 				>+</button>
 				<button

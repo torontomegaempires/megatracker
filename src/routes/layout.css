@@ -12,6 +12,13 @@ textarea {
 	font-size: 1rem; /* prevents iOS auto-zoom on focus */
 }
 
+/* ── Keyboard focus indicator ───────────────────────────────────────────────── */
+*:focus-visible {
+	outline: 2px solid #60a5fa;
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
 /* ── Nation colour palette ──────────────────────────────────────────────────── */
 :root {
 	--color-minoa: #7cb342;

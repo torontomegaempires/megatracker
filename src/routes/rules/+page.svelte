@@ -206,6 +206,7 @@
 				type="search"
 				bind:value={query}
 				placeholder="Search cards, calamities…"
+				aria-label="Search cards and calamities"
 				class="ml-auto w-44 rounded-lg bg-slate-800 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
 			/>
 		</div>

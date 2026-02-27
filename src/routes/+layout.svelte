@@ -85,9 +85,10 @@
 				{#each gameTabs as tab (tab.href)}
 					<a
 						href={tab.href}
+						aria-label={tab.label}
 						class="flex flex-col items-center py-1.5 text-[10px] transition-colors"
 						class:text-blue-400={$page.url.pathname === tab.href}
-						class:text-slate-500={$page.url.pathname !== tab.href}
+						class:text-slate-400={$page.url.pathname !== tab.href}
 					>
 						<span class="mb-0.5 text-base leading-none">{tab.icon}</span>
 						{tab.label}
