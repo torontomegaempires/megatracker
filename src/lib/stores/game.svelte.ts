@@ -2,6 +2,7 @@ import type { GameSession, Player, ActionEntry, ConnectionStatus } from '../type
 import { applyTransfer, applyTransfers, isTokenPoolValid } from '../utils/token-pool.js';
 import type { TokenTransfer } from '../types/game.js';
 import type { StatePatchPayload } from '../types/messages.js';
+import { saveSession } from './persistence.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -19,10 +20,20 @@ const currentTurn = $derived(session?.currentTurn ?? 0);
 const isHost = $derived(myPlayer?.isHost ?? false);
 const isActive = $derived(session?.status === 'active');
 
+// ─── Persistence ─────────────────────────────────────────────────────────────
+
+/** Fire-and-forget save. Only persists when the local player is the host. */
+function persistIfHost() {
+	if (session && isHost) {
+		saveSession(session).catch(() => {});
+	}
+}
+
 // ─── Mutations ────────────────────────────────────────────────────────────────
 
 function setSession(s: GameSession) {
 	session = s;
+	persistIfHost();
 }
 
 function clearSession() {
@@ -51,6 +62,7 @@ function applyPlayerTransfer(playerId: string, transfer: TokenTransfer): string 
 
 	// Patch the player in-place (Svelte 5 fine-grained reactivity)
 	session.players[idx] = { ...player, ...result.player };
+	persistIfHost();
 	return null;
 }
 
@@ -68,6 +80,7 @@ function applyPlayerTransfers(playerId: string, transfers: TokenTransfer[]): str
 	if (!result.ok) return result.error;
 
 	session.players[idx] = { ...player, ...result.player };
+	persistIfHost();
 	return null;
 }
 
@@ -81,6 +94,7 @@ function updatePlayerFields(playerId: string, patch: Partial<Player>): string | 
 	const idx = session.players.findIndex((p) => p.playerId === playerId);
 	if (idx === -1) return `Player ${playerId} not found.`;
 	session.players[idx] = { ...session.players[idx], ...patch };
+	persistIfHost();
 	return null;
 }
 
@@ -90,6 +104,7 @@ function updatePlayerFields(playerId: string, patch: Partial<Player>): string | 
 function appendActionEntry(entry: ActionEntry) {
 	if (!session) return;
 	session.actionLog = [...session.actionLog, entry];
+	persistIfHost();
 }
 
 /**
@@ -110,6 +125,7 @@ function hostSetPlayerState(playerId: string, patch: Partial<Player>): string | 
 	}
 
 	session.players[idx] = updated;
+	persistIfHost();
 	return null;
 }
 
@@ -124,6 +140,7 @@ function applyStatePatch(patch: StatePatchPayload): void {
 		session.players[idx] = { ...session.players[idx], ...patch.patch };
 	}
 	session.actionLog = [...session.actionLog, patch.actionEntry];
+	persistIfHost();
 }
 
 /**
@@ -132,6 +149,7 @@ function applyStatePatch(patch: StatePatchPayload): void {
 function addPlayer(player: Player): void {
 	if (!session) return;
 	session.players = [...session.players, player];
+	persistIfHost();
 }
 
 /**
@@ -140,6 +158,7 @@ function addPlayer(player: Player): void {
 function removePlayer(playerId: string): void {
 	if (!session) return;
 	session.players = session.players.filter((p) => p.playerId !== playerId);
+	persistIfHost();
 }
 
 /**
@@ -151,6 +170,7 @@ function setPlayerConnectionStatus(playerId: string, status: ConnectionStatus): 
 	if (idx !== -1) {
 		session.players[idx] = { ...session.players[idx], connectionStatus: status };
 	}
+	persistIfHost();
 }
 
 /**
@@ -159,6 +179,7 @@ function setPlayerConnectionStatus(playerId: string, status: ConnectionStatus): 
 function setSessionStatus(status: GameSession['status']): void {
 	if (!session) return;
 	session.status = status;
+	persistIfHost();
 }
 
 function advancePhase() {
@@ -169,6 +190,7 @@ function advancePhase() {
 		session.currentPhase = 1;
 		session.currentTurn += 1;
 	}
+	persistIfHost();
 }
 
 function rewindPhase() {
@@ -176,6 +198,7 @@ function rewindPhase() {
 	if (session.currentPhase > 1) {
 		session.currentPhase -= 1;
 	}
+	persistIfHost();
 }
 
 // ─── Exported Store Interface ─────────────────────────────────────────────────

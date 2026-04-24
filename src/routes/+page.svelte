@@ -7,10 +7,18 @@
 	import { COMMODITY_TYPES } from '$lib/types/game.js';
 	import { createDefaultTokenPool } from '$lib/utils/token-pool.js';
 	import { sessionMetaStore } from '$lib/stores/session-meta.svelte.js';
+	import { listRecentSessions } from '$lib/stores/persistence.js';
 
 	type Mode = 'landing' | 'create' | 'demo';
 
 	let mode = $state<Mode>('landing');
+	let recentSessions = $state<GameSession[]>([]);
+
+	$effect(() => {
+		listRecentSessions().then((sessions) => {
+			recentSessions = sessions;
+		});
+	});
 
 	// ── Create session fields
 	let sessionName = $state('');
@@ -147,6 +155,34 @@
 					📖 Rules Reference
 				</a>
 			</div>
+
+			{#if recentSessions.length > 0}
+				<div class="mt-8">
+					<h2 class="mb-2 text-xs font-semibold uppercase tracking-widest text-slate-500">
+						Recent Sessions
+					</h2>
+					<ul class="space-y-2">
+						{#each recentSessions as s (s.sessionId)}
+							<li class="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
+								<div class="min-w-0 flex-1">
+									<p class="truncate text-sm font-medium text-white">{s.sessionName}</p>
+									<p class="text-xs text-slate-500">
+										{s.variant} · {s.players.length} player{s.players.length !== 1 ? 's' : ''} · Turn {s.currentTurn}
+									</p>
+								</div>
+								<span
+									class="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium
+										{s.status === 'active' ? 'bg-green-900/50 text-green-400' :
+										 s.status === 'lobby' ? 'bg-amber-900/50 text-amber-400' :
+										 'bg-slate-800 text-slate-500'}"
+								>
+									{s.status}
+								</span>
+							</li>
+						{/each}
+					</ul>
+				</div>
+			{/if}
 
 		<!-- ── Create Session ── -->
 		{:else if mode === 'create'}
