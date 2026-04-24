@@ -7,7 +7,7 @@
 	import { COMMODITY_TYPES } from '$lib/types/game.js';
 	import { createDefaultTokenPool } from '$lib/utils/token-pool.js';
 	import { sessionMetaStore } from '$lib/stores/session-meta.svelte.js';
-	import { listRecentSessions } from '$lib/stores/persistence.js';
+	import { listRecentSessions, saveSessionMeta, saveSession } from '$lib/stores/persistence.js';
 
 	type Mode = 'landing' | 'create' | 'demo';
 
@@ -19,6 +19,15 @@
 			recentSessions = sessions;
 		});
 	});
+
+	function resumeSession(s: GameSession) {
+		// Recent sessions are always host sessions (only hosts persist to IndexedDB)
+		const roomCode = s.hostPeerId.replace('megatrkr-', '').toUpperCase();
+		saveSessionMeta({ sessionId: s.sessionId, myPlayerId: s.hostPlayerId, role: 'host', roomCode });
+		gameStore.setSession(s);
+		gameStore.setMyPlayerId(s.hostPlayerId);
+		goto('/dashboard');
+	}
 
 	// ── Create session fields
 	let sessionName = $state('');
@@ -59,7 +68,7 @@
 		}
 	}
 
-	function startDemo() {
+	async function startDemo() {
 		if (!demoPlayerName.trim()) return;
 
 		const civ = demoCivDef;
@@ -106,6 +115,8 @@
 
 		gameStore.setSession(session);
 		gameStore.setMyPlayerId(playerId);
+		await saveSession(session);
+		saveSessionMeta({ sessionId: session.sessionId, myPlayerId: playerId, role: 'none', roomCode: null });
 		goto('/dashboard');
 	}
 </script>
@@ -178,6 +189,12 @@
 								>
 									{s.status}
 								</span>
+								<button
+									onclick={() => resumeSession(s)}
+									class="shrink-0 rounded bg-slate-700 px-2 py-1 text-xs font-medium text-slate-200 hover:bg-slate-600 active:scale-[0.97]"
+								>
+									Resume
+								</button>
 							</li>
 						{/each}
 					</ul>

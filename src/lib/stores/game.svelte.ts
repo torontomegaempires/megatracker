@@ -2,7 +2,7 @@ import type { GameSession, Player, ActionEntry, ConnectionStatus } from '../type
 import { applyTransfer, applyTransfers, isTokenPoolValid } from '../utils/token-pool.js';
 import type { TokenTransfer } from '../types/game.js';
 import type { StatePatchPayload } from '../types/messages.js';
-import { saveSession } from './persistence.js';
+import { saveSession, loadSession, loadSessionMeta, clearSessionMeta } from './persistence.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -24,7 +24,9 @@ const isActive = $derived(session?.status === 'active');
 
 /** Fire-and-forget save. Only persists when the local player is the host. */
 function persistIfHost() {
-	if (session && isHost) {
+	if (!session || !myPlayerId) return;
+	const player = session.players.find((p) => p.playerId === myPlayerId);
+	if (player?.isHost) {
 		saveSession(session).catch(() => {});
 	}
 }
@@ -39,10 +41,22 @@ function setSession(s: GameSession) {
 function clearSession() {
 	session = null;
 	myPlayerId = null;
+	clearSessionMeta();
 }
 
 function setMyPlayerId(id: string) {
 	myPlayerId = id;
+	persistIfHost(); // now that isHost is derivable, do initial save
+}
+
+async function restoreFromStorage(): Promise<boolean> {
+	const meta = loadSessionMeta();
+	if (!meta) return false;
+	const s = await loadSession(meta.sessionId);
+	if (!s) return false;
+	session = s;
+	myPlayerId = meta.myPlayerId;
+	return true;
 }
 
 /**
@@ -231,6 +245,7 @@ export const gameStore = {
 	setSession,
 	clearSession,
 	setMyPlayerId,
+	restoreFromStorage,
 	applyPlayerTransfer,
 	applyPlayerTransfers,
 	updatePlayerFields,

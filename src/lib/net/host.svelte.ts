@@ -5,6 +5,7 @@ import { gameStore } from '../stores/game.svelte.js';
 import { sessionMetaStore } from '../stores/session-meta.svelte.js';
 import { buildActionEntry } from '../utils/action-builder.js';
 import { generateRoomCode, roomCodeToPeerId, playerPeerId } from '../utils/room-code.js';
+import { saveSessionMeta, saveSession } from '../stores/persistence.js';
 import { generateId } from '../utils/uuid.js';
 import { applyTransfers } from '../utils/token-pool.js';
 import { CIVILIZATIONS } from '../data/civilizations.js';
@@ -495,6 +496,10 @@ export const hostNet = {
 		sessionMetaStore.setRole('host');
 		sessionMetaStore.setRoomCode(roomCode);
 
+		// Explicit initial save — don't rely on persistIfHost for first write
+		await saveSession(session);
+		saveSessionMeta({ sessionId: session.sessionId, myPlayerId: hostPlayerId, role: 'host', roomCode });
+
 		// Register networking handlers
 		peerNet.onConnection(handleIncomingConnection);
 		peerNet.onMessage(handleMessage);
@@ -733,6 +738,51 @@ export const hostNet = {
 
 		// Broadcast snapshot so everyone sees the updated player list
 		peerNet.broadcast(makeSnapshot());
+	},
+
+	/**
+	 * Re-establish hosting after a page refresh.
+	 * Re-opens the same PeerJS peer ID so existing clients can reconnect.
+	 * The game state must already be restored from IndexedDB before calling this.
+	 * Retries on 'unavailable-id' — the signaling server may take a few seconds
+	 * to release the ID after a hard refresh.
+	 */
+	async rejoinSession(): Promise<void> {
+		const session = gameStore.session;
+		if (!session) throw new Error('No session to rejoin.');
+
+		const hostPeerId = session.hostPeerId;
+		const roomCode = hostPeerId.replace('megatrkr-', '').toUpperCase();
+
+		// Register handlers BEFORE opening the peer so reconnecting clients
+		// don't race against handler registration and have their messages dropped.
+		peerNet.onConnection(handleIncomingConnection);
+		peerNet.onMessage(handleMessage);
+		peerNet.onDisconnect(handleDisconnect);
+
+		const RETRY_DELAYS = [0, 3000, 6000];
+		let lastError: unknown;
+
+		for (let i = 0; i < RETRY_DELAYS.length; i++) {
+			if (RETRY_DELAYS[i] > 0) {
+				await new Promise((r) => setTimeout(r, RETRY_DELAYS[i]));
+			}
+			try {
+				await peerNet.openAsPeer(hostPeerId);
+				lastError = null;
+				break;
+			} catch (err) {
+				lastError = err;
+				const e = err as { type?: string };
+				if (e?.type !== 'unavailable-id') throw err;
+				// ID still reserved on signaling server — wait and retry
+			}
+		}
+
+		if (lastError) throw lastError;
+
+		sessionMetaStore.setRole('host');
+		sessionMetaStore.setRoomCode(roomCode);
 	},
 
 	/** Clean up all host state. */

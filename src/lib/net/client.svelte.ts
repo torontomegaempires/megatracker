@@ -5,6 +5,7 @@ import { gameStore } from '../stores/game.svelte.js';
 import { sessionMetaStore } from '../stores/session-meta.svelte.js';
 import { toastStore } from '../stores/toast.svelte.js';
 import { roomCodeToPeerId, playerPeerId, isValidRoomCode } from '../utils/room-code.js';
+import { saveSessionMeta } from '../stores/persistence.js';
 import { generateId } from '../utils/uuid.js';
 import type { TypedMessage, StatePatchPayload, PhaseChangePayload } from '../types/messages.js';
 import type { Player, TokenTransfer } from '../types/game.js';
@@ -31,7 +32,18 @@ function handleMessage(_conn: DataConnection, msg: TypedMessage): void {
 			if (!payload?.session) return;
 			setSeq(msg.sequenceId);
 			gameStore.setSession(payload.session);
-			if (_myPlayerId) gameStore.setMyPlayerId(_myPlayerId);
+			if (_myPlayerId) {
+				gameStore.setMyPlayerId(_myPlayerId);
+				const roomCode = sessionMetaStore.roomCode;
+				if (roomCode) {
+					saveSessionMeta({
+						sessionId: payload.session.sessionId,
+						myPlayerId: _myPlayerId,
+						role: 'client',
+						roomCode
+					});
+				}
+			}
 			// Navigate to lobby if session is in lobby, or dashboard if active
 			const dest = payload.session.status === 'active' ? '/dashboard' : '/lobby';
 			_onReadyToNavigate?.(dest);
@@ -82,6 +94,7 @@ function scheduleReconnect(): void {
 		try {
 			await clientNet.reconnect();
 			_reconnectAttempts = 0;
+			sessionMetaStore.setStatus('open');
 			toastStore.add('Reconnected to session.', 'success');
 		} catch {
 			scheduleReconnect();
@@ -195,18 +208,51 @@ export const clientNet = {
 	},
 
 	/**
+	 * Re-establish a client connection after a page refresh.
+	 * Opens a new PeerJS peer, connects to the host, and sends RECONNECT.
+	 * The host will respond with a STATE_SNAPSHOT to restore game state.
+	 */
+	async rejoinSession(roomCode: string, myPlayerId: string, sessionId: string): Promise<void> {
+		_myPlayerId = myPlayerId;
+		const myPeerJsId = playerPeerId(roomCode, myPlayerId);
+
+		await peerNet.openAsPeer(myPeerJsId);
+
+		sessionMetaStore.setRole('client');
+		sessionMetaStore.setRoomCode(roomCode);
+		sessionMetaStore.setHostPeerId(roomCodeToPeerId(roomCode));
+
+		_hostConn = await peerNet.connect(roomCodeToPeerId(roomCode));
+
+		peerNet.onMessage(handleMessage);
+		peerNet.onDisconnect(handleDisconnect);
+
+		peerNet.send(_hostConn, {
+			type: 'ACTION',
+			playerId: myPlayerId,
+			timestamp: Date.now(),
+			sequenceId: nextSeq(),
+			payload: { actionType: 'RECONNECT', playerId: myPlayerId, sessionId }
+		});
+	},
+
+	/**
 	 * Attempt to reconnect to the host after a disconnect.
+	 * If our Peer is still connected to the signaling server (only the
+	 * DataConnection to the host was lost), reuse it. Otherwise create a new one.
 	 */
 	async reconnect(): Promise<void> {
 		const roomCode = sessionMetaStore.roomCode;
 		if (!roomCode || !_myPlayerId) return;
 
 		try {
-			const myPeerJsId = playerPeerId(roomCode, _myPlayerId);
-			await peerNet.openAsPeer(myPeerJsId);
+			if (!peerNet.isOpen) {
+				const myPeerJsId = playerPeerId(roomCode, _myPlayerId);
+				await peerNet.openAsPeer(myPeerJsId);
+			}
+
 			_hostConn = await peerNet.connect(roomCodeToPeerId(roomCode));
 
-			// Re-send join to get fresh snapshot
 			peerNet.send(_hostConn, {
 				type: 'ACTION',
 				playerId: _myPlayerId,
@@ -220,6 +266,7 @@ export const clientNet = {
 			});
 		} catch (err) {
 			console.error('[clientNet] Reconnect failed:', err);
+			throw err;
 		}
 	},
 

@@ -1,17 +1,74 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { gameStore } from '$lib/stores/game.svelte.js';
 	import { sessionMetaStore } from '$lib/stores/session-meta.svelte.js';
 	import { hostNet } from '$lib/net/host.svelte.js';
 	import { clientNet } from '$lib/net/client.svelte.js';
 	import { goto } from '$app/navigation';
+	import { loadSessionMeta } from '$lib/stores/persistence.js';
+	import { toastStore } from '$lib/stores/toast.svelte.js';
 	import NationDashboard from '$lib/components/NationDashboard.svelte';
 	import PhaseBanner from '$lib/components/PhaseBanner.svelte';
 	import PhaseActions from '$lib/components/PhaseActions.svelte';
 	import type { Player, TokenTransfer } from '$lib/types/game.js';
 
-	// Redirect to home if no session
+	// On refresh: restore state + re-establish networking before rendering
+	let ready = $state(false);
+
+	onMount(async () => {
+		if (gameStore.session) {
+			// Already have state in memory (no refresh) — nothing to do
+			ready = true;
+			return;
+		}
+
+		const meta = loadSessionMeta();
+		if (!meta) {
+			goto('/');
+			return;
+		}
+
+		// `role` may be absent in old localStorage format — treat as 'host' since
+		// only hosts ever had session meta persisted in earlier versions.
+		const role = meta.role ?? 'host';
+
+		if (role === 'host' || role === 'none') {
+			// Host or demo: restore state from IndexedDB, then re-open PeerJS (if networked)
+			const ok = await gameStore.restoreFromStorage();
+			if (!ok) {
+				goto('/');
+				return;
+			}
+			if (role === 'host') {
+				try {
+					await hostNet.rejoinSession();
+				} catch {
+					toastStore.add('Could not reclaim host peer — running offline.', 'error');
+				}
+			}
+			ready = true;
+		} else if (role === 'client' && meta.roomCode) {
+			// Client: reconnect to host; game state comes via STATE_SNAPSHOT
+			try {
+				await clientNet.rejoinSession(meta.roomCode, meta.myPlayerId, meta.sessionId);
+				// STATE_SNAPSHOT will set gameStore.session; watch for it below
+			} catch {
+				toastStore.add('Could not reconnect to host.', 'error');
+				goto('/');
+			}
+		} else {
+			goto('/');
+		}
+	});
+
+	// For clients: once STATE_SNAPSHOT sets the session, mark ready
 	$effect(() => {
-		if (!gameStore.session) goto('/');
+		if (!ready && gameStore.session) ready = true;
+	});
+
+	// Redirect if session is cleared after initial load (e.g. host ends game)
+	$effect(() => {
+		if (ready && !gameStore.session) goto('/');
 	});
 
 	let showPhaseDetail = $state(false);

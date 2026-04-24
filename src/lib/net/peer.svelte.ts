@@ -58,6 +58,11 @@ export const peerNet = {
 		return _connections;
 	},
 
+	/** Whether the underlying Peer is connected to the signaling server. */
+	get isOpen(): boolean {
+		return _peer !== null && !_peer.disconnected && !_peer.destroyed;
+	},
+
 	/** Register the handler called when a new inbound connection is fully open. */
 	onConnection(fn: ConnectionHandler) {
 		_onConnection = fn;
@@ -118,6 +123,7 @@ export const peerNet = {
 			p.on('error', (err) => {
 				sessionMetaStore.setStatus('error');
 				sessionMetaStore.setError(err.message);
+				p.destroy();
 				// 'unavailable-id' means room code collision — caller should retry
 				reject(err);
 			});
