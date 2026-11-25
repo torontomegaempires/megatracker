@@ -1,7 +1,7 @@
 {
   "name": "megatracker",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Mega Empires purchase and game tracker for the Toronto Mega Empires group",
   "license": "CC-BY-NC-SA-4.0",
