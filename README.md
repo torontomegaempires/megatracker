@@ -54,14 +54,21 @@ Megatracker uses [semantic versioning](https://semver.org/); the version lives i
 
 ## Making changes
 
-`main` is protected: every change goes through a pull request, and the **Test and build**
-check (tests, type check and production build) must pass before it can merge. Netlify
-deploys `main` when a pull request merges.
+`main` is protected: every change goes through a pull request. Before it can merge, the
+branch must be up to date with `main` and the **Test and build** check (tests, type check
+and production build) must pass. Netlify deploys `main` when a pull request merges.
 
-1. Branch from `main`, make the change, and add a line under `[Unreleased]` in `CHANGELOG.md`
-   if players will notice it.
+1. `git fetch origin`, then branch from `origin/main`. Make the change, and add a line under
+   `[Unreleased]` in `CHANGELOG.md` if players will notice it.
 2. Push the branch and open a pull request (`gh pr create`).
-3. Merge it once the check passes.
+3. Merge it once the check passes. If GitHub says the branch is out of date, update it
+   (the **Update branch** button, or rebase onto `origin/main`) and let the check run again.
+
+If a release merges while your branch is open, it renames `[Unreleased]`, and your changelog
+line can merge into the released section without a conflict. The check fails a pull request
+whose changelog lines end up outside `[Unreleased]`; move them back under it.
+
+Instructions for coding agents are in [CLAUDE.md](CLAUDE.md).
 
 To release what has merged since the last version, run one of these from a clean checkout:
 
