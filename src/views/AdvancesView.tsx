@@ -2,7 +2,7 @@ import type { Advance, GoalId } from '../data';
 import { COLORS } from '../data';
 import type { FilterId, GameState, GoalOption, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
-import { cost, costSummary, funds, visibleAdvances } from '../engine/selectors';
+import { chainDiscount, cost, costSummary, funds, visibleAdvances } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { advanceColors } from '../components/ui';
 import { useGame } from '../state/store';
@@ -144,6 +144,8 @@ function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState;
   const barred = !owned && isBarred(game, a.name);
   const picked = game.considering.includes(a.name);
   const c = cost(game, a);
+  const discount = a.price - c;
+  const fromChain = chainDiscount(game, a);
   const classes = ['adv', owned && 'owned', barred && 'barred', chainStart && 'chain-start'].filter(Boolean).join(' ');
 
   return (
@@ -177,7 +179,16 @@ function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState;
             {a.vp}
             <small>VP</small>
           </span>
-          <span className={`adv-price${!owned && c < a.price ? ' discounted' : ''}`}>{owned ? 'Owned' : a.price}</span>
+          {owned ? (
+            <span className="adv-price">Owned</span>
+          ) : (
+            discount > 0 && (
+              <span className="adv-price">
+                {fromChain > 0 && <span className="adv-chain">{a.prev}</span>}
+                <span className="adv-discount">−{discount}</span>
+              </span>
+            )
+          )}
         </span>
       </button>
     </li>

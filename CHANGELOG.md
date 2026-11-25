@@ -10,6 +10,9 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+### Changed
+- Advances tab: discounted advances now show the discount in red (e.g. −15) instead of the crossed-out original price, with the owned chain card's name beside it when a chain discount applies.
+
 ## [0.1.2] - 2026-11-25
 
 ### Changed
