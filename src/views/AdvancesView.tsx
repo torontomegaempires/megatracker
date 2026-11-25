@@ -1,0 +1,242 @@
+import type { Advance, GoalId } from '../data';
+import { COLORS } from '../data';
+import type { FilterId, GameState, GoalOption, SortId } from '../engine/game';
+import { isBarred } from '../engine/game';
+import { cost, costSummary, funds, visibleAdvances } from '../engine/selectors';
+import { Icon } from '../components/Icon';
+import { advanceColors } from '../components/ui';
+import { useGame } from '../state/store';
+
+const FILTERS: { id: FilterId; label: string }[] = [
+  { id: 'unowned', label: 'Unowned' },
+  { id: 'affordable', label: 'Affordable' },
+  { id: 'almostAffordable', label: 'Nearly affordable' },
+  { id: 'goal', label: 'By goal' },
+  { id: 'owned', label: 'Owned' },
+  { id: 'all', label: 'All' },
+];
+
+export const SORTS: { id: SortId; label: string }[] = [
+  { id: 'alpha', label: 'Name' },
+  { id: 'cost', label: 'Lowest cost' },
+  { id: 'vp', label: 'Most VP' },
+  { id: 'economy', label: 'Best VP per cost' },
+  { id: 'discount', label: 'Biggest discount' },
+  { id: 'color', label: 'Color group' },
+  { id: 'chains', label: 'Strategic chains' },
+];
+
+const GOALS: { id: GoalId; label: string }[] = [
+  { id: 'advances', label: 'Cheaper Advances' },
+  { id: 'treasury', label: 'More treasury' },
+  { id: 'trade', label: 'Trade cards' },
+  { id: 'bend', label: 'Bend the rules' },
+  { id: 'tokens', label: 'More tokens on the map' },
+  { id: 'mobility', label: 'Token mobility' },
+  { id: 'cities', label: 'Build or hold cities' },
+  { id: 'sea', label: 'Sea power' },
+  { id: 'aggression', label: 'Aggression' },
+  { id: 'defense', label: 'Defense' },
+];
+
+const FREE_PICK_TEXT = {
+  cheapScience: { source: 'Anatomy', text: 'Take one Science advance priced under 100 for free.' },
+  oneVP: { source: 'Primal Philosophy', text: 'Take one 1-VP advance for free.' },
+};
+
+export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => void; onFunds: () => void }) {
+  const { game, dispatch } = useGame();
+  const listing = visibleAdvances(game);
+  const available = funds(game);
+  const setView = (view: Partial<GameState['view']>) => dispatch({ type: 'setView', view });
+
+  return (
+    <>
+      {game.freePick ? (
+        <div className="notice notice-accent" role="status">
+          <Icon name="specials" />
+          <div className="grow">
+            <strong>{FREE_PICK_TEXT[game.freePick].source}:</strong> {FREE_PICK_TEXT[game.freePick].text}
+          </div>
+          <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'skipFreePick' })}>
+            Skip
+          </button>
+        </div>
+      ) : (
+        <div className="toolbar">
+          <div className="chips" role="group" aria-label="Show">
+            {FILTERS.map((f) => (
+              <button key={f.id} type="button" className="chip" aria-pressed={game.view.filter === f.id} onClick={() => setView({ filter: f.id })}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <div className="toolbar-row">
+            {game.view.filter === 'goal' && (
+              <label className="select">
+                Goal
+                <span className="select-wrap">
+                <select value={game.view.goal} onChange={(e) => setView({ goal: e.target.value as GoalOption })}>
+                  {game.view.ast !== 'off' && <option value="ast">Reach the next AST age</option>}
+                  {GOALS.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+                <Icon name="chevronDown" />
+                </span>
+              </label>
+            )}
+            <label className="select">
+              Sort
+              <span className="select-wrap">
+              <select value={game.view.sort} onChange={(e) => setView({ sort: e.target.value as SortId })}>
+                {SORTS.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+              <Icon name="chevronDown" />
+              </span>
+            </label>
+          </div>
+          <div className="funds-strip">
+            {available > 0 ? (
+              <span>
+                Funds to spend <strong className="num">{available}</strong>
+              </span>
+            ) : (
+              <span className="muted">Add your funds to see what you can afford.</span>
+            )}
+            <button type="button" className="btn" onClick={onFunds}>
+              <Icon name="wallet" />
+              {available > 0 ? 'Edit' : 'Funds'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {listing.advances.length === 0 ? (
+        <p className="empty">{emptyMessage(listing.filter, available)}</p>
+      ) : (
+        <ul className="adv-list">
+          {listing.advances.map((a) => (
+            <AdvanceRow key={a.name} game={game} advance={a} chainStart={listing.chainStarts.has(a.name)} onOpen={onOpen} />
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+function emptyMessage(filter: string, available: number) {
+  if (filter === 'owned') return 'You have not bought any Advances yet.';
+  if ((filter === 'affordable' || filter === 'almostAffordable' || filter === 'goal') && available > 0)
+    return 'Nothing fits your remaining funds.';
+  return 'No Advances to show.';
+}
+
+function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState; advance: Advance; chainStart: boolean; onOpen: (n: string) => void }) {
+  const { dispatch } = useGame();
+  const owned = game.owned.includes(a.name);
+  const barred = !owned && isBarred(game, a.name);
+  const picked = game.considering.includes(a.name);
+  const c = cost(game, a);
+  const classes = ['adv', owned && 'owned', barred && 'barred', chainStart && 'chain-start'].filter(Boolean).join(' ');
+
+  return (
+    <li className={classes} style={advanceColors(a)}>
+      <button
+        type="button"
+        className="adv-field"
+        aria-pressed={owned || picked}
+        disabled={owned || barred}
+        aria-label={owned ? `${a.name}, owned` : barred ? `${a.name} needs 10 credits in one color` : `${picked ? 'Remove' : 'Add'} ${a.name}, cost ${c}`}
+        onClick={() => dispatch({ type: 'toggleConsider', name: a.name })}
+      >
+        <span className="coin">{owned ? <Icon name="check" /> : barred ? <Icon name="lock" /> : c}</span>
+      </button>
+      <button type="button" className="adv-body" onClick={() => onOpen(a.name)}>
+        <span className="adv-main">
+          <span className="adv-name">{a.name}</span>
+          {a.calamities.length > 0 && (
+            <span className="adv-tags">
+              {a.calamities.map((i) => (
+                <span key={i.calamity} className={`tag tag-${i.direction}`}>
+                  <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
+                  {i.calamity}
+                </span>
+              ))}
+            </span>
+          )}
+        </span>
+        <span className="adv-meta">
+          <span className="adv-vp">
+            {a.vp}
+            <small>VP</small>
+          </span>
+          <span className={`adv-price${!owned && c < a.price ? ' discounted' : ''}`}>{owned ? 'Owned' : a.price}</span>
+        </span>
+      </button>
+    </li>
+  );
+}
+
+export function Cart() {
+  const { game, dispatch } = useGame();
+  const summary = costSummary(game);
+  if (summary.lines.length === 0) return null;
+  const available = funds(game);
+  const remaining = available - summary.total;
+  const notes: string[] = [];
+  for (const l of summary.lines) {
+    if (l.advance.bonus) notes.push(l.advance.bonus);
+    if (l.advance.warningTFA && COLORS.some((c) => game.credits[c] < 10))
+      notes.push('Your credit exchange choices with The Four Arts will be limited.');
+  }
+
+  return (
+    <section className="cart" aria-label="Advances you are considering">
+      <div className="cart-items">
+        {summary.lines.map((l) => (
+          <span key={l.advance.name} className="cart-item" style={advanceColors(l.advance)}>
+            <span className="cart-field">
+              <b className="mini-coin num">{l.free ? 'Free' : l.cost}</b>
+            </span>
+            <span className="cart-name">{l.advance.name}</span>
+            <button type="button" aria-label={`Remove ${l.advance.name}`} onClick={() => dispatch({ type: 'toggleConsider', name: l.advance.name })}>
+              <Icon name="close" />
+            </button>
+          </span>
+        ))}
+      </div>
+      <div className="cart-row">
+        <div className="cart-total">
+          <strong>{summary.total}</strong> <span className="sub">total</span>
+          <div className="sub">
+            {summary.libraryDiscount > 0 && <>Library saves {summary.libraryDiscount}. </>}
+            {available > 0 && (
+              <span className={remaining < 0 ? 'bad' : undefined}>
+                {remaining < 0 ? `${-remaining} over your funds` : `${remaining} left over`}
+              </span>
+            )}
+          </div>
+        </div>
+        <button type="button" className="btn" onClick={() => dispatch({ type: 'clearConsider' })}>
+          Clear
+        </button>
+        <button type="button" className="btn btn-primary btn-buy" onClick={() => dispatch({ type: 'buy' })}>
+          {game.freePick ? 'Take' : `Buy ${summary.lines.length}`}
+        </button>
+      </div>
+      {(notes.length > 0 || !game.freePick) && (
+        <p className="cart-warn">
+          {notes.join(' ')}
+          {!game.freePick && notes.length === 0 && 'Buy once per turn: add everything you want first.'}
+        </p>
+      )}
+    </section>
+  );
+}

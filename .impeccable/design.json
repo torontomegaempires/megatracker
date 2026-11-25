@@ -1,0 +1,820 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-25T18:09:58+00:00",
+  "title": "Design System: Megatracker",
+  "extensions": {
+    "colorMeta": {
+      "advance-blue": {
+        "role": "primary",
+        "displayName": "Arts Blue",
+        "canonical": "#2463b5",
+        "tonalRamp": [
+          "#0d2340",
+          "#153a6a",
+          "#1e5195",
+          "#2669bf",
+          "#4c8bdb",
+          "#88b1e7",
+          "#bfd5f2",
+          "#eaf1fb"
+        ]
+      },
+      "advance-green": {
+        "role": "primary",
+        "displayName": "Sciences Green",
+        "canonical": "#1f8546",
+        "tonalRamp": [
+          "#0e3e21",
+          "#186736",
+          "#22914c",
+          "#2bba62",
+          "#51d784",
+          "#8be4ad",
+          "#c1f1d3",
+          "#eafaf0"
+        ]
+      },
+      "advance-orange": {
+        "role": "primary",
+        "displayName": "Crafts Orange",
+        "canonical": "#df6c1d",
+        "tonalRamp": [
+          "#442109",
+          "#71370f",
+          "#9e4c15",
+          "#cb621a",
+          "#e68541",
+          "#efad81",
+          "#f6d3bb",
+          "#fcf0e8"
+        ]
+      },
+      "advance-red": {
+        "role": "primary",
+        "displayName": "Civics Red",
+        "canonical": "#c42e27",
+        "tonalRamp": [
+          "#400f0d",
+          "#6a1915",
+          "#95231e",
+          "#bf2d26",
+          "#db534c",
+          "#e78c88",
+          "#f2c1bf",
+          "#fbeaea"
+        ]
+      },
+      "advance-yellow": {
+        "role": "primary",
+        "displayName": "Religion Yellow",
+        "canonical": "#ebc01f",
+        "tonalRamp": [
+          "#463906",
+          "#755f0a",
+          "#a4840f",
+          "#d3aa13",
+          "#edc83a",
+          "#f3da7c",
+          "#f9ebb9",
+          "#fdf8e8"
+        ]
+      },
+      "on-swatch": {
+        "role": "primary",
+        "displayName": "On-Colour White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b8b8b8",
+          "#d9d9d9",
+          "#f2f2f2"
+        ]
+      },
+      "on-yellow": {
+        "role": "primary",
+        "displayName": "Print Ink",
+        "canonical": "#1d1a0c",
+        "tonalRamp": [
+          "#363116",
+          "#5a5125",
+          "#7e7134",
+          "#a29243",
+          "#c0b167",
+          "#d5cb9a",
+          "#e9e3c9",
+          "#f8f6ed"
+        ]
+      },
+      "stock": {
+        "role": "secondary",
+        "displayName": "Card Stock",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b8b8b8",
+          "#d9d9d9",
+          "#f2f2f2"
+        ]
+      },
+      "stock-ink": {
+        "role": "secondary",
+        "displayName": "Stock Ink",
+        "canonical": "#17181a",
+        "tonalRamp": [
+          "#242529",
+          "#3c3e44",
+          "#54575f",
+          "#6c707a",
+          "#8d929a",
+          "#b3b6bc",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "blue-tint": {
+        "role": "primary",
+        "displayName": "Arts Wash",
+        "canonical": "#dfe9f6",
+        "tonalRamp": [
+          "#11233c",
+          "#1c3b64",
+          "#27538b",
+          "#326ab3",
+          "#588cd0",
+          "#90b2e0",
+          "#c3d6ee",
+          "#ebf1f9"
+        ]
+      },
+      "green-tint": {
+        "role": "primary",
+        "displayName": "Sciences Wash",
+        "canonical": "#dcefe2",
+        "tonalRamp": [
+          "#183421",
+          "#285737",
+          "#387a4d",
+          "#489d63",
+          "#6cbc85",
+          "#9dd2ae",
+          "#cae7d3",
+          "#eef7f0"
+        ]
+      },
+      "orange-tint": {
+        "role": "primary",
+        "displayName": "Crafts Wash",
+        "canonical": "#fbe6d6",
+        "tonalRamp": [
+          "#462207",
+          "#74390b",
+          "#a34f10",
+          "#d16614",
+          "#ec883c",
+          "#f2b07d",
+          "#f8d4b9",
+          "#fdf1e8"
+        ]
+      },
+      "red-tint": {
+        "role": "primary",
+        "displayName": "Civics Wash",
+        "canonical": "#f7dedc",
+        "tonalRamp": [
+          "#3e120e",
+          "#681e18",
+          "#912a21",
+          "#bb352b",
+          "#d75b51",
+          "#e4918b",
+          "#f1c4c1",
+          "#faebea"
+        ]
+      },
+      "yellow-tint": {
+        "role": "primary",
+        "displayName": "Religion Wash",
+        "canonical": "#faf0c8",
+        "tonalRamp": [
+          "#463906",
+          "#75600b",
+          "#a4860f",
+          "#d2ac13",
+          "#edc93b",
+          "#f3db7c",
+          "#f9ecb9",
+          "#fdf9e8"
+        ]
+      },
+      "table-mat": {
+        "role": "neutral",
+        "displayName": "Table Mat",
+        "canonical": "#dcdfe2",
+        "tonalRamp": [
+          "#23262a",
+          "#3a4046",
+          "#515962",
+          "#68737e",
+          "#8a949e",
+          "#b1b8be",
+          "#d5d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "table-mat-deep": {
+        "role": "neutral",
+        "displayName": "Deep Mat",
+        "canonical": "#cfd3d7",
+        "tonalRamp": [
+          "#23262a",
+          "#3a4046",
+          "#515961",
+          "#68737d",
+          "#8a949e",
+          "#b1b8be",
+          "#d5d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b8b8b8",
+          "#d9d9d9",
+          "#f2f2f2"
+        ]
+      },
+      "card-hover": {
+        "role": "neutral",
+        "displayName": "Card Hover",
+        "canonical": "#f1f2f3",
+        "tonalRamp": [
+          "#232629",
+          "#3b4045",
+          "#525960",
+          "#6a737c",
+          "#8c949c",
+          "#b2b8bd",
+          "#d6d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "card-sunk": {
+        "role": "neutral",
+        "displayName": "Sunk Card",
+        "canonical": "#e4e6e8",
+        "tonalRamp": [
+          "#232629",
+          "#3b4045",
+          "#525960",
+          "#6a737c",
+          "#8b949c",
+          "#b2b8bd",
+          "#d6d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#17181a",
+        "tonalRamp": [
+          "#242529",
+          "#3c3e44",
+          "#54575f",
+          "#6c707a",
+          "#8d929a",
+          "#b3b6bc",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "ink-muted": {
+        "role": "neutral",
+        "displayName": "Muted Ink",
+        "canonical": "#4c5157",
+        "tonalRamp": [
+          "#242629",
+          "#3b3f44",
+          "#53595f",
+          "#6b727a",
+          "#8d939b",
+          "#b3b7bc",
+          "#d6d9db",
+          "#f1f2f3"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#d3d6da",
+        "tonalRamp": [
+          "#23262a",
+          "#3a3f45",
+          "#525861",
+          "#69717d",
+          "#8b939d",
+          "#b1b7be",
+          "#d5d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Line",
+        "canonical": "#b4b9bf",
+        "tonalRamp": [
+          "#232629",
+          "#3b3f45",
+          "#525960",
+          "#6a727c",
+          "#8b939c",
+          "#b2b7bd",
+          "#d6d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "On Ink",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b8b8b8",
+          "#d9d9d9",
+          "#f2f2f2"
+        ]
+      },
+      "focus": {
+        "role": "neutral",
+        "displayName": "Focus Blue",
+        "canonical": "#1a5fd6",
+        "tonalRamp": [
+          "#081e44",
+          "#0e3272",
+          "#13479f",
+          "#195bcd",
+          "#407ee8",
+          "#80a9f0",
+          "#bbd1f7",
+          "#e8f0fc"
+        ]
+      },
+      "good": {
+        "role": "neutral",
+        "displayName": "Good",
+        "canonical": "#1d7a40",
+        "tonalRamp": [
+          "#0f3e20",
+          "#186736",
+          "#22904c",
+          "#2cb961",
+          "#52d684",
+          "#8ce4ad",
+          "#c1f0d3",
+          "#eafaf0"
+        ]
+      },
+      "bad": {
+        "role": "neutral",
+        "displayName": "Bad",
+        "canonical": "#bf2b23",
+        "tonalRamp": [
+          "#410f0c",
+          "#6c1814",
+          "#97221c",
+          "#c22c24",
+          "#de524a",
+          "#e98b86",
+          "#f3c1be",
+          "#fbeae9"
+        ]
+      },
+      "table-mat-dark": {
+        "role": "neutral",
+        "displayName": "Table Mat (dark scheme)",
+        "canonical": "#121315",
+        "tonalRamp": [
+          "#232529",
+          "#3b3e45",
+          "#525760",
+          "#6a707c",
+          "#8c919c",
+          "#b2b6bd",
+          "#d6d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "table-mat-deep-dark": {
+        "role": "neutral",
+        "displayName": "Deep Mat (dark scheme)",
+        "canonical": "#202226",
+        "tonalRamp": [
+          "#23252a",
+          "#3a3e45",
+          "#525761",
+          "#696f7d",
+          "#8b919d",
+          "#b1b6be",
+          "#d5d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "card-dark": {
+        "role": "neutral",
+        "displayName": "Card (dark scheme)",
+        "canonical": "#2f3236",
+        "tonalRamp": [
+          "#242629",
+          "#3b3f44",
+          "#53585f",
+          "#6b727b",
+          "#8c939b",
+          "#b3b7bd",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "card-hover-dark": {
+        "role": "neutral",
+        "displayName": "Card Hover (dark scheme)",
+        "canonical": "#393c41",
+        "tonalRamp": [
+          "#242629",
+          "#3c3f44",
+          "#53585f",
+          "#6b717a",
+          "#8d929b",
+          "#b3b6bc",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "card-sunk-dark": {
+        "role": "neutral",
+        "displayName": "Sunk Card (dark scheme)",
+        "canonical": "#44484e",
+        "tonalRamp": [
+          "#242629",
+          "#3b3f44",
+          "#53585f",
+          "#6b717b",
+          "#8d929b",
+          "#b3b7bc",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Ink (dark scheme)",
+        "canonical": "#f2f3f4",
+        "tonalRamp": [
+          "#232629",
+          "#3a4045",
+          "#525961",
+          "#69737c",
+          "#8b949d",
+          "#b2b8be",
+          "#d6d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "ink-muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted Ink (dark scheme)",
+        "canonical": "#aab0b7",
+        "tonalRamp": [
+          "#232629",
+          "#3a3f45",
+          "#525961",
+          "#69727c",
+          "#8b939d",
+          "#b2b7be",
+          "#d6d9dc",
+          "#f1f2f3"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Line (dark scheme)",
+        "canonical": "#3a3e43",
+        "tonalRamp": [
+          "#232629",
+          "#3b3f44",
+          "#535960",
+          "#6a727b",
+          "#8c939c",
+          "#b2b7bd",
+          "#d6d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "line-strong-dark": {
+        "role": "neutral",
+        "displayName": "Strong Line (dark scheme)",
+        "canonical": "#5a5f66",
+        "tonalRamp": [
+          "#242629",
+          "#3c3f44",
+          "#54585f",
+          "#6c727a",
+          "#8d939b",
+          "#b3b7bc",
+          "#d6d8db",
+          "#f1f2f3"
+        ]
+      },
+      "on-ink-dark": {
+        "role": "neutral",
+        "displayName": "On Ink (dark scheme)",
+        "canonical": "#101113",
+        "tonalRamp": [
+          "#23252a",
+          "#3a3e45",
+          "#525761",
+          "#696f7d",
+          "#8b919d",
+          "#b1b6be",
+          "#d5d8dc",
+          "#f1f2f3"
+        ]
+      },
+      "focus-dark": {
+        "role": "neutral",
+        "displayName": "Focus Blue (dark scheme)",
+        "canonical": "#79aaff",
+        "tonalRamp": [
+          "#001c4c",
+          "#002f80",
+          "#0041b2",
+          "#0054e6",
+          "#2977ff",
+          "#70a4ff",
+          "#b2ceff",
+          "#e5efff"
+        ]
+      },
+      "good-dark": {
+        "role": "neutral",
+        "displayName": "Good (dark scheme)",
+        "canonical": "#5fcf86",
+        "tonalRamp": [
+          "#123b20",
+          "#1d6235",
+          "#29894b",
+          "#35b160",
+          "#5ace82",
+          "#91deac",
+          "#c4edd2",
+          "#ebf9f0"
+        ]
+      },
+      "bad-dark": {
+        "role": "neutral",
+        "displayName": "Bad (dark scheme)",
+        "canonical": "#ff7f74",
+        "tonalRamp": [
+          "#4c0600",
+          "#800a00",
+          "#b20e00",
+          "#e61200",
+          "#ff3a29",
+          "#ff7c70",
+          "#ffb9b2",
+          "#ffe8e5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Setup screen title only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page heads and sheet titles, uppercase; 32px on the Advance sheet name plate."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Advance names and list row titles, mixed case."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Every number a player reads, tabular; 22-32px, 80px for calculator results."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Rules text (max 68ch) and explanatory lines."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Buttons, chips, tabs and selects, uppercase."
+      },
+      "section-label": {
+        "displayName": "Section Label",
+        "purpose": "Section headings inside sheets, uppercase muted ink."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "0 1px 1px rgb(20 24 28 / 10%), 0 2px 6px rgb(20 24 28 / 8%)",
+        "purpose": "Resting card on the mat."
+      },
+      {
+        "name": "lift-high",
+        "value": "0 2px 4px rgb(20 24 28 / 14%), 0 10px 22px rgb(20 24 28 / 18%)",
+        "purpose": "Picked card (with 0 0 0 2px ink outline) and sheets."
+      },
+      {
+        "name": "lift-dark",
+        "value": "0 1px 2px rgb(0 0 0 / 45%), 0 2px 8px rgb(0 0 0 / 30%)",
+        "purpose": "Resting card, dark scheme."
+      },
+      {
+        "name": "lift-high-dark",
+        "value": "0 2px 4px rgb(0 0 0 / 50%), 0 12px 26px rgb(0 0 0 / 55%)",
+        "purpose": "Picked card and sheets, dark scheme."
+      },
+      {
+        "name": "hand-tray",
+        "value": "0 -10px 24px rgb(20 24 28 / 12%)",
+        "purpose": "Purchase tray over the stack."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-lift",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Card lift (160ms) and sheet rise (200ms, 28px)."
+      },
+      {
+        "name": "press",
+        "value": "transform 80ms ease",
+        "purpose": "Button press down 1px."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Lift and sheet transitions are removed under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sheet-dialog",
+        "value": "700px"
+      },
+      {
+        "name": "shell-max",
+        "value": "760px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink-filled action, once per context (Buy, start game).",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Buy 2</button>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font-family:var(--font-card);font-weight:700;font-size:17px;letter-spacing:.02em;text-transform:uppercase;transition:background 120ms ease,transform 80ms ease;cursor:pointer} .ds-btn:hover{background:var(--card-2)} .ds-btn:active{transform:translateY(1px)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-btn-primary{background:var(--ink);border-color:var(--ink);color:var(--on-ink)} .ds-btn-primary:hover{background:color-mix(in srgb,var(--ink) 86%,var(--card))}"
+    },
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Default card-stock button with strong-line border (Clear, Edit).",
+      "html": "<button class=\"ds-btn\">Clear</button>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font-family:var(--font-card);font-weight:700;font-size:17px;letter-spacing:.02em;text-transform:uppercase;transition:background 120ms ease,transform 80ms ease;cursor:pointer} .ds-btn:hover{background:var(--card-2)} .ds-btn:active{transform:translateY(1px)} .ds-btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}"
+    },
+    {
+      "name": "Filter Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Wrapping filter set; selected chip is ink.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">Unowned</button><button class=\"ds-chip\">Affordable</button><button class=\"ds-chip\" aria-pressed=\"true\">All</button></div>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-chips{display:flex;flex-wrap:wrap;gap:6px} .ds-chip{min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink-2);font-family:var(--font-card);font-size:16px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;cursor:pointer} .ds-chip:hover{background:var(--card-2)} .ds-chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--on-ink)} .ds-chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}"
+    },
+    {
+      "name": "Select",
+      "kind": "input",
+      "refersTo": "select",
+      "description": "Styled Sort/Goal select: condensed uppercase with an ink chevron.",
+      "html": "<span class=\"ds-select\"><select><option>Name</option><option>Cost</option></select><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 9l7 7 7-7\"/></svg></span>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-select{position:relative;display:inline-flex;align-items:center} .ds-select select{appearance:none;-webkit-appearance:none;min-height:38px;padding:0 34px 0 10px;border-radius:10px;border:1px solid var(--line-strong);background:var(--card);color:var(--ink);font-family:var(--font-card);font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.02em} .ds-select select:focus-visible{outline:2px solid var(--focus);outline-offset:2px} .ds-select svg{position:absolute;right:9px;width:18px;height:18px;pointer-events:none;color:var(--ink)}"
+    },
+    {
+      "name": "Advance Row",
+      "kind": "card",
+      "refersTo": "advance-row",
+      "description": "Signature: the card edge. Flat colour field with stock cost coin, card body with name, calamity mark, VP and price. Second row shows picked state.",
+      "html": "<ul class=\"ds-stack\"><li class=\"ds-adv\" style=\"--a:#c42e27;--b:#c42e27\"><span class=\"ds-field\"><span class=\"ds-coin\">230</span></span><span class=\"ds-body\"><span class=\"ds-main\"><span class=\"ds-name\">Advanced Military</span><span class=\"ds-tag bad\">&#8595; Civil Disorder</span></span><span class=\"ds-meta\"><span class=\"ds-vp\">6<small>VP</small></span><span class=\"ds-price\">240</span></span></span></li><li class=\"ds-adv picked\" style=\"--a:#1f8546;--b:#df6c1d\"><span class=\"ds-field\"><span class=\"ds-coin\">135</span></span><span class=\"ds-body\"><span class=\"ds-main\"><span class=\"ds-name\">Engineering</span></span><span class=\"ds-meta\"><span class=\"ds-vp\">1<small>VP</small></span><span class=\"ds-price\">140</span></span></span></li></ul>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-stack{list-style:none;margin:0;padding:12px;display:grid;gap:4px;background:var(--ground)} .ds-adv{display:flex;min-height:58px;border-radius:7px;background:var(--card);box-shadow:var(--lift);overflow:hidden;transition:transform 160ms cubic-bezier(.2,.8,.2,1),box-shadow 160ms ease} .ds-adv.picked{transform:translateX(6px);box-shadow:var(--lift-high),0 0 0 2px var(--ink)} .ds-field{flex:none;width:62px;display:grid;place-items:center;background:linear-gradient(90deg,var(--a) 0 50%,var(--b) 50% 100%)} .ds-coin{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--stock);color:var(--stock-ink);font-family:var(--font-card);font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;box-shadow:inset 0 0 0 2px rgb(0 0 0 / 8%)} .ds-adv.picked .ds-coin{background:#17181a;color:#fff;box-shadow:0 0 0 2px var(--stock)} .ds-body{flex:1;display:flex;align-items:center;gap:10px;padding:7px 12px} .ds-body:hover{background:var(--card-2)} .ds-main{flex:1;min-width:0} .ds-name{display:block;font-family:var(--font-card);font-weight:600;font-size:20px;line-height:1.1;color:var(--ink)} .ds-tag{font:500 12.5px var(--font-body)} .ds-tag.bad{color:var(--bad)} .ds-meta{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--font-card);line-height:1.05} .ds-vp{font-size:20px;font-weight:700;color:var(--ink)} .ds-vp small{font-size:12px;font-weight:600;margin-left:2px;color:var(--ink-2)} .ds-price{font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:line-through}"
+    },
+    {
+      "name": "Credit Tiles",
+      "kind": "custom",
+      "refersTo": "credit-tile",
+      "description": "Five printed-colour tiles; on-colour by rule (white on blue/green/red, ink on orange/yellow).",
+      "html": "<div class=\"ds-credits\"><span class=\"ds-credit\" style=\"background:#2463b5;color:#fff\"><b>10</b>Arts</span><span class=\"ds-credit\" style=\"background:#1f8546;color:#fff\"><b>15</b>Sciences</span><span class=\"ds-credit\" style=\"background:#df6c1d;color:#1d1a0c\"><b>25</b>Crafts</span><span class=\"ds-credit\" style=\"background:#c42e27;color:#fff\"><b>10</b>Civics</span><span class=\"ds-credit\" style=\"background:#ebc01f;color:#1d1a0c\"><b>10</b>Religion</span></div>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-credits{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:8px;background:var(--ground)} .ds-credit{display:flex;flex-direction:column;align-items:center;padding:3px 0 4px;border-radius:7px;box-shadow:var(--lift);font-family:var(--font-card);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase} .ds-credit b{font-size:26px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:0}"
+    },
+    {
+      "name": "Hand Chip",
+      "kind": "chip",
+      "refersTo": "cost-coin",
+      "description": "A picked card in the hand tray: flat (split) colour field with a stock pill coin, name, remove.",
+      "html": "<span class=\"ds-hand\"><span class=\"ds-hfield\" style=\"--a:#1f8546;--b:#df6c1d\"><span class=\"ds-hcoin\">135</span></span><span class=\"ds-hname\">Engineering</span><button aria-label=\"Remove\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></button></span>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-hand{display:inline-flex;align-items:stretch;height:38px;border-radius:7px;background:var(--card);box-shadow:var(--lift),0 0 0 1px var(--line);font-family:var(--font-card);font-size:17px;font-weight:600;color:var(--ink);overflow:hidden} .ds-hfield{display:grid;place-items:center;min-width:48px;padding:0 8px;background:linear-gradient(90deg,var(--a) 0 50%,var(--b) 50% 100%)} .ds-hcoin{display:grid;place-items:center;min-width:32px;height:28px;padding:0 6px;border-radius:14px;background:var(--stock);color:var(--stock-ink);font-weight:700} .ds-hname{display:flex;align-items:center;padding:0 2px 0 10px} .ds-hand button{display:grid;place-items:center;width:34px;border:0;background:transparent;color:var(--ink-2);cursor:pointer} .ds-hand button:hover{color:var(--ink)} .ds-hand button:focus-visible{outline:2px solid var(--focus);outline-offset:-2px} .ds-hand svg{width:16px;height:16px}"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Five equal bottom tabs; active in ink with a 3px ink bar.",
+      "html": "<nav class=\"ds-tabs\"><button class=\"ds-tab\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 3h9l3 3v15H6zM15 3v3h3M9 10h6M9 14h6M9 18h4\"/></svg>Advances</button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 8h13l-3-3M20 16H7l3 3\"/></svg>Trade</button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l9.5 17h-19zM12 10v4M12 17.5v.01\"/></svg>Calamities</button></nav>",
+      "css": ":host{--ground:#dcdfe2;--card:#ffffff;--card-2:#f1f2f3;--card-3:#e4e6e8;--ink:#17181a;--ink-2:#4c5157;--line:#d3d6da;--line-strong:#b4b9bf;--on-ink:#ffffff;--focus:#1a5fd6;--good:#1d7a40;--bad:#bf2b23;--stock:#ffffff;--stock-ink:#17181a;--lift:0 1px 1px rgb(20 24 28 / 10%),0 2px 6px rgb(20 24 28 / 8%);--lift-high:0 2px 4px rgb(20 24 28 / 14%),0 10px 22px rgb(20 24 28 / 18%);--font-card:'Barlow Condensed','Arial Narrow',ui-sans-serif,system-ui,sans-serif;--font-body:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif} .ds-tabs{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-top:1px solid var(--line)} .ds-tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:62px;border:0;background:transparent;color:var(--ink-2);font-family:var(--font-card);font-size:14px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;cursor:pointer} .ds-tab svg{width:22px;height:22px} .ds-tab:hover{color:var(--ink)} .ds-tab:focus-visible{outline:2px solid var(--focus);outline-offset:-2px} .ds-tab[aria-current=page]{color:var(--ink)} .ds-tab[aria-current=page]::after{content:'';position:absolute;bottom:6px;left:30%;right:30%;height:3px;border-radius:2px;background:var(--ink)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Card Face",
+    "overview": "**Creative North Star: \"Card Face\"**\n\nEvery Civilization Advance in the list is the edge of the real printed card, recognised by its colour before its name is read. The screen is a card table: a cool grey table mat underneath, white card stock on top, and the five Advance colours printed at full strength as flat fields. Near-black ink carries the text, the selected states and the one primary action. Condensed card titling (Barlow Condensed) sets every name and every number; the system sans is kept for rules text and small explanatory lines.\n\nThe density is that of a hand of cards held close: rows four pixels apart, one row per Advance, nothing sparse. Players are glancing between turns, so recognition beats explanation. Colour is the first read, the cost coin the second, the name the third. Cards behave physically: a picked card slides out of the stack with a deeper shadow and an ink outline, an owned card reads as played, its colour knocked back and its coin showing a check.\n\nDark mode is a deliberate, user-confirmed exception to \"white card stock\": the cards turn dark grey on a near-black mat because it is easier on the eyes in a dim room. What stays printed in both schemes is what belongs to the physical card: the five Advance colours, the white cost coins, the white name plate on the Advance sheet and the white coins in the hand.",
+    "keyCharacteristics": [
+      "Five Advance colours at full printed strength, identical in light and dark schemes.",
+      "Flat colour fields only; dual-colour cards split into two equal flat halves.",
+      "Condensed uppercase card titling for headings, labels and all numbers, tabular figures.",
+      "White card stock on a cool grey mat (dark cards on a near-black mat in dark mode).",
+      "Near-black ink as the single action and selection colour; no brand accent.",
+      "Physical state: picked cards lift and shift, owned cards are played and desaturated."
+    ],
+    "rules": [
+      {
+        "name": "The Printed Colour Rule",
+        "body": "The five Advance colours are game facts. Use them only to mean their Advance colour, at full strength, as flat fields. They are the same values in light and dark mode.",
+        "section": "colors"
+      },
+      {
+        "name": "The On-Colour Rule",
+        "body": "White on blue, green and red; print ink on orange and yellow. Compute it from the colour, never choose per screen.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Ink Rule",
+        "body": "Ink is the only selection and action colour: selected chip, Buy, VP tile, picked outline, active tab. There is no brand accent hue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Every-Number Rule",
+        "body": "Every number a player reads (cost, credit, VP, total, count) is set in Barlow Condensed with tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The Rulebook Rule",
+        "body": "Rules prose and explanatory sentences are system sans, never condensed and never uppercase.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lift Means Picked Rule",
+        "body": "The high shadow plus ink outline plus 6px shift is reserved for \"in this turn's hand\" (and the chosen block on setup). Do not use it for hover or decoration.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** paint Advance colour as a full-strength flat field the player can recognise before reading.",
+      "**Do** split dual-colour cards into two equal flat halves everywhere (row field, hand chip, sheet header) and keep text off the seam.",
+      "**Do** set the on-colour by colour: white on blue, green and red; ink (#1d1a0c) on orange and yellow.",
+      "**Do** keep cost coins, hand coins and the sheet name plate white stock with near-black text in both schemes.",
+      "**Do** set every number in Barlow Condensed with tabular figures.",
+      "**Do** pair green and red with an up or down arrow for calamity help and harm.",
+      "**Do** keep every tap target at least 44px."
+    ],
+    "donts": [
+      "**Don't** reduce an Advance colour to a thin accent stripe on a tinted row.",
+      "**Don't** use gradients or blended colour transitions on card fields.",
+      "**Don't** change the five printed colours between light and dark mode.",
+      "**Don't** signal state or effect with colour alone.",
+      "**Don't** introduce an accent hue for actions or selection; ink is the action colour.",
+      "**Don't** set rules prose in the condensed face or in uppercase."
+    ]
+  }
+}
