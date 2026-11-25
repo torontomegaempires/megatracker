@@ -10,6 +10,8 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-25
+
 ### Changed
 - Cities tab: population tokens can now be typed in, and counted either on the map or as what's left in reserve out of 55, whichever is quicker to count.
 
