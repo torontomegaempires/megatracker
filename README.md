@@ -52,7 +52,18 @@ Megatracker uses [semantic versioning](https://semver.org/); the version lives i
 - In the app: Menu shows `Megatracker v1.2.3 (abc1234)`; About shows the build date too.
 - From the command line: `curl https://megatracker.torontomegaempires.com/version.json`
 
-To release, record the changes in `CHANGELOG.md`, commit them, then run one of:
+## Making changes
+
+`main` is protected: every change goes through a pull request, and the **Test and build**
+check (tests, type check and production build) must pass before it can merge. Netlify
+deploys `main` when a pull request merges.
+
+1. Branch from `main`, make the change, and add a line under `[Unreleased]` in `CHANGELOG.md`
+   if players will notice it.
+2. Push the branch and open a pull request (`gh pr create`).
+3. Merge it once the check passes.
+
+To release what has merged since the last version, run one of these from a clean checkout:
 
 ```bash
 npm run release:patch   # fixes, small tweaks      0.1.0 -> 0.1.1
@@ -60,8 +71,10 @@ npm run release:minor   # new features              0.1.0 -> 0.2.0
 npm run release:major   # breaks saved games etc.   0.1.0 -> 1.0.0
 ```
 
-Each runs the tests and type check, bumps `package.json`, commits "Release vX.Y.Z", tags
-`vX.Y.Z`, and pushes the commit and tag, which deploys it.
+Each cuts a `release/vX.Y.Z` branch from `origin/main`, runs the tests and type check,
+bumps `package.json`, dates the `[Unreleased]` section of the changelog, commits
+"Release vX.Y.Z", pushes, and opens a pull request. Merging it deploys the release, and the
+Tag release workflow tags `vX.Y.Z` on `main`.
 
 ## License
 
