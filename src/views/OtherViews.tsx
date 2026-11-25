@@ -1,7 +1,8 @@
 import { rulesFor } from '../data';
 import { calamityDescription, cityModifiers, ownedTradePowers, potentialCities, specialAbilities, tradeCardCost, visibleCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { RulesText, Stepper } from '../components/ui';
+import { RulesText, Segmented, Stepper } from '../components/ui';
+import { TOKEN_POOL } from '../engine/game';
 import { useGame } from '../state/store';
 
 function BoardInputs({ tokens = true }: { tokens?: boolean }) {
@@ -15,12 +16,44 @@ function BoardInputs({ tokens = true }: { tokens?: boolean }) {
         </label>
         <Stepper label="cities" value={game.board.cities} min={0} max={9} onChange={(cities) => dispatch({ type: 'setBoard', board: { cities } })} />
       </div>
-      {tokens && (
-        <div className="field">
-          <label>Population tokens on the map</label>
-          <Stepper label="tokens" value={game.board.tokens} min={1} max={55} onChange={(t) => dispatch({ type: 'setBoard', board: { tokens: t } })} />
-        </div>
-      )}
+      {tokens && <TokenInput />}
+    </div>
+  );
+}
+
+/** Population tokens, entered either as the count on the map or as what's left in reserve. */
+function TokenInput() {
+  const { game, dispatch } = useGame();
+  const { tokens, tokensAsReserve: reserve } = game.board;
+  const shown = reserve ? TOKEN_POOL - tokens : tokens;
+  const other = TOKEN_POOL - tokens;
+  return (
+    <div className="field stack">
+      <label>
+        Population tokens
+        <span className="hint num">
+          {reserve ? `${tokens} on the map` : `${other} in reserve`} of {TOKEN_POOL}
+        </span>
+      </label>
+      <div className="token-entry">
+        <Segmented
+          label="Count tokens"
+          value={reserve ? 'reserve' : 'map'}
+          options={[
+            { value: 'map', label: 'On map' },
+            { value: 'reserve', label: 'In reserve' },
+          ]}
+          onChange={(m) => dispatch({ type: 'setBoard', board: { tokensAsReserve: m === 'reserve' } })}
+        />
+        <Stepper
+          editable
+          label={reserve ? 'tokens in reserve' : 'tokens on the map'}
+          value={shown}
+          min={0}
+          max={TOKEN_POOL}
+          onChange={(n) => dispatch({ type: 'setBoard', board: { tokens: reserve ? TOKEN_POOL - n : n } })}
+        />
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Advance, Color, Credits } from '../data';
 import { COLOR_NAMES, COLORS } from '../data';
 import { Icon } from './Icon';
@@ -43,23 +43,54 @@ export function Stepper({
   max,
   onChange,
   label,
+  editable = false,
 }: {
   value: number;
   min: number;
   max: number;
   onChange: (v: number) => void;
   label: string;
+  /** Show a field you can type into between the buttons, for wide ranges. */
+  editable?: boolean;
 }) {
   return (
     <span className="stepper" role="group" aria-label={label}>
       <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} aria-label={`Decrease ${label}`}>
         <Icon name="minus" />
       </button>
-      <output aria-live="polite">{value}</output>
+      {editable ? (
+        <StepperInput value={value} min={min} max={max} onChange={onChange} label={label} />
+      ) : (
+        <output aria-live="polite">{value}</output>
+      )}
       <button type="button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} aria-label={`Increase ${label}`}>
         <Icon name="plus" />
       </button>
     </span>
+  );
+}
+
+function StepperInput({ value, min, max, onChange, label }: { value: number; min: number; max: number; onChange: (v: number) => void; label: string }) {
+  // A draft lets the field sit empty while typing; it settles back to the value on blur.
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      aria-label={label}
+      value={draft ?? String(value)}
+      onFocus={(e) => e.currentTarget.select()}
+      onChange={(e) => {
+        const text = e.target.value.replace(/[^0-9]/g, '').slice(0, 3);
+        setDraft(text);
+        if (text !== '') onChange(Math.max(min, Math.min(max, Number(text))));
+      }}
+      onBlur={() => setDraft(null)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur();
+      }}
+    />
   );
 }
 
