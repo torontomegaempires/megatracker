@@ -24,7 +24,7 @@ export function SetupScreen() {
       <h2 id="block-heading">Which block are you playing?</h2>
       <div className="block-options" role="group" aria-labelledby="block-heading">
         {(Object.keys(BLOCKS) as BlockId[]).map((id) => (
-          <button key={id} type="button" className="block-option" aria-pressed={block === id} onClick={() => setBlock(id)}>
+          <button key={id} type="button" className={`block-option block-${id}`} aria-pressed={block === id} onClick={() => setBlock(id)}>
             <span className="mark" aria-hidden>
               {MARKS[id]}
             </span>

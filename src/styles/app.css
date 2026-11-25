@@ -37,6 +37,12 @@
   --yellow-tint: #faf0c8;
   --on-swatch: #ffffff;
   --on-yellow: #1d1a0c;
+  /* Block identity, sampled from the rulebook map setups (East and Far East rulebooks).
+     Bright print colours, apart from the deeper advance colours above. Purple and crimson are
+     as printed; green is nudged darker so the white block letter clears 3:1 (large text). */
+  --block-west: #14a01e;
+  --block-east: #a949ee;
+  --block-fareast: #f50730;
   /* Printed card stock: the coin and sheet sublines stay white in both schemes */
   --stock: #ffffff;
   --stock-ink: #17181a;
@@ -1600,9 +1606,13 @@ dialog.sheet::backdrop {
   transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 160ms ease;
 }
 
+.block-west { --block: var(--block-west); }
+.block-east { --block: var(--block-east); }
+.block-fareast { --block: var(--block-fareast); }
+
 .block-option[aria-pressed='true'] {
   transform: translateX(6px);
-  box-shadow: var(--lift-high), 0 0 0 2px var(--ink);
+  box-shadow: var(--lift-high), 0 0 0 2px var(--block, var(--ink));
 }
 
 .block-option .mark {
@@ -1613,8 +1623,8 @@ dialog.sheet::backdrop {
   font-family: var(--font-card);
   font-size: 24px;
   font-weight: 700;
-  background: var(--ink);
-  color: var(--on-ink);
+  background: var(--block, var(--ink));
+  color: #ffffff;
 }
 
 .block-option > span:last-child {
