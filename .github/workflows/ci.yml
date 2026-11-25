@@ -17,6 +17,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Check changelog entries are under Unreleased
+        # Release PRs rename [Unreleased] on purpose, so they are skipped.
+        if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'release/')
+        run: node scripts/check-changelog.mjs HEAD^1
       - run: npm ci
       - run: npm test
       - run: npm run build
