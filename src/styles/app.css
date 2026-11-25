@@ -1283,6 +1283,26 @@ dialog.sheet::backdrop {
   background: transparent;
 }
 
+.field.stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.token-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.token-entry .segmented {
+  flex: 1;
+}
+
+.token-entry .segmented button {
+  font-size: 16px;
+  white-space: nowrap;
+}
+
 .stepper button:disabled {
   opacity: 0.3;
 }
@@ -1292,7 +1312,19 @@ dialog.sheet::backdrop {
   height: 18px;
 }
 
-.stepper output {
+.stepper input {
+  width: 52px;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  border-inline: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.stepper output,
+.stepper input {
   min-width: 34px;
   text-align: center;
   font-family: var(--font-card);

@@ -48,8 +48,15 @@ export interface GameState {
   view: ViewSettings;
   freePick: FreePick | null;
   queue: QueueItem[];
-  board: { cities: number; tokens: number };
+  /**
+   * `tokens` is always the count on the map. `tokensAsReserve` only changes how it is
+   * entered: as the number left in reserve out of the 55-token pool.
+   */
+  board: { cities: number; tokens: number; tokensAsReserve: boolean };
 }
+
+/** Population tokens each player has in all. */
+export const TOKEN_POOL = 55;
 
 /** Player count choices; 7 and 13 stand for the ranges 7–11 and 13+. */
 export const PLAYER_COUNTS = [
@@ -95,7 +102,7 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     },
     freePick: null,
     queue: [],
-    board: { cities: 0, tokens: 1 },
+    board: { cities: 0, tokens: 1, tokensAsReserve: false },
   };
 }
 
