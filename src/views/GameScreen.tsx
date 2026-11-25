@@ -191,7 +191,7 @@ function AboutSheet({ onClose }: { onClose: () => void }) {
           <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">
             Creative Commons Attribution-NonCommercial-ShareAlike 4.0
           </a>{' '}
-          license. Megatracker is shared under the same license.
+          license. Megatracker is © 2026 Rob McArthur and is shared under the same license.
         </p>
         <p className="muted">Your game is saved on this device only.</p>
         <p className="muted">

@@ -1,6 +1,8 @@
 # License
 
-Megatracker © 2026 Toronto Mega Empires group contributors.
+Megatracker © 2026 Rob McArthur.
+
+Portions adapted from the Mega Empires Calculator are © Matt Crawford.
 
 Megatracker is an adaptation of the **Mega Empires Calculator** by Matt Crawford
 (<https://crawdad.neocities.org/MCA2/about.html>, <https://calculator.mega-empires.com/>).

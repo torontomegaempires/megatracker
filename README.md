@@ -67,5 +67,6 @@ Each runs the tests and type check, bumps `package.json`, commits "Release vX.Y.
 
 Megatracker adapts the Mega Empires Calculator, which is licensed to users under
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). Megatracker is
-released under the same license — see [LICENSE.md](LICENSE.md). Mega Empires is a game by
+released under the same license — see [LICENSE.md](LICENSE.md). Megatracker © 2026 Rob McArthur;
+portions adapted from the calculator © Matt Crawford. Mega Empires is a game by
 Mega Empires / Colossus Games; this is an unofficial fan tool.
