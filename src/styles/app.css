@@ -861,9 +861,14 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-.adv-price.discounted {
-  text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
+.adv-chain {
+  margin-right: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.adv-discount {
+  color: var(--bad);
 }
 
 .adv.owned .adv-price {
