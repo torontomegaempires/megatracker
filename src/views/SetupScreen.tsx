@@ -4,6 +4,7 @@ import { BLOCKS } from '../data';
 import { PLAYER_COUNTS, startingCredits } from '../engine/game';
 import { Segmented } from '../components/ui';
 import { useStore } from '../state/store';
+import { versionLabel } from '../version';
 
 const MARKS: Record<BlockId, string> = { west: 'W', east: 'E', fareast: 'FE' };
 
@@ -66,7 +67,7 @@ export function SetupScreen() {
         <a href="https://crawdad.neocities.org/MCA2/about.html" target="_blank" rel="noreferrer">
           Matt Crawford
         </a>
-        .
+        . Megatracker {versionLabel}.
       </p>
     </main>
   );

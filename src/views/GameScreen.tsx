@@ -6,6 +6,7 @@ import { Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
 import { useGame } from '../state/store';
+import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
 import { AdvanceSheet, CalamitySheet, CreditChoiceSheet, FundsSheet } from './Sheets';
@@ -163,6 +164,9 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
         >
           Start a new game
         </button>
+        <p className="muted" style={{ fontSize: 13, textAlign: 'center' }}>
+          Megatracker {versionLabel}
+        </p>
       </div>
     </Sheet>
   );
@@ -191,6 +195,9 @@ function AboutSheet({ onClose }: { onClose: () => void }) {
           license. Megatracker is shared under the same license.
         </p>
         <p className="muted">Your game is saved on this device only.</p>
+        <p className="muted">
+          Version {APP_VERSION} · build {APP_COMMIT} · {new Date(APP_BUILT_AT).toLocaleDateString()}
+        </p>
       </div>
     </Sheet>
   );

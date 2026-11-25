@@ -41,7 +41,27 @@ npm run build    # type-check and build to dist/
 - `src/state/` — React store and persistence.
 - `src/views/`, `src/components/` — UI.
 
-Deployed as a static site on Netlify (`netlify.toml`).
+Deployed as a static site on Netlify (`netlify.toml`): every push to `main` builds and
+deploys https://megatracker.torontomegaempires.com.
+
+## Versions and releases
+
+Megatracker uses [semantic versioning](https://semver.org/); the version lives in
+`package.json` and is stamped into each build with the git commit it came from.
+
+- In the app: Menu shows `Megatracker v1.2.3 (abc1234)`; About shows the build date too.
+- From the command line: `curl https://megatracker.torontomegaempires.com/version.json`
+
+To release, record the changes in `CHANGELOG.md`, commit them, then run one of:
+
+```bash
+npm run release:patch   # fixes, small tweaks      0.1.0 -> 0.1.1
+npm run release:minor   # new features              0.1.0 -> 0.2.0
+npm run release:major   # breaks saved games etc.   0.1.0 -> 1.0.0
+```
+
+Each runs the tests and type check, bumps `package.json`, commits "Release vX.Y.Z", tags
+`vX.Y.Z`, and pushes the commit and tag, which deploys it.
 
 ## License
 
