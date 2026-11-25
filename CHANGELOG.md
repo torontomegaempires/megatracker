@@ -10,6 +10,12 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-25
+
+### Changed
+- Player count choices are now 3, 4, 5, 6, 7–11, 12 and 13+ (replacing "Other"); 7–11 and 13+ start with no credits.
+- The header shows only the block name; the player count / "Custom game" text after it is gone.
+
 ## [0.1.0] - 2026-11-25
 
 ### Added

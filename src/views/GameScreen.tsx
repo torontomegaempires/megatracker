@@ -39,7 +39,6 @@ export function GameScreen() {
           </button>
           <div className="brand">
             <span className="brand-name">{BLOCKS[game.block].name}</span>
-            <span className="brand-sub">{game.playerCount ? `${game.playerCount} players` : 'Custom game'}</span>
           </div>
           <div className="topbar-spacer" />
           <div className="vp" aria-label={`${victoryPoints(game)} victory points from Advances`}>

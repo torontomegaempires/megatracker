@@ -36,7 +36,10 @@ export interface ViewSettings {
 export interface GameState {
   schema: 1;
   block: BlockId;
-  /** 0 means "other". */
+  /**
+   * Number of players. 7 stands for "7–11" and 13 for "13+".
+   * 0 is a legacy "other" from games saved before those choices existed.
+   */
   playerCount: number;
   owned: string[];
   credits: Credits;
@@ -48,7 +51,16 @@ export interface GameState {
   board: { cities: number; tokens: number };
 }
 
-export const PLAYER_COUNTS = [3, 4, 5, 6, 12] as const;
+/** Player count choices; 7 and 13 stand for the ranges 7–11 and 13+. */
+export const PLAYER_COUNTS = [
+  { value: 3, label: '3' },
+  { value: 4, label: '4' },
+  { value: 5, label: '5' },
+  { value: 6, label: '6' },
+  { value: 7, label: '7–11' },
+  { value: 12, label: '12' },
+  { value: 13, label: '13+' },
+] as const;
 
 export function zeroCredits(): Credits {
   return { blue: 0, green: 0, orange: 0, red: 0, yellow: 0 };

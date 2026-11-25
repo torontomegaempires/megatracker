@@ -33,6 +33,8 @@ describe('setup', () => {
     expect(newGame('west', 5).credits.red).toBe(10);
     expect(newGame('west', 6).credits.blue).toBe(5);
     expect(newGame('west', 0).credits.blue).toBe(0);
+    expect(newGame('west', 7).credits.blue).toBe(0); // 7–11 players
+    expect(newGame('west', 13).credits.blue).toBe(0); // 13+ players
   });
 });
 

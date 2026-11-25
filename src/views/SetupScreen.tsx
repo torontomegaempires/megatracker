@@ -42,7 +42,7 @@ export function SetupScreen() {
         label="Player count"
         value={players ?? -1}
         onChange={setPlayers}
-        options={[...PLAYER_COUNTS.map((n) => ({ value: n as number, label: String(n) })), { value: 0, label: 'Other' }]}
+        options={PLAYER_COUNTS.map((p) => ({ value: p.value as number, label: p.label }))}
       />
       {players !== null && (
         <p className="setup-note">
