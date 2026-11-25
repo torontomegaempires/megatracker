@@ -1,0 +1,26 @@
+# Tags vX.Y.Z on main when a merged change bumps the version in package.json.
+name: Tag release
+
+on:
+  push:
+    branches: [main]
+    paths: [package.json]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag the new version
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            echo "$tag already exists"
+          else
+            git tag "$tag"
+            git push origin "$tag"
+            echo "Tagged $tag"
+          fi

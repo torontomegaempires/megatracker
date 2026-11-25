@@ -12,11 +12,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "release:patch": "npm version patch -m \"Release v%s\"",
-    "release:minor": "npm version minor -m \"Release v%s\"",
-    "release:major": "npm version major -m \"Release v%s\"",
-    "preversion": "npm test && npm run typecheck",
-    "postversion": "git push --follow-tags"
+    "release:patch": "node scripts/release.mjs patch",
+    "release:minor": "node scripts/release.mjs minor",
+    "release:major": "node scripts/release.mjs major"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",
