@@ -16,6 +16,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 - Trade Empire (West/East) and Silk Routes (Far East) now count toward funds: the Trade tab counts the 1 commodity card that adds the most as a missing card of an incomplete set, and says which card it used.
 
 ### Changed
+- Advances tab: Show, Sort and Funds now share one row at the top, so the list starts much higher on the screen. "Nearly affordable" is now "Within reach", and the sort names are shorter.
 - Advances tab: the "By goal" filter is now "Goal" and shows the unowned Advances on your goal. Its themes moved to the Goal tab as ideas.
 - Trade tab redesigned: alongside the extra stacks you can buy from, pick the commodity cards in your hand by name and count, enter your treasury, and hold sets back for next turn. Funds to spend on Advances are worked out from these, replacing the Funds sheet; buying turns in the cards you didn't hold and only the treasury still needed.
 - Player count choices are now 3, 4, 5, 6, 7–8, 9, 10–11, 12, 13–14 and 15–18, one per trade card deck, so the Trade tab lists the commodities your block actually uses. Starting credits are unchanged.

@@ -247,7 +247,7 @@ Each colour also has a pale wash (blue-tint through yellow-tint, darkened to dee
 
 A single phone column, max 760px wide and centred on larger screens, with a 14px gutter. The header is sticky on the table mat: a 44px row with the menu, the block name ("THE WEST") in condensed uppercase with the player count beside it, and the VP ink tile at the right; below it five equal credit tiles across the full width, then the age track. The block name replaces the app name in the header because "Megatracker" truncated at phone width; the app name lives in the document title and setup screen.
 
-Under the header, filter chips wrap onto as many rows as they need so the active filter is always visible, followed by the styled Sort select and the funds strip. Then the stack: card rows 4px apart, with 12px extra above the start of each strategic chain. The bottom is fixed: a 62px six-tab bar, and when cards are picked (on the Advances or Goal tab) the hand tray sits above it with horizontally scrolling hand chips, the total, Clear and Buy. Sheets rise from the bottom on phones (max 600px wide) and centre as dialogs from 700px.
+Under the header, one 44px toolbar row holds the Show and Sort selects and the Funds button, each with a small label above its value, so the current filter, sort and funds stay visible without pushing the stack down. Then the stack: card rows 4px apart, with 12px extra above the start of each strategic chain. The bottom is fixed: a 62px six-tab bar, and when cards are picked (on the Advances or Goal tab) the hand tray sits above it with horizontally scrolling hand chips, the total, Clear and Buy. Sheets rise from the bottom on phones (max 600px wide) and centre as dialogs from 700px.
 
 Touch targets are 44px minimum throughout; the row colour field is 62px wide to hold the 44px coin with margins and keep the tap target generous.
 
@@ -256,7 +256,7 @@ Touch targets are 44px minimum throughout; the row colour field is 62px wide to 
 Cards sit on the mat with a soft two-layer contact shadow; nothing else floats. Depth is physical, not decorative: a picked card lifts to a higher shadow and slides 6px right with a 2px ink outline. The hand tray throws one upward shadow over the stack. Dark mode deepens the same shadows rather than adding glows.
 
 ### Shadow Vocabulary
-- **Resting card** (`0 1px 1px rgb(20 24 28 / 10%), 0 2px 6px rgb(20 24 28 / 8%)`): Rows, panels, credit tiles, notices, the funds strip, the sheet name plate.
+- **Resting card** (`0 1px 1px rgb(20 24 28 / 10%), 0 2px 6px rgb(20 24 28 / 8%)`): Rows, panels, credit tiles, notices, the sheet name plate.
 - **Lifted card** (`0 2px 4px rgb(20 24 28 / 14%), 0 10px 22px rgb(20 24 28 / 18%)`): Picked rows and selected block options (with `0 0 0 2px` ink), sheets.
 - **Hand tray** (`0 -10px 24px rgb(20 24 28 / 12%)`): The purchase tray over the stack.
 
@@ -301,6 +301,7 @@ The card's colour field in equal flat halves across the full header. The name an
 ### Inputs / Fields
 - **Style:** Card background, 1px strong-line border, 10px radius, 38px tall.
 - **Selects:** Native arrow removed; Barlow Condensed uppercase 17px with an ink chevron icon at the right.
+- **Toolbar pickers:** On the Advances tab, Show, Sort and Funds are 44px controls with an 11px muted uppercase label in the top-left corner and the 16px value below it (Funds a 19px numeral and a wallet icon). Option labels stay short ("Within reach", "VP per cost") so the values fit at phone width.
 - **Stepper / Segmented:** Stepper is a bordered group with 44px buttons and a 22px condensed numeral; segmented sits in a sunk trough with the selected segment in ink.
 - **Focus:** 2px focus-blue outline, 2px offset, everywhere.
 
