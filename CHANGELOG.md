@@ -10,6 +10,8 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-26
+
 ### Added
 - Goal tab: plan the Advances you want to buy over the game. It shows how many are left, what they cost today and the VP you'll have when done, and you can buy them from there. Ideas by theme (Cheaper Advances, More treasury, Trade cards, the next AST age and the rest) help you add to it, as does "Add to goal" on any Advance's details. Advances on your goal are flagged on the Advances tab.
 - Advance rows show the credits each card gives as small boxes in its colours, under the name.
