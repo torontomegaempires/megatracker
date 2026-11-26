@@ -39,7 +39,9 @@ show('npm', ['test']);
 show('npm', ['run', 'typecheck']);
 show('npm', ['version', version, '--no-git-tag-version']);
 
-const today = new Date().toISOString().slice(0, 10);
+// The local date (not UTC, which is already tomorrow on a Toronto evening), as YYYY-MM-DD.
+const now = new Date();
+const today = [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((n) => String(n).padStart(2, '0')).join('-');
 const changelog = readFileSync('CHANGELOG.md', 'utf8').replace('## [Unreleased]\n', `## [Unreleased]\n\n## [${version}] - ${today}\n`);
 writeFileSync('CHANGELOG.md', changelog);
 
