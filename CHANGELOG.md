@@ -10,6 +10,8 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-26
+
 ### Changed
 - Advances are sorted by cost unless you pick another order.
 - The tabs are now in the order Advances, Goal, Cities, Trade, Calamities, Specials, Game.
