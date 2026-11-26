@@ -465,7 +465,7 @@ p {
   max-width: 760px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   background: var(--card);
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
@@ -2108,4 +2108,169 @@ dialog.sheet::backdrop {
 .field.stack .select-wrap select {
   flex: 1;
   min-width: 0;
+}
+
+/* ------------------------------------------------------------ shared game */
+.setup-join {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.shared-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.shared-meta {
+  margin: -6px 2px 12px;
+  font-size: 14px;
+}
+
+.shared-me {
+  margin-bottom: 12px;
+}
+
+.shared-sync {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--good);
+}
+
+.shared-sync.is-offline,
+.shared-error {
+  color: var(--bad);
+}
+
+.shared-error {
+  font-size: 14px;
+  margin: 10px 2px 0;
+}
+
+.shared-formula {
+  margin: 10px 2px 0;
+  font-size: 13px;
+}
+
+.share-code {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ui);
+  background: var(--card);
+  line-height: 1;
+}
+
+.share-code-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+.share-code-value {
+  font-family: var(--font-card);
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: 0.12em;
+}
+
+.code-input {
+  font-family: var(--font-card);
+  font-weight: 700;
+  font-size: 28px !important;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  min-height: 52px !important;
+}
+
+.standings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.standing {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--card);
+  border-radius: var(--r-card);
+  box-shadow: var(--lift);
+  border-left: 4px solid transparent;
+}
+
+.standing.is-mine {
+  border-left-color: var(--ink);
+}
+
+.standing-rank {
+  font-family: var(--font-card);
+  font-weight: 700;
+  font-size: 22px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.standing:first-child .standing-rank {
+  color: var(--ink);
+}
+
+.standing-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.standing-nation {
+  font-family: var(--font-card);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.standing-era,
+.standing-bonus {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--card-3);
+  letter-spacing: 0.03em;
+}
+
+.standing-bonus {
+  background: var(--yellow-tint);
+  color: var(--stock-ink);
+}
+
+.standing-meta {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.standing-score {
+  font-family: var(--font-card);
+  font-weight: 700;
+  font-size: 30px;
+  min-width: 2.2ch;
+  text-align: right;
+}
+
+.standing-remove {
+  width: 36px;
+  height: 36px;
+  margin-right: -6px;
+  color: var(--ink-2);
 }

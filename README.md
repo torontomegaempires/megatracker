@@ -29,23 +29,38 @@ calculations — with a new interface. Group-specific enhancements will be added
 - **Special buildings** — optional (West/East), on the Cities tab: build one with your Advances,
   track the ones you control and their VP, and sacrifice them for funds or against a calamity.
 - **AST guide** — optional Basic/Expert Archaeological Succession Table progress.
+- **Game** — shared games: one player creates a game and the rest join with its code. Every
+  phone shows each nation's score (Advance VP + cities + 5 per A.S.T. space moved +
+  special-building VP + the 5 VP solo Late Iron Age bonus), rank and A.S.T. era.
 
-The game is saved in the browser on each device (localStorage).
+Each player's game is saved in the browser on their device (localStorage). Shared games also
+send a summary (owned Advances, cities, A.S.T. position, special buildings) to the server.
 
 ## Development
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm test         # rules engine tests (Vitest)
+npm run dev      # http://localhost:5173 (no shared games)
+netlify dev      # http://localhost:8888, the app plus the shared-game API
+npm test         # rules engine and API tests (Vitest)
 npm run build    # type-check and build to dist/
 ```
+
+Shared games run on a Netlify Function (`netlify/functions/games.mts`, logic in `server/`)
+backed by Neon Postgres. The function reads the database URL from `NETLIFY_DATABASE_URL`
+(set by Netlify DB) or `DATABASE_URL`, and creates its tables on first use
+(`server/schema.ts`). Under `netlify dev` with neither set, games are kept in
+`.netlify/shared-games.json` instead. When a game ends, each seat's final score, cities,
+A.S.T. position, 1/3/6 VP Advance counts and building flags are stored in the same shape as the
+group website's `game_player_nation` table.
 
 - `src/data/` — Advance, calamity and interaction data, generated from the original
   calculator by `scripts/import-calculator-data.mjs`; `index.ts` links it into chains etc.
 - `src/engine/` — pure game logic (state, reducer, costs, filters, guides) with tests.
 - `src/state/` — React store and persistence.
 - `src/views/`, `src/components/` — UI.
+- `src/engine/standings.ts` — shared-game scoring, ranking and A.S.T. eras; `src/shared/` —
+  the API's types and client; `server/` and `netlify/functions/` — the API.
 
 Deployed as a static site on Netlify (`netlify.toml`): every push to `main` builds and
 deploys https://megatracker.torontomegaempires.com.

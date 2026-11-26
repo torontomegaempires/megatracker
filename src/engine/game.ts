@@ -66,9 +66,10 @@ export interface GameState {
   queue: QueueItem[];
   /**
    * `tokens` is always the count on the map. `tokensAsReserve` only changes how it is
-   * entered: as the number left in reserve out of the 55-token pool.
+   * entered: as the number left in reserve out of the 55-token pool. `astPosition` is the
+   * space your succession marker is on, from 1 (the start) up.
    */
-  board: { cities: number; tokens: number; tokensAsReserve: boolean };
+  board: { cities: number; tokens: number; tokensAsReserve: boolean; astPosition: number };
   buildings: BuildingsState;
 }
 
@@ -170,7 +171,7 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     },
     freePick: null,
     queue: [],
-    board: { cities: 0, tokens: 1, tokensAsReserve: false },
+    board: { cities: 0, tokens: 1, tokensAsReserve: false, astPosition: 1 },
     buildings: newBuildings(),
   };
 }

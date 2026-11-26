@@ -9,10 +9,11 @@ import { useGame } from '../state/store';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
 import { GoalView } from './GoalView';
+import { SharedGameView } from './SharedGameView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
 import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
 
-type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'goal' | 'specials';
+type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'goal' | 'specials' | 'game';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'advances', label: 'Advances', icon: 'advances' },
   { id: 'cities', label: 'Cities', icon: 'cities' },
@@ -20,13 +21,14 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'calamities', label: 'Calamities', icon: 'calamities' },
   { id: 'goal', label: 'Goal', icon: 'flag' },
   { id: 'specials', label: 'Specials', icon: 'specials' },
+  { id: 'game', label: 'Game', icon: 'standings' },
 ];
 
 type Overlay = null | { kind: 'menu' } | { kind: 'about' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
 
-export function GameScreen() {
+export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | null; onJoinHandled: () => void }) {
   const { game } = useGame();
-  const [tab, setTab] = useState<Tab>('advances');
+  const [tab, setTab] = useState<Tab>(joinCode ? 'game' : 'advances');
   const [overlay, setOverlay] = useState<Overlay>(null);
   const [focusHand, setFocusHand] = useState(false);
   const clearFocusHand = useCallback(() => setFocusHand(false), []);
@@ -79,6 +81,7 @@ export function GameScreen() {
         {tab === 'cities' && <CitiesView onPurchase={() => setTab('advances')} />}
         {tab === 'trade' && <TradeView focusHand={focusHand} onFocused={clearFocusHand} />}
         {tab === 'calamities' && <CalamitiesView onOpen={(name) => setOverlay({ kind: 'calamity', name })} />}
+        {tab === 'game' && <SharedGameView joinCode={joinCode} onJoinHandled={onJoinHandled} />}
         {tab === 'specials' && <SpecialsView onActivated={(toAdvances) => toAdvances && setTab('advances')} />}
       </main>
 
@@ -162,7 +165,7 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           ]}
         />
         <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
-          Tracks the Advance and VP requirements for each age. Cities are not tracked.
+          Tracks the Advance and VP requirements for each age. Cities are not tracked here; the Game tab counts them for shared games.
         </p>
       </div>
       {rulesFor(game.block).rules === 'we' && (

@@ -1,6 +1,6 @@
 import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePower } from '../data';
 import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
-import type { AstMode, FilterId, FreePick, GameState, SortId } from './game';
+import type { AstMode, BuildingsState, FilterId, FreePick, GameState, SortId } from './game';
 
 /** Whether this game uses special buildings: the expansion is for The West and The East. */
 export function buildingsOn(state: GameState): boolean {
@@ -48,8 +48,11 @@ export interface BuildingPoints {
 
 /** Victory points from special buildings, or null when the game doesn't use them. */
 export function buildingPoints(state: GameState): BuildingPoints | null {
-  if (!buildingsOn(state)) return null;
-  const { owned, controlled, civ } = state.buildings;
+  return buildingsOn(state) ? pointsForBuildings(state.buildings) : null;
+}
+
+/** 2 VP for owning a building, 1 for each one controlled, and 2 more for controlling your civilization's own. */
+export function pointsForBuildings({ owned, controlled, civ }: Pick<BuildingsState, 'owned' | 'controlled' | 'civ'>): BuildingPoints {
   const p = { owned: owned ? 2 : 0, controlled: controlled.length, historic: civ && controlled.includes(civ) ? 2 : 0 };
   return { ...p, total: p.owned + p.controlled + p.historic };
 }
@@ -401,6 +404,8 @@ export interface AstAge {
   abbr: string;
   name: string;
   text: string;
+  /** Cities needed on the map. */
+  cities: number;
   /** Advances needed within the price range, and VP needed (0 = none). */
   cards: number;
   minPrice: number;
@@ -408,29 +413,38 @@ export interface AstAge {
   vp: number;
 }
 
-const age = (abbr: string, name: string, text: string, cards = 0, minPrice = 0, maxPrice = 999, vp = 0): AstAge => ({ abbr, name, text, cards, minPrice, maxPrice, vp });
+const age = (abbr: string, name: string, text: string, cities: number, cards = 0, minPrice = 0, maxPrice = 999, vp = 0): AstAge => ({
+  abbr,
+  name,
+  text,
+  cities,
+  cards,
+  minPrice,
+  maxPrice,
+  vp,
+});
 
 export const AST: Record<Exclude<AstMode, 'off'>, AstAge[]> = {
   basic: [
-    age('SA', 'Stone Age', 'No requirement'),
-    age('EBA', 'Early Bronze Age', '2 cities'),
-    age('MBA', 'Middle Bronze Age', '3 cities, 3 Advances', 3),
-    age('LBA', 'Late Bronze Age', '3 cities, 3 Advances priced 100+', 3, 100, 999),
-    age('EIA', 'Early Iron Age', '4 cities, 2 Advances priced 200+', 2, 200, 999),
-    age('LIA', 'Late Iron Age', '5 cities, 3 Advances priced 200+', 3, 200, 999),
+    age('SA', 'Stone Age', 'No requirement', 0),
+    age('EBA', 'Early Bronze Age', '2 cities', 2),
+    age('MBA', 'Middle Bronze Age', '3 cities, 3 Advances', 3, 3),
+    age('LBA', 'Late Bronze Age', '3 cities, 3 Advances priced 100+', 3, 3, 100, 999),
+    age('EIA', 'Early Iron Age', '4 cities, 2 Advances priced 200+', 4, 2, 200, 999),
+    age('LIA', 'Late Iron Age', '5 cities, 3 Advances priced 200+', 5, 3, 200, 999),
   ],
   expert: [
-    age('SA', 'Stone Age', 'No requirement'),
-    age('EBA', 'Early Bronze Age', '3 cities'),
-    age('MBA', 'Middle Bronze Age', '3 cities, 5 VP', 0, 0, 999, 5),
-    age('LBA', 'Late Bronze Age', '4 cities, 12 Advances', 12),
-    age('EIA', 'Early Iron Age', '5 cities, 10 Advances priced under 100, 38 VP', 10, 0, 99, 38),
-    age('LIA', 'Late Iron Age', '6 cities, all 17 Advances priced under 100, 56 VP', 17, 0, 99, 56),
+    age('SA', 'Stone Age', 'No requirement', 0),
+    age('EBA', 'Early Bronze Age', '3 cities', 3),
+    age('MBA', 'Middle Bronze Age', '3 cities, 5 VP', 3, 0, 0, 999, 5),
+    age('LBA', 'Late Bronze Age', '4 cities, 12 Advances', 4, 12),
+    age('EIA', 'Early Iron Age', '5 cities, 10 Advances priced under 100, 38 VP', 5, 10, 0, 99, 38),
+    age('LIA', 'Late Iron Age', '6 cities, all 17 Advances priced under 100, 56 VP', 6, 17, 0, 99, 56),
   ],
 };
 
 /** Progress toward an age as a fraction 0..1, counting only Advances (cities are not tracked). */
-function ageProgress(a: AstAge, advances: Advance[]): number {
+export function ageProgress(a: AstAge, advances: Advance[]): number {
   if (a.cards === 0 && a.vp === 0) return 1;
   const cards = Math.max(1, a.cards);
   const vpNeeded = Math.max(1, a.vp);
