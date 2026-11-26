@@ -6,10 +6,10 @@ import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer as gam
 
 const STORAGE_KEY = 'megatracker:game';
 
-type RootAction = Action | { type: 'start'; block: BlockId; playerCount: number } | { type: 'reset' };
+type RootAction = Action | { type: 'start'; block: BlockId; playerCount: number; buildings?: boolean } | { type: 'reset' };
 
 function rootReducer(state: GameState | null, action: RootAction): GameState | null {
-  if (action.type === 'start') return newGame(action.block, action.playerCount);
+  if (action.type === 'start') return newGame(action.block, action.playerCount, action.buildings);
   if (action.type === 'reset') return null;
   if (!state) return state;
   return gameReducer(state, action);
@@ -30,7 +30,7 @@ function load(): GameState | null {
       goal: loadGoal(data.goal, data.block),
       board: { ...fresh.board, ...data.board },
       funding: loadFunding(data.funding),
-      buildings: loadBuildings(data.buildings),
+      buildings: loadBuildings(data.buildings, data.block),
     };
   } catch {
     return null;

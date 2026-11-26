@@ -1,5 +1,5 @@
 import type { Advance, BlockId } from '../data';
-import { BLOCKS, buildingById, rulesFor } from '../data';
+import { buildingIn, rulesFor } from '../data';
 import type { GameState } from './game';
 import type { AstAge } from './selectors';
 import { AST, ageProgress, buildingsOn, pointsForBuildings } from './selectors';
@@ -43,9 +43,9 @@ export function cleanSnapshot(block: BlockId, raw: unknown): SeatSnapshot {
   const rules = rulesFor(block);
   const owned = Array.isArray(s.owned) ? [...new Set(s.owned.filter((n): n is string => typeof n === 'string' && rules.byName.has(n)))] : [];
   let buildings: SeatSnapshot['buildings'] = null;
-  if (BLOCKS[block].rules === 'we' && s.buildings && typeof s.buildings === 'object') {
+  if (s.buildings && typeof s.buildings === 'object') {
     const b = s.buildings as Record<string, unknown>;
-    const known = (id: unknown): id is string => typeof id === 'string' && !!buildingById(id);
+    const known = (id: unknown): id is string => !!buildingIn(block, id);
     buildings = {
       civ: known(b.civ) ? b.civ : null,
       owned: known(b.owned) ? b.owned : null,

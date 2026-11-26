@@ -15,8 +15,12 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 - The tabs are now in the order Advances, Goal, Cities, Trade, Calamities, Specials, Game.
 - The special buildings' Trade benefit is its own paragraph on the Cities tab.
 - Calamity effects show as a red − (worse) or a green + (better) instead of arrows.
+- The start screen asks which game you're playing: The West, The East, The Far East or Mega Empires (10–18 players), each with its own player counts. The Far East offers 3, 4, 5, 6–8 and 9–11.
 
 ### Added
+- Turn on the Special Buildings expansion when you start a game, in any game, including The Far East's 12 nations and their buildings.
+- Nations show their token color next to their name in a shared game's standings and on the Cities tab.
+- The header shows your nation's name on a pill in its color instead of the game's name once you've joined a shared game, or picked your civilization for Special Buildings.
 - An Advance's green + calamity tag is filled in when it would help against a calamity your owned Advances currently make worse.
 
 ### Fixed

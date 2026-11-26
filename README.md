@@ -8,7 +8,8 @@ calculations — with a new interface. Group-specific enhancements will be added
 
 ## What it does
 
-- **Advances** — pick your block (West, East, Far East) and player count; see every
+- **Advances** — pick your game (The West, The East, The Far East or Mega Empires), player
+  count and whether you use the Special Buildings expansion; see every
   Civilization Advance with your current cost after credits and chain discounts. Filter by
   unowned / affordable / nearly affordable / goal, sort by cost, VP, value, chains and more.
   Advances on your goal are flagged.

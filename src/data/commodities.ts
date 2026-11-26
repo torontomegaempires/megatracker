@@ -87,13 +87,13 @@ function westEastDeck(...decks: WestEastDeck[]): Commodity[] {
  * Which West/East decks make up a game's cards. Player counts are the PLAYER_COUNTS values: 7 is 7-8,
  * 10 is 10-11, 13 is 13-14, 15 is 15-18, and 0 is an old "other" game (9-player deck).
  */
-function westEastDecksFor(block: 'west' | 'east', playerCount: number): WestEastDeck[] {
+function westEastDecksFor(block: 'west' | 'east' | 'mega', playerCount: number): WestEastDeck[] {
   // 12+ players split the cards into a West and an East deck, but that only decides where a card
   // is drawn: every card is in play for both blocks, so a hand can hold either deck's cards.
   if (playerCount >= 15) return ['west15', 'east15'];
   if (playerCount >= 12) return ['west12', 'east12'];
   if (playerCount >= 10) return ['west9']; // 10-11 players use the West's 9-player deck
-  if (playerCount === 9 || playerCount === 0) return [block === 'west' ? 'west9' : 'east9'];
+  if (playerCount === 9 || playerCount === 0 || block === 'mega') return [block === 'east' ? 'east9' : 'west9'];
   return [block];
 }
 

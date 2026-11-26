@@ -43,6 +43,8 @@
   --block-west: #14a01e;
   --block-east: #a949ee;
   --block-fareast: #f50730;
+  /* Mega Empires: the blue of mega-empires.com's active panels; white letters clear 3:1 */
+  --block-mega: #4a97c2;
   /* Printed card stock: the coin and sheet sublines stay white in both schemes */
   --stock: #ffffff;
   --stock-ink: #17181a;
@@ -318,6 +320,26 @@ p {
   font-size: 22px;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+}
+
+.brand-nation {
+  /* Your nation on a pill in its token color, the same size as the VP box. The text is white or
+     near-black, whichever contrasts more; the faint inner edge keeps pale pills distinct from
+     the light ground. */
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-card);
+  background: var(--nation);
+  color: var(--on-nation);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.14);
+  line-height: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand:has(.brand-nation) {
+  align-items: center;
 }
 
 .topbar-spacer {
@@ -2006,6 +2028,7 @@ dialog.sheet::backdrop {
 .block-west { --block: var(--block-west); }
 .block-east { --block: var(--block-east); }
 .block-fareast { --block: var(--block-fareast); }
+.block-mega { --block: var(--block-mega); }
 
 .block-option[aria-pressed='true'] {
   transform: translateX(6px);
@@ -2025,6 +2048,7 @@ dialog.sheet::backdrop {
 }
 
 .block-option > span:last-child {
+  align-self: center;
   padding: 10px 14px;
 }
 
@@ -2033,11 +2057,6 @@ dialog.sheet::backdrop {
   font-weight: 700;
   font-size: 22px;
   text-transform: uppercase;
-}
-
-.block-option .blurb {
-  font-size: 14px;
-  color: var(--ink-2);
 }
 
 .setup-note {
@@ -2239,6 +2258,16 @@ dialog.sheet::backdrop {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 8px;
+}
+
+.nation-swatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.35em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+  vertical-align: 0.02em;
 }
 
 .standing-nation {

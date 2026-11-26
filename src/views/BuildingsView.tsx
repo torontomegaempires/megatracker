@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { SpecialBuilding } from '../data';
-import { BUILDING_ERAS, buildingById, buildingCost, SPECIAL_BUILDINGS } from '../data';
+import { BUILDING_ERAS, buildingById, buildingCost, buildingsIn } from '../data';
 import type { BuildingEra } from '../data';
 import { buildingPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { Segmented } from '../components/ui';
+import { NationSwatch, Segmented } from '../components/ui';
 import { useGame } from '../state/store';
 
 const byCiv = (b: SpecialBuilding) => `${b.civ} · ${b.name}`;
@@ -41,7 +41,7 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
               onChange={(e) => dispatch({ type: 'setBuildings', buildings: { civ: e.target.value || null } })}
             >
               <option value="">Choose</option>
-              {SPECIAL_BUILDINGS.map((x) => (
+              {buildingsIn(game.block).map((x) => (
                 <option key={x.id} value={x.id}>
                   {x.civ}
                 </option>
@@ -98,7 +98,7 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
   const b = game.buildings;
   const cost = buildingCost(b.era);
   // Anything not already on the board can be built; suggest your own civilization's first.
-  const available = SPECIAL_BUILDINGS.filter((x) => !b.controlled.includes(x.id));
+  const available = buildingsIn(game.block).filter((x) => !b.controlled.includes(x.id));
   const [picked, setPick] = useState('');
   const pick = picked || (b.civ && available.some((x) => x.id === b.civ) ? b.civ : '');
   const chosen = available.find((x) => x.id === pick);
@@ -112,7 +112,10 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
           <div className="row-main">
             <div className="row-title">{owned.name}</div>
             <div className="row-meta">
-              <span className="badge">{owned.civ}</span>
+              <span className="badge">
+                <NationSwatch nation={owned.civ} />
+                {owned.civ}
+              </span>
               <span className="badge">Owned</span>
               {!controlled && <span className="badge">Not controlled</span>}
             </div>
@@ -138,7 +141,10 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
           <div className="row-main">
             <div className="row-title">{considering.name}</div>
             <div className="row-meta">
-              <span className="badge">{considering.civ}</span>
+              <span className="badge">
+                <NationSwatch nation={considering.civ} />
+                {considering.civ}
+              </span>
               <span className="badge">In your purchase · {cost}</span>
             </div>
           </div>
@@ -193,7 +199,7 @@ function OtherBuildings() {
   const { game, dispatch } = useGame();
   const b = game.buildings;
   const others = b.controlled.filter((id) => id !== b.owned).map((id) => buildingById(id)!);
-  const addable = SPECIAL_BUILDINGS.filter((x) => !b.controlled.includes(x.id) && x.id !== b.owned && x.id !== b.considering);
+  const addable = buildingsIn(game.block).filter((x) => !b.controlled.includes(x.id) && x.id !== b.owned && x.id !== b.considering);
 
   return (
     <>
@@ -204,7 +210,10 @@ function OtherBuildings() {
               <div className="row-main">
                 <div className="row-title">{x.name}</div>
                 <div className="row-meta">
-                  <span className="badge">{x.civ}</span>
+                  <span className="badge">
+                    <NationSwatch nation={x.civ} />
+                    {x.civ}
+                  </span>
                 </div>
               </div>
               <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'toggleControl', id: x.id })}>

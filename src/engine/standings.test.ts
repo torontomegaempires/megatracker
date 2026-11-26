@@ -105,7 +105,7 @@ describe('snapshots', () => {
     const real = we[0].name;
     const s = cleanSnapshot('west', { owned: [real, real, 'Not an Advance', 3], cities: 99, astPosition: -4, buildings: { civ: 'atlantis', owned: 'rome', controlled: ['rome', 'nowhere'] } });
     expect(s).toEqual({ owned: [real], cities: 9, astPosition: 1, buildings: { civ: null, owned: 'rome', controlled: ['rome'] } });
-    expect(cleanSnapshot('fareast', { buildings: { owned: 'rome', controlled: [] } }).buildings).toBeNull();
+    expect(cleanSnapshot('fareast', { buildings: { owned: 'rome', controlled: ['tang'] } }).buildings).toEqual({ civ: null, owned: null, controlled: ['tang'] });
     expect(cleanSnapshot('west', null)).toEqual(snap());
   });
 });

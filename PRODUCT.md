@@ -21,7 +21,7 @@ A rebuild of Matt Crawford's Mega Empires Calculator (calculator.mega-empires.co
 ## Operating Context
 
 - Used in person, one phone per player, during multi-hour games; attention is split with the physical game.
-- Blocks: The West, The East (same rules as The West) and The Far East; player counts 3, 4, 5, 6, 12 or other.
+- Games: The West and The East (same rules, 3–9 players), The Far East (3–11) and Mega Empires (The West and The East together, 10–18), each with its own player count choices; the Special Buildings expansion is optional in all of them.
 - Core loop per turn: enter funds (trade card sets, odd commodities, treasury), pick Advances, buy once, resolve any extra-credit choices or free picks.
 - Game state is saved on the device only.
 

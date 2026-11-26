@@ -1,20 +1,26 @@
 import { useState } from 'react';
 import type { BlockId } from '../data';
 import { BLOCKS } from '../data';
-import { PLAYER_COUNTS, startingCredits } from '../engine/game';
+import { startingCredits } from '../engine/game';
 import { Segmented } from '../components/ui';
 import { useStore } from '../state/store';
 import { JoinSheet } from './SharedGameView';
 import { versionLabel } from '../version';
-
-const MARKS: Record<BlockId, string> = { west: 'W', east: 'E', fareast: 'FE' };
 
 export function SetupScreen({ joinCode, onJoinHandled }: { joinCode: string | null; onJoinHandled: () => void }) {
   const { dispatch } = useStore();
   const [joining, setJoining] = useState(!!joinCode);
   const [block, setBlock] = useState<BlockId | null>(null);
   const [players, setPlayers] = useState<number | null>(null);
+  const [buildings, setBuildings] = useState(false);
   const credits = players === null ? 0 : startingCredits(players);
+  const counts = block ? BLOCKS[block].playerCounts : [];
+
+  // Each game has its own player counts, so a count from another game is cleared.
+  const pickGame = (id: BlockId) => {
+    setBlock(id);
+    if (!BLOCKS[id].playerCounts.some((p) => p.value === players)) setPlayers(null);
+  };
 
   return (
     <main className="setup">
@@ -23,30 +29,30 @@ export function SetupScreen({ joinCode, onJoinHandled }: { joinCode: string | nu
         <p>Your Civilization Advances, credits, trade and calamities for Mega Empires.</p>
       </header>
 
-      <h2 id="block-heading">Which block are you playing?</h2>
+      <h2 id="block-heading">Which game are you playing?</h2>
       <div className="block-options" role="group" aria-labelledby="block-heading">
         {(Object.keys(BLOCKS) as BlockId[]).map((id) => (
-          <button key={id} type="button" className={`block-option block-${id}`} aria-pressed={block === id} onClick={() => setBlock(id)}>
+          <button key={id} type="button" className={`block-option block-${id}`} aria-pressed={block === id} onClick={() => pickGame(id)}>
             <span className="mark" aria-hidden>
-              {MARKS[id]}
+              {BLOCKS[id].mark}
             </span>
-            <span>
-              <span className="name">{BLOCKS[id].name}</span>
-              <br />
-              <span className="blurb">{BLOCKS[id].blurb}</span>
-            </span>
+            <span className="name">{BLOCKS[id].name}</span>
           </button>
         ))}
       </div>
 
       <h2>How many players?</h2>
-      <Segmented
-        label="Player count"
-        columns={5}
-        value={players ?? -1}
-        onChange={setPlayers}
-        options={PLAYER_COUNTS.map((p) => ({ value: p.value as number, label: p.label }))}
-      />
+      {block ? (
+        <Segmented
+          label="Player count"
+          columns={counts.length}
+          value={players ?? -1}
+          onChange={setPlayers}
+          options={counts.map((p) => ({ value: p.value, label: p.label }))}
+        />
+      ) : (
+        <p className="setup-note">Choose a game to see its player counts.</p>
+      )}
       {players !== null && (
         <p className="setup-note">
           {credits > 0 ? `Everyone starts with ${credits} credits in each color.` : 'No starting credits.'}
@@ -54,12 +60,24 @@ export function SetupScreen({ joinCode, onJoinHandled }: { joinCode: string | nu
         </p>
       )}
 
+      <h2>Special Buildings?</h2>
+      <Segmented<'off' | 'on'>
+        label="Special Buildings expansion"
+        value={buildings ? 'on' : 'off'}
+        onChange={(v) => setBuildings(v === 'on')}
+        options={[
+          { value: 'off', label: 'Off' },
+          { value: 'on', label: 'On' },
+        ]}
+      />
+      <p className="setup-note">Adds special buildings and their VP to the Cities tab. You can change this later in the menu.</p>
+
       <div className="setup-cta">
         <button
           type="button"
           className="btn btn-primary btn-block"
           disabled={!block || players === null}
-          onClick={() => block && players !== null && dispatch({ type: 'start', block, playerCount: players })}
+          onClick={() => block && players !== null && dispatch({ type: 'start', block, playerCount: players, buildings })}
         >
           Start the game
         </button>

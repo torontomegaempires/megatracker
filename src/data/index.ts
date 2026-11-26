@@ -5,18 +5,43 @@ import { calamitiesWestEast } from './calamities-we';
 import { interactions } from './interactions';
 import type { AdvanceDef, CalamityDef, Color, InteractionDef } from './types';
 import { COLORS } from './types';
+import type { SpecialBuilding } from './buildings';
+import { buildingById, buildingsFor } from './buildings';
 
 export * from './types';
 export * from './commodities';
 export * from './buildings';
 
-export type BlockId = 'west' | 'east' | 'fareast';
+/** The game being played. Mega Empires is The West and The East together, for 10 or more players. */
+export type BlockId = 'west' | 'east' | 'fareast' | 'mega';
 export type RuleSet = 'we' | 'fe';
 
-export const BLOCKS: Record<BlockId, { name: string; rules: RuleSet; blurb: string }> = {
-  west: { name: 'The West', rules: 'we', blurb: '51 Advances, West/East rules' },
-  east: { name: 'The East', rules: 'we', blurb: 'Same rules as The West' },
-  fareast: { name: 'The Far East', rules: 'fe', blurb: '45 Advances, Far East rules' },
+/**
+ * A player count choice: the value is the lowest count in the range, and is what a game saves.
+ * Ranges share a trade card deck and starting credits.
+ */
+export interface PlayerCount {
+  value: number;
+  label: string;
+}
+
+export interface Block {
+  name: string;
+  /** The letters on the game's colored mark. */
+  mark: string;
+  rules: RuleSet;
+  playerCounts: PlayerCount[];
+}
+
+const pc = (value: number, label = String(value)): PlayerCount => ({ value, label });
+
+export const BLOCKS: Record<BlockId, Block> = {
+  west: { name: 'The West', mark: 'W', rules: 'we', playerCounts: [pc(3), pc(4), pc(5), pc(6), pc(7, '7–8'), pc(9)] },
+  east: { name: 'The East', mark: 'E', rules: 'we', playerCounts: [pc(3), pc(4), pc(5), pc(6), pc(7, '7–8'), pc(9)] },
+  // The Far East adds its extra commodity sets at 9–11 players and a census board for 6–11.
+  // 6–8 is saved as 6, so the whole range starts with 6 players' 5 credits (a group decision).
+  fareast: { name: 'The Far East', mark: 'FE', rules: 'fe', playerCounts: [pc(3), pc(4), pc(5), pc(6, '6–8'), pc(9, '9–11')] },
+  mega: { name: 'Mega Empires', mark: 'ME', rules: 'we', playerCounts: [pc(10, '10–11'), pc(12), pc(13, '13–14'), pc(15, '15–18')] },
 };
 
 export interface Advance extends AdvanceDef {
@@ -142,6 +167,17 @@ export const RULES: Record<RuleSet, RuleData> = {
   we: build('we', advancesWestEast, calamitiesWestEast),
   fe: build('fe', advancesFarEast, calamitiesFarEast),
 };
+
+/** Special buildings for this game. */
+export function buildingsIn(block: BlockId): SpecialBuilding[] {
+  return buildingsFor(BLOCKS[block].rules);
+}
+
+/** A building by id, only if it belongs to this game. */
+export function buildingIn(block: BlockId, id: unknown): SpecialBuilding | undefined {
+  const b = typeof id === 'string' ? buildingById(id) : undefined;
+  return b && b.rules === BLOCKS[block].rules ? b : undefined;
+}
 
 export function rulesFor(block: BlockId): RuleData {
   return RULES[BLOCKS[block].rules];
