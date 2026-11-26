@@ -10,6 +10,9 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+### Changed
+- The About page links to Megatracker's source code on GitHub and drops the group subtitle and the note about commercial licensing.
+
 ## [0.3.0] - 2026-11-26
 
 ### Added
