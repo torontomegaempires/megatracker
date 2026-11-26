@@ -258,9 +258,10 @@ export function costSummary(state: GameState): CostSummary {
     else maxOther = Math.max(maxOther, c);
     return { advance: a, cost: c, free };
   });
-  const libraryDiscount = hasLibrary ? Math.min(maxOther, 40) : 0;
   const considered = buildingsOn(state) && state.buildings.considering ? buildingById(state.buildings.considering) : undefined;
   const building = considered ? { building: considered, cost: buildingCost(state.buildings.era) } : null;
+  // A building is bought as if it were an Advance, so Library can discount it too.
+  const libraryDiscount = hasLibrary ? Math.min(Math.max(maxOther, building?.cost ?? 0), 40) : 0;
   const total = lines.reduce((t, l) => t + (l.free ? 0 : l.cost), 0) - libraryDiscount + (building?.cost ?? 0);
   return { lines, libraryDiscount, building, total };
 }
@@ -282,7 +283,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
   let cap = (available || 9999) + (f === 'almostAffordable' ? 50 : 0) - summary.total;
   if (state.considering.includes('Library')) {
     // Raise the cap while the Library discount has not been fully used.
-    const costliest = summary.lines.filter((l) => l.advance.name !== 'Library').reduce((m, l) => Math.max(m, l.cost), 0);
+    const costliest = summary.lines.filter((l) => l.advance.name !== 'Library').reduce((m, l) => Math.max(m, l.cost), summary.building?.cost ?? 0);
     if (costliest < 40) cap += 40 - costliest;
   }
 

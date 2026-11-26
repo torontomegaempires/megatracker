@@ -360,6 +360,14 @@ describe('special buildings', () => {
     expect(g.buildings).toMatchObject({ owned: 'hellas', controlled: ['hellas'], considering: null });
   });
 
+  it('can be discounted by Library, as if it were an Advance', () => {
+    let g = reducer(withBuildings(), { type: 'considerBuilding', id: 'hellas' });
+    g = consider(g, 'Library');
+    expect(costSummary(g)).toMatchObject({ libraryDiscount: 30, total: cost(g, adv(g, 'Library')) });
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'iron' } });
+    expect(costSummary(g)).toMatchObject({ libraryDiscount: 40, total: cost(g, adv(g, 'Library')) + 10 });
+  });
+
   it('can be bought without any Advances, paying from the treasury', () => {
     let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { era: 'lateBronze' } });
     g = reducer(reducer(g, { type: 'considerBuilding', id: 'rome' }), { type: 'setTreasury', treasury: 50 });
