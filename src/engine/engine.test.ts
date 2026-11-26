@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
-import { loadFunding, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, cost, costSummary, funds, fundsBreakdown, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
+import { astStatus, bestSubstitution, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -137,6 +137,61 @@ describe('extra credit choices', () => {
     expect(choiceTap('10for10', credits, d, 'red')).toEqual(zeroCredits());
     d = choiceTap('10for10', credits, d, 'green');
     expect(choiceReady('10for10', d)).toBe(true);
+  });
+});
+
+describe('goal', () => {
+  const toggle = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleGoal', name }), s);
+
+  it('adds and removes Advances, ignoring names not in the block', () => {
+    let g = toggle(newGame('west', 0), 'Pottery', 'Democracy', 'Not An Advance');
+    expect(g.goal).toEqual(['Pottery', 'Democracy']);
+    g = toggle(g, 'Pottery');
+    expect(g.goal).toEqual(['Democracy']);
+    expect(reducer(g, { type: 'clearGoal' }).goal).toEqual([]);
+  });
+
+  it('keeps bought Advances on the goal and totals what is left', () => {
+    let g = toggle(newGame('west', 0), 'Democracy', 'Pottery', 'Agriculture');
+    g = buy(g, 'Agriculture');
+    const p = goalProgress(g);
+    expect(p.bought.map((a) => a.name)).toEqual(['Agriculture']);
+    expect(p.toBuy.map((a) => a.name)).toEqual(['Pottery', 'Democracy']); // cheapest first
+    expect(p.costLeft).toBe(cost(g, adv(g, 'Pottery')) + cost(g, adv(g, 'Democracy')));
+    expect(p.vpLeft).toBe(adv(g, 'Pottery').vp + adv(g, 'Democracy').vp);
+  });
+
+  it('filters the Advances tab to unowned goal Advances', () => {
+    let g = toggle(newGame('west', 0), 'Pottery', 'Democracy');
+    g = buy(g, 'Pottery');
+    g = reducer(g, { type: 'setView', view: { filter: 'goal' } });
+    expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Democracy']);
+  });
+
+  it('suggests unowned Advances for a theme that are not on the goal yet', () => {
+    const g = toggle(newGame('west', 0), 'Mining');
+    const names = goalSuggestions(reducer(g, { type: 'setView', view: { strategy: 'treasury' } })).map((a) => a.name);
+    expect(names.length).toBeGreaterThan(0);
+    expect(names).not.toContain('Mining');
+    for (const n of names) expect(adv(g, n).goals?.treasury).toBe(true);
+  });
+
+  it('suggests Advances for the next AST age, and drops that theme when the guide is turned off', () => {
+    let g = reducer(newGame('west', 0), { type: 'setView', view: { ast: 'basic', strategy: 'ast' } });
+    g = { ...g, owned: ['Pottery', 'Masonry', 'Mysticism'] }; // next: Late Bronze Age, Advances priced 100+
+    expect(goalSuggestions(g).every((a) => a.price >= 100)).toBe(true);
+    g = reducer(g, { type: 'setView', view: { ast: 'off' } });
+    expect(g.view.strategy).toBe('advances');
+  });
+
+  it('loads games saved before the goal list', () => {
+    const fresh = newGame('west', 0).view;
+    expect(loadView({ filter: 'goal', goal: 'trade', ast: 'off' }, fresh)).toMatchObject({ filter: 'goal', strategy: 'trade' });
+    expect(loadView({ goal: 'ast', ast: 'off' }, fresh).strategy).toBe('advances');
+    expect(loadView({ goal: 'ast', ast: 'basic' }, fresh).strategy).toBe('ast');
+    expect(loadView(undefined, fresh)).toEqual(fresh);
+    expect(loadGoal(undefined, 'west')).toEqual([]);
+    expect(loadGoal(['Pottery', 'Pottery', 'Nope', 3], 'west')).toEqual(['Pottery']);
   });
 });
 

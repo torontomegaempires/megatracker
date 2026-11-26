@@ -17,6 +17,7 @@ export function AdvanceSheet({ name, onClose, onNavigate }: { name: string; onCl
   const owned = game.owned.includes(a.name);
   const picked = game.considering.includes(a.name);
   const barred = !owned && isBarred(game, a.name);
+  const goal = game.goal.includes(a.name);
   const c = cost(game, a);
   const fromCredits = Math.min(a.price, creditFor(game, a));
   const fromChain = chainDiscount(game, a);
@@ -33,17 +34,28 @@ export function AdvanceSheet({ name, onClose, onNavigate }: { name: string; onCl
             <Icon name="check" /> You own this Advance
           </span>
         ) : (
-          <button
-            type="button"
-            className={`btn ${picked ? '' : 'btn-primary'}`}
-            disabled={barred}
-            onClick={() => {
-              dispatch({ type: 'toggleConsider', name: a.name });
-              onClose();
-            }}
-          >
-            {picked ? 'Remove from purchase' : barred ? 'Needs 10 credits in one color' : `Consider buying for ${c}`}
-          </button>
+          <>
+            <button
+              type="button"
+              className="btn btn-goal"
+              aria-pressed={goal}
+              onClick={() => dispatch({ type: 'toggleGoal', name: a.name })}
+            >
+              <Icon name="flag" />
+              {goal ? 'On goal' : 'Add to goal'}
+            </button>
+            <button
+              type="button"
+              className={`btn ${picked ? '' : 'btn-primary'}`}
+              disabled={barred}
+              onClick={() => {
+                dispatch({ type: 'toggleConsider', name: a.name });
+                onClose();
+              }}
+            >
+              {picked ? 'Remove from purchase' : barred ? 'Needs 10 credits in one color' : `Consider buying for ${c}`}
+            </button>
+          </>
         )
       }
     >

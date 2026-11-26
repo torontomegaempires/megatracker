@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNo
 import type { BlockId } from '../data';
 import { BLOCKS } from '../data';
 import type { Action, GameState } from '../engine/game';
-import { loadFunding, newGame, reducer as gameReducer } from '../engine/game';
+import { loadFunding, loadGoal, loadView, newGame, reducer as gameReducer } from '../engine/game';
 
 const STORAGE_KEY = 'megatracker:game';
 
@@ -26,7 +26,8 @@ function load(): GameState | null {
     return {
       ...fresh,
       ...data,
-      view: { ...fresh.view, ...data.view },
+      view: loadView(data.view, fresh.view),
+      goal: loadGoal(data.goal, data.block),
       board: { ...fresh.board, ...data.board },
       funding: loadFunding(data.funding),
     };

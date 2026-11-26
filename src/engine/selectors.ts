@@ -1,6 +1,6 @@
 import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
 import { commoditiesFor, commodityById, rulesFor, setValue } from '../data';
-import type { AstMode, FilterId, FreePick, GameState, SortId } from './game';
+import type { AstMode, FilterId, FreePick, GameState, SortId, StrategyOption } from './game';
 
 export function freePickMatches(a: Advance, pick: FreePick): boolean {
   if (pick === 'cheapScience') return a.price < 100 && a.colors.includes('green');
@@ -155,7 +155,6 @@ export function visibleAdvances(state: GameState): AdvanceListing {
   const rules = rulesFor(state.block);
   const f: FilterId | FreePick = state.freePick ?? state.view.filter;
   const s: SortId | 'revCost' = state.freePick === 'oneVP' ? 'revCost' : state.freePick ? 'alpha' : state.view.sort;
-  const goal = state.view.goal;
   const summary = costSummary(state);
   const available = funds(state);
   let cap = (available || 9999) + (f === 'almostAffordable' ? 50 : 0) - summary.total;
@@ -164,7 +163,6 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     const costliest = summary.lines.filter((l) => l.advance.name !== 'Library').reduce((m, l) => Math.max(m, l.cost), 0);
     if (costliest < 40) cap += 40 - costliest;
   }
-  const ast = astStatus(state);
 
   const list = rules.advances.filter((a) => {
     const isOwned = owns(state, a.name);
@@ -179,8 +177,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
       case 'oneVP':
         return freePickMatches(a, f);
       case 'goal':
-        if (goal === 'ast') return !!ast?.next && ast.next.filter(a);
-        return !!a.goals?.[goal] && cost(state, a) <= cap;
+        return onGoal(state, a.name);
       default:
         return cost(state, a) <= cap;
     }
@@ -217,6 +214,51 @@ export function visibleAdvances(state: GameState): AdvanceListing {
       break;
   }
   return { advances: list, chainStarts, sort: s, filter: f };
+}
+
+// ---------------------------------------------------------------------------
+// Goal: the Advances a player plans to buy over the game
+
+export function onGoal(state: GameState, name: string): boolean {
+  return state.goal.includes(name);
+}
+
+export interface GoalProgress {
+  /** Goal Advances still to buy, cheapest first at today's costs. */
+  toBuy: Advance[];
+  /** Goal Advances already owned, in the order they were added to the goal. */
+  bought: Advance[];
+  /** What the Advances still to buy cost now, before chain discounts or credits they give each other. */
+  costLeft: number;
+  /** VP the Advances still to buy are worth. */
+  vpLeft: number;
+}
+
+export function goalProgress(state: GameState): GoalProgress {
+  const rules = rulesFor(state.block);
+  const advances = state.goal.map((n) => rules.byName.get(n)).filter((a): a is Advance => !!a);
+  const toBuy = advances.filter((a) => !owns(state, a.name)).sort((a, b) => cost(state, a) - cost(state, b) || a.price - b.price);
+  const bought = advances.filter((a) => owns(state, a.name));
+  return {
+    toBuy,
+    bought,
+    costLeft: toBuy.reduce((t, a) => t + cost(state, a), 0),
+    vpLeft: toBuy.reduce((t, a) => t + a.vp, 0),
+  };
+}
+
+/** Whether an Advance fits a theme: one of its goal tags, or helping reach the next AST age. */
+export function matchesStrategy(state: GameState, a: Advance, strategy: StrategyOption): boolean {
+  if (strategy === 'ast') return !!astStatus(state)?.next?.filter(a);
+  return !!a.goals?.[strategy];
+}
+
+/** Unowned Advances not yet on the goal that fit the chosen theme, cheapest first. */
+export function goalSuggestions(state: GameState): Advance[] {
+  const { strategy } = state.view;
+  return rulesFor(state.block)
+    .advances.filter((a) => !owns(state, a.name) && !onGoal(state, a.name) && matchesStrategy(state, a, strategy))
+    .sort((a, b) => cost(state, a) - cost(state, b) || a.price - b.price);
 }
 
 // ---------------------------------------------------------------------------

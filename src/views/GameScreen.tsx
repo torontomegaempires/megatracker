@@ -8,15 +8,17 @@ import { Segmented } from '../components/ui';
 import { useGame } from '../state/store';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
+import { GoalView } from './GoalView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
 import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
 
-type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'specials';
+type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'goal' | 'specials';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'advances', label: 'Advances', icon: 'advances' },
   { id: 'cities', label: 'Cities', icon: 'cities' },
   { id: 'trade', label: 'Trade', icon: 'trade' },
   { id: 'calamities', label: 'Calamities', icon: 'calamities' },
+  { id: 'goal', label: 'Goal', icon: 'flag' },
   { id: 'specials', label: 'Specials', icon: 'specials' },
 ];
 
@@ -29,7 +31,7 @@ export function GameScreen() {
   const [focusHand, setFocusHand] = useState(false);
   const clearFocusHand = useCallback(() => setFocusHand(false), []);
   const close = () => setOverlay(null);
-  const showCart = tab === 'advances' && costSummary(game).lines.length > 0;
+  const showCart = (tab === 'advances' || tab === 'goal') && costSummary(game).lines.length > 0;
   const specials = specialAbilities(game).length;
 
   return (
@@ -69,6 +71,7 @@ export function GameScreen() {
             }}
           />
         )}
+        {tab === 'goal' && <GoalView onOpen={(name) => setOverlay({ kind: 'advance', name })} />}
         {tab === 'cities' && <CitiesView />}
         {tab === 'trade' && <TradeView focusHand={focusHand} onFocused={clearFocusHand} />}
         {tab === 'calamities' && <CalamitiesView onOpen={(name) => setOverlay({ kind: 'calamity', name })} />}
@@ -147,7 +150,7 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
         <Segmented<AstMode>
           label="AST guide"
           value={game.view.ast}
-          onChange={(ast) => dispatch({ type: 'setView', view: { ast, goal: ast === 'off' && game.view.goal === 'ast' ? 'advances' : game.view.goal } })}
+          onChange={(ast) => dispatch({ type: 'setView', view: { ast } })}
           options={[
             { value: 'off', label: 'Off' },
             { value: 'basic', label: 'Basic' },
