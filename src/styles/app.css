@@ -503,7 +503,8 @@ p {
 .tab[aria-current='page']::after {
   content: '';
   position: absolute;
-  bottom: calc(6px + env(safe-area-inset-bottom));
+  /* The tab bar's padding already clears the safe area, so the tab's own bottom is above it */
+  bottom: 6px;
   left: 30%;
   right: 30%;
   height: 3px;

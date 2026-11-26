@@ -22,6 +22,9 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 - Player count choices are now 3, 4, 5, 6, 7–8, 9, 10–11, 12, 13–14 and 15–18, one per trade card deck, so the Trade tab lists the commodities your block actually uses. Starting credits are unchanged.
 - Advances tab: discounted advances now show the discount in red (e.g. −15) instead of the crossed-out original price, with the owned chain card's name beside it when a chain discount applies.
 
+### Fixed
+- The line under the selected tab no longer jumps up into the icon when Chrome on Android hides its bottom bar as you scroll.
+
 ## [0.1.2] - 2026-11-25
 
 ### Changed
