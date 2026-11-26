@@ -1,5 +1,5 @@
 import { useCallback, useState, type CSSProperties } from 'react';
-import { BLOCKS, COLOR_NAMES, COLORS, contrastRatio, nationByName } from '../data';
+import { BLOCKS, buildingById, COLOR_NAMES, COLORS, contrastRatio, nationByName } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
 import { GitHubIcon, Icon, type IconName } from '../components/Icon';
@@ -29,13 +29,16 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
 const GROUNDS = { light: '#dcdfe2', dark: '#121315' };
 
 /**
- * The game's name, or once you've joined a shared game, your nation's name in its token color.
+ * The game's name, or your nation's name in its token color: the nation you joined a shared game
+ * as, or else the civilization you picked for Special Buildings.
  * Colors too pale (or too dark) for the header get an outline in the ink color for that theme.
  */
 function BrandName() {
   const { game } = useGame();
   const { seat, view } = useShared();
-  const nation = seat && view?.code === seat.code ? view.standings.find((r) => r.seatId === seat.seatId)?.nation : undefined;
+  const seated = seat && view?.code === seat.code ? view.standings.find((r) => r.seatId === seat.seatId)?.nation : undefined;
+  const civ = buildingsOn(game) && game.buildings.civ ? buildingById(game.buildings.civ)?.civ : undefined;
+  const nation = seated || civ;
   if (!nation) return <span className="brand-name">{BLOCKS[game.block].name}</span>;
   const color = nationByName(nation)?.color;
   const style = color
