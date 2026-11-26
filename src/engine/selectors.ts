@@ -1,5 +1,5 @@
 import type { Advance, Calamity, RuleData, TradePower } from '../data';
-import { rulesFor } from '../data';
+import { commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, FilterId, FreePick, GameState, SortId } from './game';
 
 export function freePickMatches(a: Advance, pick: FreePick): boolean {
@@ -31,11 +31,38 @@ export function victoryPoints(state: GameState): number {
   return state.owned.reduce((t, n) => t + (rules.byName.get(n)?.vp ?? 0), 0);
 }
 
+export interface FundsBreakdown {
+  /** Value of the commodity cards that will be turned in (not held). */
+  cards: number;
+  /** Value of the commodity cards held for next turn. */
+  held: number;
+  heldCards: number;
+  /** Treasury tokens count double with Mining (West/East) or Treasure Voyages (Far East). */
+  treasuryMultiplier: 1 | 2;
+  treasuryValue: number;
+  total: number;
+}
+
+export function fundsBreakdown(state: GameState): FundsBreakdown {
+  const { hand, held: heldIds, treasury } = state.funding;
+  let cards = 0;
+  let held = 0;
+  let heldCards = 0;
+  for (const [id, n] of Object.entries(hand)) {
+    const value = setValue(commodityById(id)?.value ?? 0, n);
+    if (heldIds.includes(id)) {
+      held += value;
+      heldCards += n;
+    } else cards += value;
+  }
+  const treasuryMultiplier = owns(state, rulesFor(state.block).treasuryDoubler) ? 2 : 1;
+  const treasuryValue = treasury * treasuryMultiplier;
+  return { cards, held, heldCards, treasuryMultiplier, treasuryValue, total: cards + treasuryValue };
+}
+
+/** Value available for Advances this turn: commodities not held, plus treasury. */
 export function funds(state: GameState): number {
-  const rules = rulesFor(state.block);
-  const sets = state.funding.sets.reduce((t, s) => t + s.rank * s.qty * s.qty, 0);
-  const treasury = state.funding.treasury * (owns(state, rules.treasuryDoubler) ? 2 : 1);
-  return sets + state.funding.misc + treasury;
+  return fundsBreakdown(state).total;
 }
 
 export interface CostLine {

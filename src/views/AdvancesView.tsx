@@ -108,11 +108,11 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
                 Funds to spend <strong className="num">{available}</strong>
               </span>
             ) : (
-              <span className="muted">Add your funds to see what you can afford.</span>
+              <span className="muted">Add your trade cards and treasury to see what you can afford.</span>
             )}
             <button type="button" className="btn" onClick={onFunds}>
               <Icon name="wallet" />
-              {available > 0 ? 'Edit' : 'Funds'}
+              {available > 0 ? 'Hand' : 'Add'}
             </button>
           </div>
         </div>

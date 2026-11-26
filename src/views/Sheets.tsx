@@ -2,12 +2,11 @@ import { useState } from 'react';
 import type { Calamity, Credits } from '../data';
 import { COLOR_NAMES, COLORS, rulesFor } from '../data';
 import { choiceCanTap, choicePrompt, choiceReady, choiceTap } from '../engine/credits';
-import type { Funding } from '../engine/game';
-import { emptyFunding, isBarred, zeroCredits } from '../engine/game';
-import { calamityDescription, chainDiscount, cost, creditFor, funds } from '../engine/selectors';
+import { isBarred, zeroCredits } from '../engine/game';
+import { calamityDescription, chainDiscount, cost, creditFor } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
-import { advanceColors, colorNames, CreditPills, RulesText, Stepper } from '../components/ui';
+import { advanceColors, colorNames, CreditPills, RulesText } from '../components/ui';
 import { useGame } from '../state/store';
 
 // --------------------------------------------------------------- advance
@@ -194,97 +193,6 @@ export function CalamitySheet({ name, onClose, onOpenAdvance }: { name: string; 
         </div>
       )}
     </Sheet>
-  );
-}
-
-// ----------------------------------------------------------------- funds
-
-export function FundsSheet({ onClose }: { onClose: () => void }) {
-  const { game, dispatch } = useGame();
-  const f = game.funding;
-  const set = (funding: Funding) => dispatch({ type: 'setFunding', funding });
-  const setSet = (i: number, patch: Partial<Funding['sets'][number]>) =>
-    set({ ...f, sets: f.sets.map((s, j) => (j === i ? { ...s, ...patch } : s)) });
-  const doubler = rulesFor(game.block).treasuryDoubler;
-  const doubled = game.owned.includes(doubler);
-
-  return (
-    <Sheet
-      title="Funds to spend"
-      subtitle="Trade card sets, odd commodities and treasury"
-      onClose={onClose}
-      footer={
-        <>
-          <button type="button" className="btn" onClick={() => set(emptyFunding())}>
-            Clear
-          </button>
-          <button type="button" className="btn btn-primary" onClick={onClose}>
-            Done
-          </button>
-        </>
-      }
-    >
-      <div className="big-total">
-        <span className="muted">Total</span>
-        <strong>{funds(game)}</strong>
-      </div>
-
-      <div className="section">
-        <h3>Sets of trade cards</h3>
-        <div className="sets">
-          <div className="set-row">
-            <span className="label">Card value</span>
-            <span className="label">Cards in set</span>
-            <span className="label" style={{ textAlign: 'right' }}>
-              Worth
-            </span>
-          </div>
-          {f.sets.map((s, i) => (
-            <div className="set-row" key={i}>
-              <Stepper label={`set ${i + 1} card value`} value={s.rank} min={0} max={9} onChange={(rank) => setSet(i, { rank })} />
-              <Stepper label={`set ${i + 1} number of cards`} value={s.qty} min={0} max={12} onChange={(qty) => setSet(i, { qty })} />
-              <span className="set-value">{s.rank * s.qty * s.qty}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="section">
-        <div className="field">
-          <label htmlFor="misc">
-            Odd commodities
-            <span className="hint">Face value of cards not in a set</span>
-          </label>
-          <NumberInput id="misc" value={f.misc} max={60} onChange={(misc) => set({ ...f, misc })} />
-        </div>
-        <div className="field">
-          <label htmlFor="treasury">
-            Treasury
-            <span className="hint">{doubled ? `Counts double (${doubler})` : 'Tokens in your treasury'}</span>
-          </label>
-          <NumberInput id="treasury" value={f.treasury} max={55} onChange={(treasury) => set({ ...f, treasury })} />
-        </div>
-      </div>
-    </Sheet>
-  );
-}
-
-function NumberInput({ id, value, max, onChange }: { id: string; value: number; max: number; onChange: (v: number) => void }) {
-  return (
-    <input
-      id={id}
-      type="number"
-      inputMode="numeric"
-      min={0}
-      max={max}
-      value={value === 0 ? '' : value}
-      placeholder="0"
-      style={{ width: 96, textAlign: 'right' }}
-      onChange={(e) => {
-        const n = Math.max(0, Math.min(max, Math.floor(Number(e.target.value) || 0)));
-        onChange(n);
-      }}
-    />
   );
 }
 

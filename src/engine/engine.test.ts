@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { RULES, rulesFor } from '../data';
+import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
-import { newGame, reducer, zeroCredits } from './game';
-import { astStatus, cost, costSummary, funds, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { loadFunding, newGame, reducer, zeroCredits } from './game';
+import { astStatus, cost, costSummary, funds, fundsBreakdown, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -33,8 +33,8 @@ describe('setup', () => {
     expect(newGame('west', 5).credits.red).toBe(10);
     expect(newGame('west', 6).credits.blue).toBe(5);
     expect(newGame('west', 0).credits.blue).toBe(0);
-    expect(newGame('west', 7).credits.blue).toBe(0); // 7–11 players
-    expect(newGame('west', 13).credits.blue).toBe(0); // 13+ players
+    for (const n of [7, 9, 10, 13, 15]) expect(newGame('west', n).credits.blue).toBe(0); // 7–8 up to 15–18, apart from 12
+    expect(newGame('west', 12).credits.blue).toBe(5);
   });
 });
 
@@ -57,19 +57,22 @@ describe('costs', () => {
     expect(total).toBe(cost(g, adv(g, 'Library')) + cost(g, adv(g, 'Pottery')) - Math.min(40, cost(g, adv(g, 'Pottery'))));
   });
 
-  it('values trade card sets as rank x qty squared, doubling treasury with Mining', () => {
-    let g = newGame('west', 0);
-    g = reducer(g, { type: 'setFunding', funding: { sets: [{ rank: 3, qty: 4 }], misc: 2, treasury: 10 } });
-    expect(funds(g)).toBe(48 + 2 + 10);
+  it('values each commodity as face value x cards squared, doubling treasury with Mining', () => {
+    let g = newGame('west', 5);
+    g = reducer(g, { type: 'setCommodity', id: 'fish', count: 4 }); // 3 x 16
+    g = reducer(g, { type: 'setCommodity', id: 'ochre', count: 2 }); // 1 x 4
+    g = reducer(g, { type: 'setCommodity', id: 'gold', count: 1 }); // 9
+    g = reducer(g, { type: 'setTreasury', treasury: 10 });
+    expect(funds(g)).toBe(48 + 4 + 9 + 10);
     g = { ...g, owned: ['Mining'] };
-    expect(funds(g)).toBe(48 + 2 + 20);
+    expect(funds(g)).toBe(48 + 4 + 9 + 20);
   });
 });
 
 describe('buying', () => {
   it('adds face credits and VP, and clears the purchase list and funds', () => {
     let g = newGame('west', 0);
-    g = reducer(g, { type: 'setFunding', funding: { sets: [], misc: 50, treasury: 0 } });
+    g = reducer(g, { type: 'setCommodity', id: 'fish', count: 5 }); // 75
     g = buy(g, 'Pottery');
     expect(g.owned).toEqual(['Pottery']);
     expect(g.considering).toEqual([]);
@@ -162,5 +165,85 @@ describe('guides', () => {
   it('personalises the Primal Philosophy special', () => {
     const g = { ...newGame('fareast', 0), owned: ['Primal Philosophy'] };
     expect(specialAbilities(g)[0].text).toContain('number of Advances (1)');
+  });
+});
+
+describe('trade hand', () => {
+  const hand = (g: GameState, counts: Record<string, number>) =>
+    Object.entries(counts).reduce((s, [id, count]) => reducer(s, { type: 'setCommodity', id, count }), g);
+
+  it('uses the trade card deck for the block and player count', () => {
+    const deck = (block: 'west' | 'east', n: number) => Object.fromEntries(commoditiesFor(block, n).map((c) => [c.name, c.max]));
+    expect(Object.keys(deck('west', 5))).toHaveLength(18);
+    expect(deck('west', 5)).toMatchObject({ Ochre: 9, Clay: 9, Gold: 5 });
+    expect(deck('west', 7).Bone).toBeUndefined(); // 7–8
+    expect(deck('east', 3)).toMatchObject({ Flax: 9, Silk: 4 });
+    expect(deck('west', 9)).toMatchObject({ Bone: 8, Amber: 4 });
+    expect(deck('east', 9)).toMatchObject({ Bone: 8, Flax: 9 });
+    expect(deck('east', 10)).toEqual(deck('west', 9)); // 10–11 use the West's 9-player deck
+    // 12–14: each block mixes both editions, with no extra sets
+    expect(deck('west', 12)).toMatchObject({ Ochre: 9, Clay: 5, Hides: 4, Gold: 3, Pearls: 2 });
+    expect(deck('west', 13).Silk).toBeUndefined();
+    expect(deck('west', 13).Bone).toBeUndefined();
+    expect(deck('east', 12)).toMatchObject({ Flax: 9, Clay: 4, Hides: 5, Silk: 4, Gold: 2 });
+    // 15–18 adds the extra sets at lower counts
+    expect(deck('east', 15)).toMatchObject({ Bone: 4, Amber: 2, Pearls: 3 });
+    expect(Object.keys(deck('west', 15))).toHaveLength(36);
+    expect(commoditiesFor('west', 15).every((c, i, a) => i === 0 || a[i - 1].value <= c.value)).toBe(true);
+  });
+
+  it('gives the Far East its own commodities, even where names match West/East cards', () => {
+    const fe = commoditiesFor('fareast', 5);
+    expect(fe).toHaveLength(18);
+    expect(fe.find((c) => c.name === 'Fish')).toMatchObject({ id: 'fe-fish', value: 1, max: 9 });
+    expect(commoditiesFor('west', 5).find((c) => c.name === 'Fish')?.value).toBe(3);
+    expect(fe.map((c) => c.name)).not.toContain('Fruit');
+    expect(commoditiesFor('fareast', 7).map((c) => c.name)).not.toContain('Fruit'); // 7–8
+    expect(commoditiesFor('fareast', 10).map((c) => c.name)).toContain('Fruit'); // 10–11
+
+    let g = newGame('fareast', 5);
+    g = reducer(g, { type: 'setCommodity', id: 'fe-jade', count: 2 }); // 8 x 4
+    expect(funds(g)).toBe(32);
+  });
+
+  it('leaves held commodities out of funds', () => {
+    let g = hand(newGame('west', 5), { fish: 3, gold: 2 }); // 27 + 36
+    g = reducer(g, { type: 'toggleHeld', id: 'gold' });
+    expect(fundsBreakdown(g)).toMatchObject({ cards: 27, held: 36, heldCards: 2, total: 27 });
+    g = reducer(g, { type: 'toggleHeld', id: 'gold' });
+    expect(funds(g)).toBe(63);
+  });
+
+  it('forgets a held commodity once none are left', () => {
+    let g = hand(newGame('west', 5), { fish: 3 });
+    g = reducer(g, { type: 'toggleHeld', id: 'fish' });
+    g = reducer(g, { type: 'setCommodity', id: 'fish', count: 0 });
+    expect(g.funding).toEqual({ hand: {}, held: [], treasury: 0 });
+    expect(reducer(g, { type: 'toggleHeld', id: 'fish' })).toBe(g);
+  });
+
+  it('turns in unheld cards when buying, keeps held ones, and spends only the treasury needed', () => {
+    let g = hand(newGame('west', 0), { fish: 2, gold: 2 }); // 12 + 36 held
+    g = reducer(g, { type: 'toggleHeld', id: 'gold' });
+    g = reducer(g, { type: 'setTreasury', treasury: 50 });
+    const price = costSummary(consider(g, 'Pottery')).total;
+    g = buy(g, 'Pottery');
+    expect(g.funding.hand).toEqual({ gold: 2 });
+    expect(g.funding.held).toEqual([]);
+    expect(g.funding.treasury).toBe(50 - (price - 12));
+  });
+
+  it('spends doubled treasury at half the tokens, rounding up', () => {
+    let g = { ...newGame('west', 0), owned: ['Mining'] };
+    g = reducer(g, { type: 'setTreasury', treasury: 40 });
+    const price = costSummary(consider(g, 'Pottery')).total;
+    g = buy(g, 'Pottery');
+    expect(g.funding.treasury).toBe(40 - Math.ceil(price / 2));
+  });
+
+  it('keeps only the treasury from games saved before the hand existed', () => {
+    expect(loadFunding({ sets: [{ rank: 3, qty: 2 }], misc: 4, treasury: 12 })).toEqual({ hand: {}, held: [], treasury: 12 });
+    expect(loadFunding(undefined)).toEqual({ hand: {}, held: [], treasury: 0 });
+    expect(loadFunding({ hand: { fish: 2 }, held: ['fish', 'gold'], treasury: 3 })).toEqual({ hand: { fish: 2 }, held: ['fish'], treasury: 3 });
   });
 });
