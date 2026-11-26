@@ -119,7 +119,7 @@ export function AdvanceSheet({ name, onClose, onNavigate }: { name: string; onCl
             {a.calamities.map((i) => (
               <li key={i.calamity}>
                 <span className={`effect-dot ${i.direction}`} aria-hidden>
-                  <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
+                  <Icon name={i.direction === 'advantage' ? 'plus' : 'minus'} />
                 </span>
                 <span className="who">
                   {i.calamity} <span className="visually-hidden">({i.direction})</span>
@@ -189,7 +189,7 @@ export function CalamitySheet({ name, onClose, onOpenAdvance }: { name: string; 
               return (
                 <li key={i.advance} style={{ opacity: owned ? 1 : 0.7 }}>
                   <span className={`effect-dot ${i.direction}`} aria-hidden>
-                    <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
+                    <Icon name={i.direction === 'advantage' ? 'plus' : 'minus'} />
                   </span>
                   <span className="who">
                     <button type="button" className="link-btn" style={{ padding: 0 }} onClick={() => onOpenAdvance(i.advance)}>

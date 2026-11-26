@@ -428,7 +428,7 @@ export function CalamitiesView({ onOpen }: { onOpen: (name: string) => void }) {
                     <span className="adv-tags">
                       {c.advances.map((i) => (
                         <span key={i.advance} className={`tag tag-${i.direction}${game.owned.includes(i.advance) ? '' : ' tag-unowned'}`}>
-                          <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
+                          <Icon name={i.direction === 'advantage' ? 'plus' : 'minus'} />
                           {i.advance}
                         </span>
                       ))}
