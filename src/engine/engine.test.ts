@@ -3,7 +3,7 @@ import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, payment, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, payment, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances, worsenedCalamities } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -461,5 +461,16 @@ describe('special buildings', () => {
     expect(
       loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: 'hellas', sacrificing: ['rome', 'hellas'] }),
     ).toEqual({ enabled: true, civ: null, era: 'iron', owned: 'rome', controlled: ['rome'], considering: null, sacrificing: ['rome'] });
+  });
+});
+
+describe('calamities', () => {
+  it('flags calamities that owned Advances make worse on balance', () => {
+    const g = newGame('west', 5);
+    expect(worsenedCalamities(g).has('Famine')).toBe(false);
+    const withAgriculture = { ...g, owned: ['Agriculture'] };
+    expect(worsenedCalamities(withAgriculture).has('Famine')).toBe(true);
+    expect(worsenedCalamities({ ...g, owned: ['Agriculture', 'Pottery'] }).has('Famine')).toBe(false);
+    expect(worsenedCalamities({ ...g, owned: ['Calendar'] }).has('Famine')).toBe(false);
   });
 });

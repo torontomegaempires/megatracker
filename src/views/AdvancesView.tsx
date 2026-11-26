@@ -3,7 +3,7 @@ import type { Advance } from '../data';
 import { COLOR_NAMES, COLORS } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
-import { chainDiscount, cost, costSummary, funds, onGoal, payment, visibleAdvances } from '../engine/selectors';
+import { chainDiscount, cost, costSummary, funds, onGoal, payment, visibleAdvances, worsenedCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { advanceColors } from '../components/ui';
 import { useGame } from '../state/store';
@@ -135,6 +135,7 @@ export function AdvanceRow({
   const discount = a.price - c;
   const fromChain = chainDiscount(game, a);
   const credits = COLORS.filter((col) => a.credits[col]);
+  const worse = owned ? new Set<string>() : worsenedCalamities(game);
   const classes = ['adv', owned && 'owned', barred && 'barred', chainStart && 'chain-start'].filter(Boolean).join(' ');
 
   return (
@@ -170,12 +171,19 @@ export function AdvanceRow({
                   ))}
                 </span>
               )}
-              {a.calamities.map((i) => (
-                <span key={i.calamity} className={`tag tag-${i.direction}`}>
-                  <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
-                  {i.calamity}
-                </span>
-              ))}
+              {a.calamities.map((i) => {
+                const mitigates = i.direction === 'advantage' && worse.has(i.calamity);
+                return (
+                  <span
+                    key={i.calamity}
+                    className={`tag tag-${i.direction}${mitigates ? ' tag-mitigates' : ''}`}
+                    title={mitigates ? `Offsets the ${i.calamity} penalty from Advances you own` : undefined}
+                  >
+                    <Icon name={i.direction === 'advantage' ? 'plus' : 'minus'} />
+                    {i.calamity}
+                  </span>
+                );
+              })}
             </span>
           )}
         </span>

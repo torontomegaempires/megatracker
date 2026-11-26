@@ -967,6 +967,14 @@ p {
   color: var(--bad);
 }
 
+/* Helps against a calamity the player's owned Advances currently make worse. */
+.tag-mitigates {
+  background: var(--good);
+  color: var(--on-ink);
+  padding: 1px 5px 1px 3px;
+  border-radius: 4px;
+}
+
 .tag-unowned {
   opacity: 0.55;
 }

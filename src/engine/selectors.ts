@@ -581,3 +581,17 @@ export function visibleCalamities(state: GameState): Calamity[] {
     .calamities.filter((c) => (c.category === 'minor' ? minor : major))
     .map((c) => ({ ...c, advances: c.advances.filter((i) => unowned || owns(state, i.advance)) }));
 }
+
+/**
+ * Calamities your owned Advances make worse on balance: more owned Advances hinder you
+ * against it than help. An unowned Advance that helps against one of these is worth flagging.
+ */
+export function worsenedCalamities(state: GameState): Set<string> {
+  const worse = new Set<string>();
+  for (const c of rulesFor(state.block).calamities) {
+    let net = 0;
+    for (const i of c.advances) if (owns(state, i.advance)) net += i.direction === 'advantage' ? 1 : -1;
+    if (net < 0) worse.add(c.name);
+  }
+  return worse;
+}
