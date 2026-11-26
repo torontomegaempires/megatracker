@@ -116,6 +116,10 @@ players. Nobody pushes to `production` by hand. Its ruleset blocks deleting it a
 pushes, so it can only move forward, but it doesn't stop someone with write access pushing to
 it, so leave that to the workflow.
 
+If a Tag release run fails after a release merges, fix the cause, then start the workflow by
+hand from `main` (Actions > Tag release > Run workflow). It tags `main`'s version if the tag is
+missing and moves `production` to it.
+
 ## Reporting problems
 
 Found a bug, a wrong Advance or calamity value, or have an idea? Open an issue with one of

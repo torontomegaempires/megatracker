@@ -8,15 +8,25 @@ on:
   push:
     branches: [main]
     paths: [package.json]
+  # Run it by hand (Actions > Tag release > Run workflow) to finish a release whose run failed:
+  # it tags main's version if needed and moves production to it.
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   tag:
+    # Only main is released: a manual run started from another branch does nothing.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history, so the runner has production's commit and git can see that moving
+          # it to the new tag is a fast-forward. A shallow clone has only the tip, and git
+          # then refuses the push ("fetch first") whenever production already exists.
+          fetch-depth: 0
       - name: Tag the new version
         run: |
           tag="v$(node -p "require('./package.json').version")"
