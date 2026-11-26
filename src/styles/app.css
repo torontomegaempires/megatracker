@@ -2240,6 +2240,16 @@ dialog.sheet::backdrop {
   gap: 4px 8px;
 }
 
+.nation-swatch {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-right: 0.35em;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--line-strong);
+  vertical-align: 0.02em;
+}
+
 .standing-nation {
   font-family: var(--font-card);
   font-weight: 700;

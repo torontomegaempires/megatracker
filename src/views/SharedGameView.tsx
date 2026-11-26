@@ -6,7 +6,7 @@ import type { SharedAstMode } from '../engine/standings';
 import { AST_MAX, AST_START, LATE_IRON_AGE_POSITION, MAX_CITIES, snapshotOf } from '../engine/standings';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
-import { Segmented, Stepper } from '../components/ui';
+import { NationSwatch, Segmented, Stepper } from '../components/ui';
 import type { GameView, StandingView } from '../shared/api';
 import { CODE_LENGTH, normalizeCode } from '../shared/api';
 import { api } from '../shared/client';
@@ -196,7 +196,10 @@ function StandingRow({ row, mine, onRemove }: { row: StandingView; mine: boolean
       </span>
       <div className="standing-main">
         <div className="standing-title">
-          <span className="standing-nation">{row.nation}</span>
+          <span className="standing-nation">
+            <NationSwatch nation={row.nation} />
+            {row.nation}
+          </span>
           <span className="standing-era" title={s.age.name}>
             {s.age.abbr}
           </span>

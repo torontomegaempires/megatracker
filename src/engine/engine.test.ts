@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCKS, buildingsIn, commoditiesFor, RULES, rulesFor } from '../data';
+import { BLOCKS, buildingsIn, commoditiesFor, nationByName, RULES, rulesFor, SPECIAL_BUILDINGS } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, PLAYER_COUNTS, playerCountLabel, reducer, zeroCredits } from './game';
@@ -381,6 +381,14 @@ describe('special buildings', () => {
     expect(reducer(fe, { type: 'considerBuilding', id: 'heian' }).buildings.considering).toBe('heian');
     expect(buildingPoints(fe)).not.toBeNull();
     expect(reducer(newGame('west', 5), { type: 'setBuildings', buildings: { civ: 'tang' } }).buildings.civ).toBeNull();
+  });
+
+  it('gives every nation a token color and finds nations as players type them', () => {
+    for (const b of SPECIAL_BUILDINGS) expect(b.color).toMatch(/^#[0-9a-f]{6}$/);
+    expect(nationByName('rome')?.color).toBe('#eb0585');
+    expect(nationByName(' Dai  Viet ')?.id).toBe('daiviet');
+    expect(nationByName('The Celt')?.id).toBe('celt');
+    expect(nationByName('Atlantis')).toBeUndefined();
   });
 
   it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {

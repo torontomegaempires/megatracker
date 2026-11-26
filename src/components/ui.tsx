@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Advance, Color, Credits } from '../data';
-import { COLOR_NAMES, COLORS } from '../data';
+import { COLOR_NAMES, COLORS, nationByName } from '../data';
 import { Icon } from './Icon';
 
 /** CSS variables that paint an advance's one or two colors. */
@@ -126,4 +126,11 @@ export function Segmented<T extends string | number>({
 
 export function colorClass(c: Color) {
   return `c-${c}`;
+}
+
+/** A small square in a nation's token color, or nothing for a nation Megatracker doesn't know. */
+export function NationSwatch({ nation }: { nation: string }) {
+  const color = nationByName(nation)?.color;
+  if (!color) return null;
+  return <span className="nation-swatch" style={{ background: color }} aria-hidden />;
 }

@@ -4,7 +4,7 @@ import { BUILDING_ERAS, buildingById, buildingCost, buildingsIn } from '../data'
 import type { BuildingEra } from '../data';
 import { buildingPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { Segmented } from '../components/ui';
+import { NationSwatch, Segmented } from '../components/ui';
 import { useGame } from '../state/store';
 
 const byCiv = (b: SpecialBuilding) => `${b.civ} · ${b.name}`;
@@ -112,7 +112,10 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
           <div className="row-main">
             <div className="row-title">{owned.name}</div>
             <div className="row-meta">
-              <span className="badge">{owned.civ}</span>
+              <span className="badge">
+                <NationSwatch nation={owned.civ} />
+                {owned.civ}
+              </span>
               <span className="badge">Owned</span>
               {!controlled && <span className="badge">Not controlled</span>}
             </div>
@@ -138,7 +141,10 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
           <div className="row-main">
             <div className="row-title">{considering.name}</div>
             <div className="row-meta">
-              <span className="badge">{considering.civ}</span>
+              <span className="badge">
+                <NationSwatch nation={considering.civ} />
+                {considering.civ}
+              </span>
               <span className="badge">In your purchase · {cost}</span>
             </div>
           </div>
@@ -204,7 +210,10 @@ function OtherBuildings() {
               <div className="row-main">
                 <div className="row-title">{x.name}</div>
                 <div className="row-meta">
-                  <span className="badge">{x.civ}</span>
+                  <span className="badge">
+                    <NationSwatch nation={x.civ} />
+                    {x.civ}
+                  </span>
                 </div>
               </div>
               <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'toggleControl', id: x.id })}>
