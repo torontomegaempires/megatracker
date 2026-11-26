@@ -858,6 +858,33 @@ p {
   font-weight: 500;
 }
 
+/* The credits the card gives toward later purchases: small printed colour boxes */
+.adv-credits {
+  display: inline-flex;
+  gap: 3px;
+  align-self: center;
+}
+
+.adv-credit {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 17px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--swatch);
+  color: var(--on);
+  font-family: var(--font-card);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.adv.owned .adv-credit {
+  opacity: 0.55;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;

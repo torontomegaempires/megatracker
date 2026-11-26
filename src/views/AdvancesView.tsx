@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Advance } from '../data';
-import { COLORS } from '../data';
+import { COLOR_NAMES, COLORS } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
 import { chainDiscount, cost, costSummary, funds, onGoal, visibleAdvances } from '../engine/selectors';
@@ -137,6 +137,7 @@ export function AdvanceRow({
   const c = cost(game, a);
   const discount = a.price - c;
   const fromChain = chainDiscount(game, a);
+  const credits = COLORS.filter((col) => a.credits[col]);
   const classes = ['adv', owned && 'owned', barred && 'barred', chainStart && 'chain-start'].filter(Boolean).join(' ');
 
   return (
@@ -161,8 +162,17 @@ export function AdvanceRow({
             )}
             {a.name}
           </span>
-          {a.calamities.length > 0 && (
+          {(credits.length > 0 || a.calamities.length > 0) && (
             <span className="adv-tags">
+              {credits.length > 0 && (
+                <span className="adv-credits">
+                  {credits.map((col) => (
+                    <span key={col} className={`adv-credit c-${col}`} aria-label={`${COLOR_NAMES[col]} credit ${a.credits[col]}`}>
+                      {a.credits[col]}
+                    </span>
+                  ))}
+                </span>
+              )}
               {a.calamities.map((i) => (
                 <span key={i.calamity} className={`tag tag-${i.direction}`}>
                   <Icon name={i.direction === 'advantage' ? 'up' : 'down'} />
