@@ -455,7 +455,7 @@ p {
   max-width: 760px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   background: var(--card);
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
@@ -476,7 +476,24 @@ p {
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 2px;
   position: relative;
+}
+
+/* Six labels across a narrow phone: tighten so "Calamities" still fits */
+@media (max-width: 399px) {
+  .tab {
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+}
+
+@media (max-width: 339px) {
+  .tab {
+    font-size: 12px;
+    letter-spacing: 0;
+  }
 }
 
 .tab[aria-current='page'] {
@@ -799,6 +816,39 @@ p {
   letter-spacing: 0.01em;
 }
 
+/* On the player's goal: a small ink flag before the name */
+.adv-goal {
+  display: inline-block;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+
+.adv-goal .icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
+}
+
+.adv-goal .icon path {
+  fill: currentColor;
+}
+
+/* A trailing row action, such as adding to or removing from the goal */
+.adv-action {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+
+.adv-action:hover {
+  background: var(--card-2);
+}
+
 .adv-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1106,6 +1156,19 @@ dialog.sheet::backdrop {
   flex: 1;
 }
 
+.sheet-foot .btn-goal {
+  flex: none;
+  padding: 0 12px;
+}
+
+.btn-goal[aria-pressed='true'] {
+  background: var(--card-3);
+}
+
+.btn-goal[aria-pressed='true'] .icon path {
+  fill: currentColor;
+}
+
 .section + .section {
   margin-top: 16px;
 }
@@ -1383,6 +1446,30 @@ dialog.sheet::backdrop {
 
 .page-head + .group-head {
   margin-top: 0;
+}
+
+/* ------------------------------------------------------------------ goal */
+.goal-intro {
+  margin: 0 2px 4px;
+  font-size: 14px;
+  max-width: 68ch;
+}
+
+.goal-facts {
+  margin-bottom: 10px;
+}
+
+.goal-facts .fact {
+  background: var(--card);
+  box-shadow: var(--lift);
+}
+
+.goal-theme {
+  margin: 0 2px 10px;
+}
+
+.goal-clear {
+  margin-top: 18px;
 }
 
 .funds-total {

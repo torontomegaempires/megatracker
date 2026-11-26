@@ -4,7 +4,8 @@ import { costSummary, freePickMatches, fundsBreakdown } from './selectors';
 
 export type FilterId = 'unowned' | 'affordable' | 'almostAffordable' | 'goal' | 'owned' | 'all';
 export type SortId = 'alpha' | 'cost' | 'vp' | 'economy' | 'discount' | 'color' | 'chains';
-export type GoalOption = GoalId | 'ast';
+/** A theme for finding Advances to add to your goal: one of the data's goal tags, or the next AST age. */
+export type StrategyOption = GoalId | 'ast';
 export type AstMode = 'off' | 'basic' | 'expert';
 /** A free advance being taken: Anatomy's cheap science, or Primal Philosophy's 1-VP advance. */
 export type FreePick = 'cheapScience' | 'oneVP';
@@ -25,7 +26,8 @@ export type QueueItem =
 
 export interface ViewSettings {
   filter: FilterId;
-  goal: GoalOption;
+  /** The theme the Goal tab suggests Advances for. */
+  strategy: StrategyOption;
   sort: SortId;
   ast: AstMode;
   calamities: { minor: boolean; major: boolean; unowned: boolean };
@@ -44,6 +46,8 @@ export interface GameState {
   credits: Credits;
   funding: Funding;
   considering: string[];
+  /** Advances the player plans to buy over the game, in the order they were added. */
+  goal: string[];
   view: ViewSettings;
   freePick: FreePick | null;
   queue: QueueItem[];
@@ -91,6 +95,22 @@ export function loadFunding(saved: unknown): Funding {
   return { hand: { ...f.hand }, held: f.held.filter((id) => (f.hand![id] ?? 0) > 0), treasury };
 }
 
+/** View settings from a saved game; games saved before the Goal tab kept the theme as `goal`. */
+export function loadView(saved: unknown, fresh: ViewSettings): ViewSettings {
+  const { goal, ...v } = (saved ?? {}) as Partial<ViewSettings> & { goal?: StrategyOption };
+  const view = { ...fresh, ...v };
+  if (!v.strategy && goal) view.strategy = goal;
+  if (view.ast === 'off' && view.strategy === 'ast') view.strategy = fresh.strategy;
+  return view;
+}
+
+/** The goal list from a saved game, keeping only Advances in this block. */
+export function loadGoal(saved: unknown, block: BlockId): string[] {
+  if (!Array.isArray(saved)) return [];
+  const rules = rulesFor(block);
+  return [...new Set(saved.filter((n): n is string => typeof n === 'string' && rules.byName.has(n)))];
+}
+
 export function startingCredits(playerCount: number): number {
   if (playerCount === 4 || playerCount === 6 || playerCount === 12) return 5;
   if (playerCount === 3 || playerCount === 5) return 10;
@@ -107,9 +127,10 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     credits: { blue: c, green: c, orange: c, red: c, yellow: c },
     funding: emptyFunding(),
     considering: [],
+    goal: [],
     view: {
       filter: 'unowned',
-      goal: 'advances',
+      strategy: 'advances',
       sort: 'alpha',
       ast: 'off',
       calamities: { minor: false, major: true, unowned: false },
@@ -124,6 +145,8 @@ export type Action =
   | { type: 'toggleConsider'; name: string }
   | { type: 'clearConsider' }
   | { type: 'buy' }
+  | { type: 'toggleGoal'; name: string }
+  | { type: 'clearGoal' }
   | { type: 'skipFreePick' }
   | { type: 'setView'; view: Partial<ViewSettings> }
   | { type: 'setCommodity'; id: string; count: number }
@@ -214,10 +237,22 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, considering: [] };
     case 'buy':
       return buy(state);
+    case 'toggleGoal': {
+      const { name } = action;
+      if (state.goal.includes(name)) return { ...state, goal: state.goal.filter((n) => n !== name) };
+      if (!rulesFor(state.block).byName.has(name)) return state;
+      return { ...state, goal: [...state.goal, name] };
+    }
+    case 'clearGoal':
+      return { ...state, goal: [] };
     case 'skipFreePick':
       return { ...state, freePick: null, considering: [] };
-    case 'setView':
-      return { ...state, view: { ...state.view, ...action.view } };
+    case 'setView': {
+      const view = { ...state.view, ...action.view };
+      // The AST theme only exists while the AST guide is on.
+      if (view.ast === 'off' && view.strategy === 'ast') view.strategy = 'advances';
+      return { ...state, view };
+    }
     case 'setCommodity': {
       const count = Math.max(0, Math.floor(action.count));
       const hand = { ...state.funding.hand };

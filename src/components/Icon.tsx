@@ -13,6 +13,7 @@ const paths = {
   trade: 'M4 8h13l-3-3M20 16H7l3 3',
   calamities: 'M12 3l9.5 17h-19zM12 10v4M12 17.5v.01',
   specials: 'M12 3l2.2 5.4L20 9l-4.4 3.8L17 19l-5-3.1L7 19l1.4-6.2L4 9l5.8-.6z',
+  flag: 'M5 21V4M5 4h12l-2.5 4.5L17 13H5',
   wallet: 'M4 7h14a2 2 0 012 2v9a2 2 0 01-2 2H4zM4 7V5.5A1.5 1.5 0 015.5 4H16M15 13.5h2',
   chevronDown: 'M5 9l7 7 7-7',
   up: 'M12 19V6M6 11l6-6 6 6',

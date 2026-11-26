@@ -247,7 +247,7 @@ Each colour also has a pale wash (blue-tint through yellow-tint, darkened to dee
 
 A single phone column, max 760px wide and centred on larger screens, with a 14px gutter. The header is sticky on the table mat: a 44px row with the menu, the block name ("THE WEST") in condensed uppercase with the player count beside it, and the VP ink tile at the right; below it five equal credit tiles across the full width, then the age track. The block name replaces the app name in the header because "Megatracker" truncated at phone width; the app name lives in the document title and setup screen.
 
-Under the header, filter chips wrap onto as many rows as they need so the active filter is always visible, followed by the styled Sort and Goal selects and the funds strip. Then the stack: card rows 4px apart, with 12px extra above the start of each strategic chain. The bottom is fixed: a 62px five-tab bar, and when cards are picked the hand tray sits above it with horizontally scrolling hand chips, the total, Clear and Buy. Sheets rise from the bottom on phones (max 600px wide) and centre as dialogs from 700px.
+Under the header, filter chips wrap onto as many rows as they need so the active filter is always visible, followed by the styled Sort select and the funds strip. Then the stack: card rows 4px apart, with 12px extra above the start of each strategic chain. The bottom is fixed: a 62px six-tab bar, and when cards are picked (on the Advances or Goal tab) the hand tray sits above it with horizontally scrolling hand chips, the total, Clear and Buy. Sheets rise from the bottom on phones (max 600px wide) and centre as dialogs from 700px.
 
 Touch targets are 44px minimum throughout; the row colour field is 62px wide to hold the 44px coin with margins and keep the tap target generous.
 
@@ -286,6 +286,8 @@ The edge of the card. A 62px flat colour field on the left (two equal halves for
 - **Pick:** Tapping the colour field toggles the card into the hand; the coin turns ink with a white ring and the row lifts.
 - **Owned:** The field mixes 30% colour into the sunk card colour; the coin shows a green check; the name goes muted and the price reads "Owned" in green.
 - **Calamity marks:** Up arrow plus green for help, down arrow plus red for harm; unowned effects at 55% opacity.
+- **On the goal:** A small filled ink flag before the name of an unowned Advance on the player's goal. It is not shown in the goal list itself.
+- **Row action:** An optional 48px button after the body, with a hairline divider (add to or remove from the goal on the Goal tab).
 
 ### Credit Tiles and Chooser
 Five equal tiles in the printed colours, numeral over an uppercase colour name, resting shadow, on-colour text. The credit chooser in sheets reuses the same tiles.
@@ -303,7 +305,7 @@ The card's colour field in equal flat halves across the full header. The name an
 - **Focus:** 2px focus-blue outline, 2px offset, everywhere.
 
 ### Navigation
-Bottom tab bar on card with a top hairline, five equal 62px tabs of icon over 14px condensed uppercase label. Inactive in muted ink; active in ink with a 3px ink bar near the bottom. Badges are small ink pills.
+Bottom tab bar on card with a top hairline, six equal 62px tabs of icon over 14px condensed uppercase label (13px under 400px wide, 12px under 340px, so "Calamities" fits). Inactive in muted ink; active in ink with a 3px ink bar near the bottom. Badges are small ink pills.
 
 ### Icons
 Inline 24-unit stroke SVGs, 2px round stroke, 22px default, currentColor.

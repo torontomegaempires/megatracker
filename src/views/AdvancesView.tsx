@@ -1,8 +1,9 @@
-import type { Advance, GoalId } from '../data';
+import type { ReactNode } from 'react';
+import type { Advance } from '../data';
 import { COLORS } from '../data';
-import type { FilterId, GameState, GoalOption, SortId } from '../engine/game';
+import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
-import { chainDiscount, cost, costSummary, funds, visibleAdvances } from '../engine/selectors';
+import { chainDiscount, cost, costSummary, funds, onGoal, visibleAdvances } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { advanceColors } from '../components/ui';
 import { useGame } from '../state/store';
@@ -11,7 +12,7 @@ const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'unowned', label: 'Unowned' },
   { id: 'affordable', label: 'Affordable' },
   { id: 'almostAffordable', label: 'Nearly affordable' },
-  { id: 'goal', label: 'By goal' },
+  { id: 'goal', label: 'Goal' },
   { id: 'owned', label: 'Owned' },
   { id: 'all', label: 'All' },
 ];
@@ -24,19 +25,6 @@ export const SORTS: { id: SortId; label: string }[] = [
   { id: 'discount', label: 'Biggest discount' },
   { id: 'color', label: 'Color group' },
   { id: 'chains', label: 'Strategic chains' },
-];
-
-const GOALS: { id: GoalId; label: string }[] = [
-  { id: 'advances', label: 'Cheaper Advances' },
-  { id: 'treasury', label: 'More treasury' },
-  { id: 'trade', label: 'Trade cards' },
-  { id: 'bend', label: 'Bend the rules' },
-  { id: 'tokens', label: 'More tokens on the map' },
-  { id: 'mobility', label: 'Token mobility' },
-  { id: 'cities', label: 'Build or hold cities' },
-  { id: 'sea', label: 'Sea power' },
-  { id: 'aggression', label: 'Aggression' },
-  { id: 'defense', label: 'Defense' },
 ];
 
 const FREE_PICK_TEXT = {
@@ -72,22 +60,6 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
             ))}
           </div>
           <div className="toolbar-row">
-            {game.view.filter === 'goal' && (
-              <label className="select">
-                Goal
-                <span className="select-wrap">
-                <select value={game.view.goal} onChange={(e) => setView({ goal: e.target.value as GoalOption })}>
-                  {game.view.ast !== 'off' && <option value="ast">Reach the next AST age</option>}
-                  {GOALS.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.label}
-                    </option>
-                  ))}
-                </select>
-                <Icon name="chevronDown" />
-                </span>
-              </label>
-            )}
             <label className="select">
               Sort
               <span className="select-wrap">
@@ -119,7 +91,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
       )}
 
       {listing.advances.length === 0 ? (
-        <p className="empty">{emptyMessage(listing.filter, available)}</p>
+        <p className="empty">{emptyMessage(listing.filter, available, game.goal.length > 0)}</p>
       ) : (
         <ul className="adv-list">
           {listing.advances.map((a) => (
@@ -131,16 +103,35 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
   );
 }
 
-function emptyMessage(filter: string, available: number) {
+function emptyMessage(filter: string, available: number, hasGoal: boolean) {
   if (filter === 'owned') return 'You have not bought any Advances yet.';
-  if ((filter === 'affordable' || filter === 'almostAffordable' || filter === 'goal') && available > 0)
+  if (filter === 'goal')
+    return hasGoal ? 'You own every Advance on your goal.' : 'Your goal is empty. Add Advances on the Goal tab, or from an Advance’s details.';
+  if ((filter === 'affordable' || filter === 'almostAffordable') && available > 0)
     return 'Nothing fits your remaining funds.';
   return 'No Advances to show.';
 }
 
-function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState; advance: Advance; chainStart: boolean; onOpen: (n: string) => void }) {
+export function AdvanceRow({
+  game,
+  advance: a,
+  chainStart = false,
+  onOpen,
+  action,
+  goalMark = true,
+}: {
+  game: GameState;
+  advance: Advance;
+  chainStart?: boolean;
+  onOpen: (n: string) => void;
+  /** A button at the end of the row, such as adding or removing it from the goal. */
+  action?: ReactNode;
+  /** Flag the row when it is on the goal (not needed in the goal list itself). */
+  goalMark?: boolean;
+}) {
   const { dispatch } = useGame();
   const owned = game.owned.includes(a.name);
+  const goal = goalMark && !owned && onGoal(game, a.name);
   const barred = !owned && isBarred(game, a.name);
   const picked = game.considering.includes(a.name);
   const c = cost(game, a);
@@ -162,7 +153,14 @@ function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState;
       </button>
       <button type="button" className="adv-body" onClick={() => onOpen(a.name)}>
         <span className="adv-main">
-          <span className="adv-name">{a.name}</span>
+          <span className="adv-name">
+            {goal && (
+              <span className="adv-goal">
+                <Icon name="flag" label="On your goal:" />
+              </span>
+            )}
+            {a.name}
+          </span>
           {a.calamities.length > 0 && (
             <span className="adv-tags">
               {a.calamities.map((i) => (
@@ -191,6 +189,7 @@ function AdvanceRow({ game, advance: a, chainStart, onOpen }: { game: GameState;
           )}
         </span>
       </button>
+      {action}
     </li>
   );
 }
