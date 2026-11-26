@@ -14,9 +14,6 @@ calculations — with a new interface. Group-specific enhancements will be added
   Advances on your goal are flagged.
   Add Advances to a purchase, see the total (including Library's discount) against the funds
   you entered, then buy once per turn.
-- **Goal** — the Advances you plan to buy over the game: how many are left, what they cost
-  today and the VP you'll have when done. Ideas by theme (cheaper Advances, treasury, trade
-  cards, the next AST age and more) help you add to it.
 - **Credits and VP** — face credits are added automatically; extra-credit choices
   (Monument, Written Record, The Four Arts, Literature, Paper Money, Movable Type Printing)
   and free picks (Anatomy, Primal Philosophy) are walked through step by step.
@@ -24,6 +21,9 @@ calculations — with a new interface. Group-specific enhancements will be added
 - **Cities** — how many cities you can build and support from your tokens.
 - **Trade** — which trade card stacks you can buy from and for how many tokens; your hand of commodity cards, treasury and held sets.
 - **Calamities** — every calamity with the Advances that help or hurt you.
+- **Goal** — the Advances you plan to buy over the game: how many are left, what they cost
+  today and the VP you'll have when done. Ideas by theme (cheaper Advances, treasury, trade
+  cards, the next AST age and more) help you add to it.
 - **Specials** — your owned special abilities, with one-tap use where the app can help.
 - **AST guide** — optional Basic/Expert Archaeological Succession Table progress.
 

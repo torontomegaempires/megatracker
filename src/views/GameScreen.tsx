@@ -12,13 +12,13 @@ import { GoalView } from './GoalView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
 import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
 
-type Tab = 'advances' | 'goal' | 'cities' | 'trade' | 'calamities' | 'specials';
+type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'goal' | 'specials';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'advances', label: 'Advances', icon: 'advances' },
-  { id: 'goal', label: 'Goal', icon: 'flag' },
   { id: 'cities', label: 'Cities', icon: 'cities' },
   { id: 'trade', label: 'Trade', icon: 'trade' },
   { id: 'calamities', label: 'Calamities', icon: 'calamities' },
+  { id: 'goal', label: 'Goal', icon: 'flag' },
   { id: 'specials', label: 'Specials', icon: 'specials' },
 ];
 
