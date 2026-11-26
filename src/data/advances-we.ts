@@ -13,10 +13,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "red": 20
-    },
-    "goals": {
-      "aggression": true,
-      "mobility": true
     }
   },
   {
@@ -29,11 +25,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "green": 5,
       "orange": 10
     },
-    "goals": {
-      "defense": true,
-      "mobility": true,
-      "tokens": true
-    },
     "nextname": "Democracy"
   },
   {
@@ -44,9 +35,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 20,
       "orange": 5
-    },
-    "goals": {
-      "advances": true
     },
     "bonus": "After purchasing Anatomy, take a science (green) card with base price less than 100, free."
   },
@@ -60,9 +48,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "blue": 10,
       "green": 5
     },
-    "goals": {
-      "cities": true
-    },
     "nextname": "Mining"
   },
   {
@@ -75,10 +60,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "green": 10,
       "yellow": 5
     },
-    "goals": {
-      "mobility": true,
-      "sea": true
-    },
     "nextname": "Calendar"
   },
   {
@@ -89,9 +70,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "green": 10,
       "red": 5
     },
-    "goals": {
-      "sea": true
-    },
     "nextname": "Public Works"
   },
   {
@@ -101,9 +79,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "green": 10
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Library",
     "trade": [
@@ -127,10 +102,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "blue": 5,
       "orange": 10
     },
-    "goals": {
-      "mobility": true,
-      "sea": true
-    },
     "nextname": "Naval Warfare"
   },
   {
@@ -141,11 +112,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 10,
       "red": 5
-    },
-    "goals": {
-      "bend": true,
-      "tokens": true,
-      "treasury": true
     },
     "nextname": "Trade Routes"
   },
@@ -158,10 +124,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 20,
       "yellow": 5
-    },
-    "goals": {
-      "aggression": true,
-      "defense": true
     }
   },
   {
@@ -172,7 +134,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "orange": 5,
       "yellow": 10
     },
-    "goals": {},
     "nextname": "Fundamentalism"
   },
   {
@@ -183,11 +144,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "red": 20
-    },
-    "goals": {
-      "bend": true,
-      "cities": true,
-      "tokens": true
     }
   },
   {
@@ -197,13 +153,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "yellow": 20
-    },
-    "goals": {
-      "aggression": true,
-      "cities": true,
-      "defense": true,
-      "mobility": true,
-      "tokens": true
     },
     "special": "You may choose to take up to 5 of your tokens from the board and place them anywhere on the board, providing that no population limits are exceeded."
   },
@@ -216,10 +165,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 10,
       "red": 5
-    },
-    "goals": {
-      "aggression": true,
-      "defense": true
     },
     "nextname": "Provincial Empire"
   },
@@ -244,9 +189,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "red": 5,
       "yellow": 5
     },
-    "goals": {
-      "advances": true
-    },
     "nextname": "Medicine"
   },
   {
@@ -258,12 +200,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 10,
       "orange": 10
-    },
-    "goals": {
-      "aggression": true,
-      "cities": true,
-      "defense": true,
-      "sea": true
     },
     "nextname": "Roadbuilding"
   },
@@ -284,11 +220,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "yellow": 10
-    },
-    "goals": {
-      "aggression": true,
-      "cities": true,
-      "defense": true
     },
     "nextname": "Monotheism",
     "special": "You may choose to destroy all units in an area adjacent by land to your units. Barbarians, pirates and units belonging to players holding Fundamentalism or Philosophy are unaffected."
@@ -312,9 +243,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "blue": 5,
       "green": 20
     },
-    "goals": {
-      "advances": true
-    },
     "bonus": "Get a 40 point discount to one other Advance purchased in the same turn as Library."
   },
   {
@@ -329,9 +257,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "red": 10,
       "yellow": 5
     },
-    "goals": {
-      "advances": true
-    },
     "nextname": "Mathematics"
   },
   {
@@ -341,9 +266,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "orange": 10
-    },
-    "goals": {
-      "sea": true
     },
     "nextname": "Engineering"
   },
@@ -357,9 +279,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "orange": 10,
       "red": 10,
       "yellow": 10
-    },
-    "goals": {
-      "advances": true
     }
   },
   {
@@ -382,10 +301,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "orange": 10,
       "red": 5
     },
-    "goals": {
-      "aggression": true,
-      "defense": true
-    },
     "nextname": "Military"
   },
   {
@@ -398,11 +313,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "orange": 5,
       "red": 10
     },
-    "goals": {
-      "aggression": true,
-      "defense": true,
-      "mobility": true
-    },
     "nextname": "Advanced Military"
   },
   {
@@ -413,11 +323,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "orange": 20
-    },
-    "goals": {
-      "advances": true,
-      "trade": true,
-      "treasury": true
     },
     "trade": [
       {
@@ -439,9 +344,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "red": 10,
       "yellow": 5
     },
-    "goals": {
-      "treasury": true
-    },
     "nextname": "Law"
   },
   {
@@ -451,12 +353,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "red": 5,
       "yellow": 20
-    },
-    "goals": {
-      "aggression": true,
-      "cities": true,
-      "defense": true,
-      "tokens": true
     },
     "special": "You may choose to annex all units in an area adjacent by land to your units. Barbarians, pirates, and players holding Monotheism or Theology are unaffected."
   },
@@ -468,9 +364,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "orange": 10,
       "yellow": 10
-    },
-    "goals": {
-      "advances": true
     },
     "nextname": "Wonder of the World",
     "bonus": "Monument will give 20 extra points of credit tokens in any combination.",
@@ -516,12 +409,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "orange": 5,
       "red": 10
     },
-    "goals": {
-      "aggression": true,
-      "defense": true,
-      "mobility": true,
-      "sea": true
-    },
     "nextname": "Diaspora"
   },
   {
@@ -532,9 +419,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 20,
       "yellow": 20
-    },
-    "goals": {
-      "defense": true
     }
   },
   {
@@ -544,13 +428,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 20,
       "yellow": 5
-    },
-    "goals": {
-      "aggression": true,
-      "cities": true,
-      "defense": true,
-      "tokens": true,
-      "treasury": true
     },
     "special": "You may choose one of two options: (1) Gain up to 5 treasury tokens from stock. (2) Annex all units in one area adjacent by land to your units. Pay treasury tokens equal to the to the number of unit points annexed. Barbarians, pirates, and players holding Politics or Cultural Ascendancy are unaffected."
   },
@@ -572,10 +449,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "red": 20,
       "yellow": 5
     },
-    "goals": {
-      "defense": true,
-      "trade": true
-    },
     "special": "You may select up to five players that have units adjacent by land or water to yours. These players must choose and give you a commodity card with a face value of at least 2. Players holding Provincial Empire or Public Works may not be selected."
   },
   {
@@ -587,11 +460,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "orange": 5,
       "red": 20
-    },
-    "goals": {
-      "defense": true,
-      "mobility": true,
-      "tokens": true
     }
   },
   {
@@ -601,9 +469,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "blue": 10,
       "red": 5
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Politics",
     "trade": [
@@ -622,12 +487,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "orange": 20
-    },
-    "goals": {
-      "aggression": true,
-      "defense": true,
-      "mobility": true,
-      "trade": true
     }
   },
   {
@@ -659,9 +518,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "yellow": 20
-    },
-    "goals": {
-      "defense": true
     }
   },
   {
@@ -673,9 +529,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "orange": 20,
       "red": 5
-    },
-    "goals": {
-      "trade": true
     }
   },
   {
@@ -685,9 +538,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "orange": 10,
       "yellow": 5
-    },
-    "goals": {
-      "treasury": true
     },
     "nextname": "Trade Empire",
     "special": "You may discard any number of commodity cards to gain treasury tokens at twice their face value."
@@ -699,11 +549,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "red": 5,
       "yellow": 10
-    },
-    "goals": {
-      "bend": true,
-      "cities": true,
-      "tokens": true
     },
     "nextname": "Theology",
     "special": "You may annex 1 pirate city or up to 5 barbarian tokens anywhere on the board."
@@ -717,10 +562,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "green": 5,
       "red": 10
     },
-    "goals": {
-      "cities": true,
-      "mobility": true
-    },
     "nextname": "Diplomacy"
   },
   {
@@ -732,10 +573,6 @@ export const advancesWestEast: AdvanceDef[] = [
       "blue": 20,
       "orange": 20
     },
-    "goals": {
-      "bend": true,
-      "trade": true
-    },
     "trade": "You may take a trade card for free from a stack whose number is <b>greater than</b> the number of your cities on the map."
   },
   {
@@ -746,9 +583,6 @@ export const advancesWestEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "red": 5
-    },
-    "goals": {
-      "advances": true
     },
     "nextname": "Cartography",
     "bonus": "Written Record will give 10 extra points of credit tokens in any combination.",

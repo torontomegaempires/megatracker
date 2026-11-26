@@ -3,7 +3,7 @@ import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -168,27 +168,10 @@ describe('goal', () => {
     expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Democracy']);
   });
 
-  it('suggests unowned Advances for a theme that are not on the goal yet', () => {
-    const g = toggle(newGame('west', 0), 'Mining');
-    const names = goalSuggestions(reducer(g, { type: 'setView', view: { strategy: 'treasury' } })).map((a) => a.name);
-    expect(names.length).toBeGreaterThan(0);
-    expect(names).not.toContain('Mining');
-    for (const n of names) expect(adv(g, n).goals?.treasury).toBe(true);
-  });
-
-  it('suggests Advances for the next AST age, and drops that theme when the guide is turned off', () => {
-    let g = reducer(newGame('west', 0), { type: 'setView', view: { ast: 'basic', strategy: 'ast' } });
-    g = { ...g, owned: ['Pottery', 'Masonry', 'Mysticism'] }; // next: Late Bronze Age, Advances priced 100+
-    expect(goalSuggestions(g).every((a) => a.price >= 100)).toBe(true);
-    g = reducer(g, { type: 'setView', view: { ast: 'off' } });
-    expect(g.view.strategy).toBe('advances');
-  });
-
-  it('loads games saved before the goal list', () => {
+  it('loads saved games, dropping the Goal tab’s old idea themes', () => {
     const fresh = newGame('west', 0).view;
-    expect(loadView({ filter: 'goal', goal: 'trade', ast: 'off' }, fresh)).toMatchObject({ filter: 'goal', strategy: 'trade' });
-    expect(loadView({ goal: 'ast', ast: 'off' }, fresh).strategy).toBe('advances');
-    expect(loadView({ goal: 'ast', ast: 'basic' }, fresh).strategy).toBe('ast');
+    expect(loadView({ filter: 'goal', goal: 'trade', ast: 'basic' }, fresh)).toEqual({ ...fresh, filter: 'goal', ast: 'basic' });
+    expect(loadView({ strategy: 'treasury', sort: 'cost' }, fresh)).toEqual({ ...fresh, sort: 'cost' });
     expect(loadView(undefined, fresh)).toEqual(fresh);
     expect(loadGoal(undefined, 'west')).toEqual([]);
     expect(loadGoal(['Pottery', 'Pottery', 'Nope', 3], 'west')).toEqual(['Pottery']);
