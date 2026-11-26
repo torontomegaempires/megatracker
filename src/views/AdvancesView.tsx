@@ -3,7 +3,7 @@ import type { Advance } from '../data';
 import { COLOR_NAMES, COLORS } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
-import { chainDiscount, cost, costSummary, funds, onGoal, visibleAdvances } from '../engine/selectors';
+import { chainDiscount, cost, costSummary, funds, onGoal, payment, visibleAdvances } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { advanceColors } from '../components/ui';
 import { useGame } from '../state/store';
@@ -208,6 +208,11 @@ export function Cart() {
   if (summary.lines.length === 0 && !building) return null;
   const available = funds(game);
   const remaining = available - summary.total;
+  const paid = payment(game);
+  const paidWith = [
+    ...paid.sets.map((s) => `${s.commodity.name} ${s.value}`),
+    ...(paid.treasury > 0 ? [`Treasury ${paid.treasury}${paid.treasuryValue !== paid.treasury ? ` (worth ${paid.treasuryValue})` : ''}`] : []),
+  ];
   const notes: string[] = [];
   for (const l of summary.lines) {
     if (l.advance.bonus) notes.push(l.advance.bonus);
@@ -267,6 +272,7 @@ export function Cart() {
           {game.freePick ? 'Take' : `Buy ${summary.lines.length + (building ? 1 : 0)}`}
         </button>
       </div>
+      {summary.total > 0 && remaining >= 0 && paidWith.length > 0 && <p className="cart-pay">Pay with {paidWith.join(', ')}</p>}
       {(notes.length > 0 || !game.freePick) && (
         <p className="cart-warn">
           {notes.join(' ')}
