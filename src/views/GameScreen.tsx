@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { BLOCKS, COLOR_NAMES, COLORS } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
@@ -9,7 +9,7 @@ import { useGame } from '../state/store';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
-import { AdvanceSheet, CalamitySheet, CreditChoiceSheet, FundsSheet } from './Sheets';
+import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
 
 type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'specials';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
@@ -20,12 +20,14 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'specials', label: 'Specials', icon: 'specials' },
 ];
 
-type Overlay = null | { kind: 'menu' } | { kind: 'about' } | { kind: 'funds' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
+type Overlay = null | { kind: 'menu' } | { kind: 'about' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
 
 export function GameScreen() {
   const { game } = useGame();
   const [tab, setTab] = useState<Tab>('advances');
   const [overlay, setOverlay] = useState<Overlay>(null);
+  const [focusHand, setFocusHand] = useState(false);
+  const clearFocusHand = useCallback(() => setFocusHand(false), []);
   const close = () => setOverlay(null);
   const showCart = tab === 'advances' && costSummary(game).lines.length > 0;
   const specials = specialAbilities(game).length;
@@ -58,9 +60,17 @@ export function GameScreen() {
       </header>
 
       <main className={`main${showCart ? ' has-cart' : ''}`}>
-        {tab === 'advances' && <AdvancesView onOpen={(name) => setOverlay({ kind: 'advance', name })} onFunds={() => setOverlay({ kind: 'funds' })} />}
+        {tab === 'advances' && (
+          <AdvancesView
+            onOpen={(name) => setOverlay({ kind: 'advance', name })}
+            onFunds={() => {
+              setTab('trade');
+              setFocusHand(true);
+            }}
+          />
+        )}
         {tab === 'cities' && <CitiesView />}
-        {tab === 'trade' && <TradeView />}
+        {tab === 'trade' && <TradeView focusHand={focusHand} onFocused={clearFocusHand} />}
         {tab === 'calamities' && <CalamitiesView onOpen={(name) => setOverlay({ kind: 'calamity', name })} />}
         {tab === 'specials' && <SpecialsView onActivated={(toAdvances) => toAdvances && setTab('advances')} />}
       </main>
@@ -84,7 +94,6 @@ export function GameScreen() {
       {overlay?.kind === 'calamity' && (
         <CalamitySheet name={overlay.name} onClose={close} onOpenAdvance={(name) => setOverlay({ kind: 'advance', name })} />
       )}
-      {overlay?.kind === 'funds' && <FundsSheet onClose={close} />}
       {overlay?.kind === 'menu' && <MenuSheet onClose={close} onAbout={() => setOverlay({ kind: 'about' })} />}
       {overlay?.kind === 'about' && <AboutSheet onClose={close} />}
       <CreditChoiceSheet />

@@ -1,5 +1,7 @@
-import { rulesFor } from '../data';
-import { calamityDescription, cityModifiers, ownedTradePowers, potentialCities, specialAbilities, tradeCardCost, visibleCalamities } from '../engine/selectors';
+import { useEffect, useRef, useState } from 'react';
+import type { Commodity } from '../data';
+import { commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import { calamityDescription, cityModifiers, fundsBreakdown, ownedTradePowers, potentialCities, specialAbilities, tradeCardCost, visibleCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { RulesText, Segmented, Stepper } from '../components/ui';
 import { TOKEN_POOL } from '../engine/game';
@@ -12,7 +14,7 @@ function BoardInputs({ tokens = true }: { tokens?: boolean }) {
       <div className="field">
         <label>
           Cities on the map
-          <span className="hint">Shared with the Trade tab</span>
+          <span className="hint">Shared with the {tokens ? 'Trade' : 'Cities'} tab</span>
         </label>
         <Stepper label="cities" value={game.board.cities} min={0} max={9} onChange={(cities) => dispatch({ type: 'setBoard', board: { cities } })} />
       </div>
@@ -94,19 +96,45 @@ export function CitiesView() {
 
 // ------------------------------------------------------------------ trade
 
-export function TradeView() {
-  const { game } = useGame();
-  const powers = ownedTradePowers(game);
-  const cities = game.board.cities;
+export function TradeView({ focusHand, onFocused }: { focusHand?: boolean; onFocused?: () => void }) {
+  const handRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!focusHand || !handRef.current) return;
+    // The header is sticky, so scroll the hand to just below it.
+    const header = document.querySelector<HTMLElement>('.topbar')?.offsetHeight ?? 0;
+    window.scrollTo({ top: handRef.current.getBoundingClientRect().top + window.scrollY - header - 8 });
+    onFocused?.();
+  }, [focusHand, onFocused]);
+
   return (
     <>
       <div className="page-head">
-        <h2>Trade cards</h2>
+        <h2>Trade</h2>
       </div>
+      <TradeStacks />
+      <h3 className="group-head" id="hand" ref={handRef}>
+        Your hand
+      </h3>
+      <FundsSummary />
+      <TreasuryInput />
+      <HandList />
+      <CommodityPicker />
+    </>
+  );
+}
+
+function TradeStacks() {
+  const { game } = useGame();
+  const powers = ownedTradePowers(game);
+  const cities = game.board.cities;
+  const literature = rulesFor(game.block).rules === 'fe' && game.owned.includes('Literature');
+  return (
+    <>
+      <h3 className="group-head">Extra trade cards</h3>
       <BoardInputs tokens={false} />
-      <p className="muted" style={{ margin: '14px 2px 10px', fontSize: 14 }}>
+      <p className="muted" style={{ margin: '12px 2px 8px', fontSize: 14 }}>
         {cities > 0 ? `Besides drawing 1 card from ${cities === 1 ? 'stack 1' : `stacks 1–${cities}`}, after` : 'After'} all players have drawn
-        trade cards, you may buy more from:
+        trade cards, you may buy more from these stacks, paying from your treasury ({game.funding.treasury}).
       </p>
       <ul className="rows">
         {powers.map((t, i) => (
@@ -135,10 +163,173 @@ export function TradeView() {
           </li>
         ))}
       </ul>
-      {rulesFor(game.block).rules === 'fe' && game.owned.includes('Literature') && (
-        <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>Prices include the Literature discount.</p>
-      )}
+      {literature && <p className="muted" style={{ marginTop: 10, fontSize: 13 }}>Prices include the Literature discount.</p>}
     </>
+  );
+}
+
+function FundsSummary() {
+  const { game } = useGame();
+  const f = fundsBreakdown(game);
+  const doubler = rulesFor(game.block).treasuryDoubler;
+  const parts = [`cards ${f.cards}`, f.treasuryMultiplier === 2 ? `treasury ${f.treasuryValue} (doubled by ${doubler})` : `treasury ${f.treasuryValue}`];
+  return (
+    <div className="funds-total" aria-live="polite">
+      <div className="funds-total-row">
+        <span>Funds to spend</span>
+        <strong>{f.total}</strong>
+      </div>
+      <div className="funds-total-sub">
+        {parts.join(' + ')}
+        {f.heldCards > 0 && (
+          <>
+            <br />
+            Holding {f.heldCards} {f.heldCards === 1 ? 'card' : 'cards'} worth {f.held} for next turn
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TreasuryInput() {
+  const { game, dispatch } = useGame();
+  const doubler = rulesFor(game.block).treasuryDoubler;
+  const doubled = game.owned.includes(doubler);
+  return (
+    <div className="panel">
+      <div className="field">
+        <label>
+          Treasury
+          <span className="hint">{doubled ? `Counts double for Advances (${doubler})` : 'Tokens in your treasury'}</span>
+        </label>
+        <Stepper
+          editable
+          label="treasury tokens"
+          value={game.funding.treasury}
+          min={0}
+          max={TOKEN_POOL}
+          onChange={(treasury) => dispatch({ type: 'setTreasury', treasury })}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Commodity cards can be kept after buying Advances up to this many. */
+const HAND_LIMIT = 8;
+
+function HandList() {
+  const { game, dispatch } = useGame();
+  const { hand, held } = game.funding;
+  const items = Object.entries(hand)
+    .map(([id, n]) => ({ c: commodityById(id), n }))
+    .filter((x): x is { c: Commodity; n: number } => !!x.c)
+    .sort((a, b) => a.c.value - b.c.value || a.c.name.localeCompare(b.c.name));
+  const f = fundsBreakdown(game);
+
+  if (items.length === 0) {
+    return <p className="hand-empty">No commodity cards yet. Pick the ones you hold below.</p>;
+  }
+  return (
+    <>
+      <ul className="rows hand-list" aria-label="Commodity cards in your hand">
+        {items.map(({ c, n }) => {
+          const isHeld = held.includes(c.id);
+          return (
+            <li key={c.id} className={`hand-row${isHeld ? ' is-held' : ''}`}>
+              <span className="stack-num" aria-label={`Face value ${c.value}`}>
+                {c.value}
+              </span>
+              <span className="row-main">
+                <span className="row-title">{c.name}</span>
+                <span className="hand-worth">
+                  {isHeld ? 'Held · ' : ''}worth <b className="num">{setValue(c.value, n)}</b>
+                </span>
+              </span>
+              <Stepper label={`${c.name} cards`} value={n} min={0} max={c.max} onChange={(count) => dispatch({ type: 'setCommodity', id: c.id, count })} />
+              <button type="button" className="chip hold-chip" aria-pressed={isHeld} onClick={() => dispatch({ type: 'toggleHeld', id: c.id })}>
+                {isHeld ? 'Held' : 'Hold'}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="hand-foot">
+        <span className="muted">
+          Hold a set to keep it for next turn; it won't count toward funds.
+          {f.heldCards > HAND_LIMIT && (
+            <strong className="bad"> You can keep only {HAND_LIMIT} commodity cards after buying.</strong>
+          )}
+        </span>
+        <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'clearHand' })}>
+          Clear
+        </button>
+      </div>
+    </>
+  );
+}
+
+function CommodityPicker() {
+  const { game, dispatch } = useGame();
+  const [open, setOpen] = useState<string | null>(null);
+  const list = commoditiesFor(game.block, game.playerCount);
+  const stacks = [...new Set(list.map((c) => c.value))];
+  const hand = game.funding.hand;
+  return (
+    <div className="panel picker">
+      <h4 className="picker-head">Add commodity cards</h4>
+      {stacks.map((value) => {
+        const here = list.filter((c) => c.value === value);
+        const picked = here.find((c) => c.id === open);
+        return (
+          <div key={value} className="picker-stack">
+            <div className="picker-row">
+              <span className="stack-num" aria-label={`Face value ${value}`}>
+                {value}
+              </span>
+              <div className="chips">
+                {here.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="chip"
+                    aria-expanded={open === c.id}
+                    aria-pressed={open === c.id}
+                    onClick={() => setOpen(open === c.id ? null : c.id)}
+                  >
+                    {c.name}
+                    {hand[c.id] ? <span className="chip-count num">×{hand[c.id]}</span> : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {picked && (
+              <div className="qty" role="group" aria-label={`How many ${picked.name} cards?`}>
+                <div className="qty-head">How many {picked.name}?</div>
+                <div className="qty-grid">
+                  {Array.from({ length: picked.max + (hand[picked.id] ? 1 : 0) }, (_, i) => (hand[picked.id] ? i : i + 1)).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className="qty-btn"
+                      aria-pressed={(hand[picked.id] ?? 0) === n}
+                      onClick={() => {
+                        dispatch({ type: 'setCommodity', id: picked.id, count: n });
+                        setOpen(null);
+                      }}
+                    >
+                      <span className="qty-n num">{n === 0 ? 'None' : n}</span>
+                      {n > 0 && <span className="qty-v num">{setValue(picked.value, n)}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

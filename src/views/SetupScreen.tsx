@@ -40,6 +40,7 @@ export function SetupScreen() {
       <h2>How many players?</h2>
       <Segmented
         label="Player count"
+        columns={5}
         value={players ?? -1}
         onChange={setPlayers}
         options={PLAYER_COUNTS.map((p) => ({ value: p.value as number, label: p.label }))}

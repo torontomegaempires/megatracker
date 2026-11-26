@@ -99,14 +99,22 @@ export function Segmented<T extends string | number>({
   value,
   onChange,
   label,
+  columns,
 }: {
   options: { value: T; label: ReactNode }[];
   value: T;
   onChange: (v: T) => void;
   label: string;
+  /** Lay the options out in rows of this many instead of one row. */
+  columns?: number;
 }) {
   return (
-    <div className="segmented" role="group" aria-label={label}>
+    <div
+      className={`segmented${columns ? ' segmented-grid' : ''}`}
+      role="group"
+      aria-label={label}
+      style={columns ? ({ '--segmented-columns': columns } as CSSProperties) : undefined}
+    >
       {options.map((o) => (
         <button key={String(o.value)} type="button" aria-pressed={o.value === value} onClick={() => onChange(o.value)}>
           {o.label}

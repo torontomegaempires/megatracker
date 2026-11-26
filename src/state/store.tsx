@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNo
 import type { BlockId } from '../data';
 import { BLOCKS } from '../data';
 import type { Action, GameState } from '../engine/game';
-import { newGame, reducer as gameReducer } from '../engine/game';
+import { loadFunding, newGame, reducer as gameReducer } from '../engine/game';
 
 const STORAGE_KEY = 'megatracker:game';
 
@@ -23,7 +23,13 @@ function load(): GameState | null {
     if (data?.schema !== 1 || !(data.block in BLOCKS)) return null;
     // Fill in any settings added since the game was saved.
     const fresh = newGame(data.block, data.playerCount);
-    return { ...fresh, ...data, view: { ...fresh.view, ...data.view }, board: { ...fresh.board, ...data.board } };
+    return {
+      ...fresh,
+      ...data,
+      view: { ...fresh.view, ...data.view },
+      board: { ...fresh.board, ...data.board },
+      funding: loadFunding(data.funding),
+    };
   } catch {
     return null;
   }
