@@ -8,18 +8,15 @@ import { TOKEN_POOL } from '../engine/game';
 import { useGame } from '../state/store';
 import { BuildingsView, confirmSacrifice } from './BuildingsView';
 
-function BoardInputs({ tokens = true }: { tokens?: boolean }) {
+function BoardInputs() {
   const { game, dispatch } = useGame();
   return (
     <div className="panel">
       <div className="field">
-        <label>
-          Cities on the map
-          <span className="hint">Shared with the {tokens ? 'Trade' : 'Cities'} tab</span>
-        </label>
+        <label>Cities on the map</label>
         <Stepper label="cities" value={game.board.cities} min={0} max={9} onChange={(cities) => dispatch({ type: 'setBoard', board: { cities } })} />
       </div>
-      {tokens && <TokenInput />}
+      <TokenInput />
     </div>
   );
 }
@@ -113,7 +110,6 @@ export function TradeView({ focusHand, onFocused }: { focusHand?: boolean; onFoc
       <div className="page-head">
         <h2>Trade</h2>
       </div>
-      <TradeStacks />
       <h3 className="group-head" id="hand" ref={handRef}>
         Your hand
       </h3>
@@ -126,18 +122,18 @@ export function TradeView({ focusHand, onFocused }: { focusHand?: boolean; onFoc
   );
 }
 
+/** Trade card stacks you may buy extra cards from, for the Specials tab. */
 function TradeStacks() {
   const { game } = useGame();
   const powers = ownedTradePowers(game);
-  const cities = game.board.cities;
   const literature = rulesFor(game.block).rules === 'fe' && game.owned.includes('Literature');
   return (
     <>
-      <h3 className="group-head">Extra trade cards</h3>
-      <BoardInputs tokens={false} />
-      <p className="muted" style={{ margin: '12px 2px 8px', fontSize: 14 }}>
-        {cities > 0 ? `Besides drawing 1 card from ${cities === 1 ? 'stack 1' : `stacks 1–${cities}`}, after` : 'After'} all players have drawn
-        trade cards, you may buy more from these stacks, paying from your treasury ({game.funding.treasury}).
+      <div className="page-head">
+        <h2>Extra trade cards</h2>
+      </div>
+      <p className="muted" style={{ margin: '0 2px 8px', fontSize: 14 }}>
+        After all players have drawn trade cards, you may buy more from these stacks, paying from your treasury ({game.funding.treasury}).
       </p>
       <ul className="rows">
         {powers.map((t, i) => (
@@ -480,7 +476,8 @@ export function SpecialsView({ onActivated }: { onActivated: (goToAdvances: bool
   const list = specialAbilities(game);
   return (
     <>
-      <div className="page-head">
+      <TradeStacks />
+      <div className="page-head page-head-later">
         <h2>Special abilities</h2>
         <span className="muted">after calamities</span>
       </div>

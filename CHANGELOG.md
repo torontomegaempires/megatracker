@@ -15,6 +15,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ### Changed
 - The VP at the top of the screen now says "Advances" beside it: it counts only your Advances.
+- Extra trade cards (the stacks you can buy from and their token prices) moved from the Trade tab to the top of the Specials tab, without the cities count; the Trade tab now starts with your hand.
 
 ## [0.2.0] - 2026-11-26
 

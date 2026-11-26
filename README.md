@@ -20,12 +20,13 @@ calculations — with a new interface. Group-specific enhancements will be added
 - **Funds** — the commodity cards in your hand (value × cards² per commodity) and treasury (doubled with Mining / Treasure Voyages), minus any sets held for next turn.
 - **Cities** — how many cities you can build and support from your tokens. With the Special
   Buildings expansion on (West/East), also your special building and the ones you control.
-- **Trade** — which trade card stacks you can buy from and for how many tokens; your hand of commodity cards, treasury and held sets.
+- **Trade** — your hand of commodity cards, treasury and held sets.
 - **Calamities** — every calamity with the Advances that help or hurt you.
 - **Goal** — the Advances you plan to buy over the game: how many are left, what they cost
   today and the VP you'll have when done. Ideas by theme (cheaper Advances, treasury, trade
   cards, the next AST age and more) help you add to it.
-- **Specials** — your owned special abilities, with one-tap use where the app can help.
+- **Specials** — which trade card stacks you can buy extra cards from and for how many tokens, and
+  your owned special abilities, with one-tap use where the app can help.
 - **Special buildings** — optional (West/East), on the Cities tab: build one with your Advances,
   track the ones you control and their VP, and sacrifice them for funds or against a calamity.
 - **AST guide** — optional Basic/Expert Archaeological Succession Table progress.
