@@ -1,5 +1,5 @@
-import type { Advance, Calamity, RuleData, TradePower } from '../data';
-import { commodityById, rulesFor, setValue } from '../data';
+import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
+import { commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, FilterId, FreePick, GameState, SortId } from './game';
 
 export function freePickMatches(a: Advance, pick: FreePick): boolean {
@@ -32,7 +32,7 @@ export function victoryPoints(state: GameState): number {
 }
 
 export interface FundsBreakdown {
-  /** Value of the commodity cards that will be turned in (not held). */
+  /** Value of the commodity cards that will be turned in (not held), including any substitution. */
   cards: number;
   /** Value of the commodity cards held for next turn. */
   held: number;
@@ -40,7 +40,50 @@ export interface FundsBreakdown {
   /** Treasury tokens count double with Mining (West/East) or Treasure Voyages (Far East). */
   treasuryMultiplier: 1 | 2;
   treasuryValue: number;
+  /** The card counted as part of another set, when Trade Empire or Silk Routes adds value. */
+  substitution: Substitution | null;
   total: number;
+}
+
+/** One commodity card counted as a missing card of another, incomplete, set. */
+export interface Substitution {
+  /** The advance that allows it. */
+  advance: string;
+  /** The commodity whose card stands in. */
+  substitute: Commodity;
+  /** The commodity whose incomplete set it joins. */
+  set: Commodity;
+  /** Funds gained over counting every set as it is. */
+  gain: number;
+}
+
+/**
+ * The substitution that adds the most to funds, or null without the advance or a gain.
+ * Only cards being turned in take part: a held set neither gains nor gives a card. A set is
+ * incomplete while you hold fewer cards than its commodity has in this game's deck.
+ */
+export function bestSubstitution(state: GameState): Substitution | null {
+  const { advance, higherOnly } = rulesFor(state.block).setSubstitute;
+  if (!owns(state, advance)) return null;
+  const { hand, held } = state.funding;
+  const deck = new Map(commoditiesFor(state.block, state.playerCount).map((c) => [c.id, c]));
+  const cards = Object.entries(hand)
+    .filter(([id, n]) => n > 0 && !held.includes(id))
+    .map(([id, n]) => ({ c: deck.get(id) ?? commodityById(id), n }))
+    .filter((x): x is { c: Commodity; n: number } => !!x.c);
+
+  let best: Substitution | null = null;
+  for (const set of cards) {
+    if (!deck.has(set.c.id) || set.n >= set.c.max) continue;
+    const added = setValue(set.c.value, set.n + 1) - setValue(set.c.value, set.n);
+    for (const sub of cards) {
+      if (sub.c.id === set.c.id) continue;
+      if (higherOnly ? sub.c.value <= set.c.value : sub.c.value < set.c.value) continue;
+      const gain = added - (setValue(sub.c.value, sub.n) - setValue(sub.c.value, sub.n - 1));
+      if (gain > (best?.gain ?? 0)) best = { advance, substitute: sub.c, set: set.c, gain };
+    }
+  }
+  return best;
 }
 
 export function fundsBreakdown(state: GameState): FundsBreakdown {
@@ -55,9 +98,11 @@ export function fundsBreakdown(state: GameState): FundsBreakdown {
       heldCards += n;
     } else cards += value;
   }
+  const substitution = bestSubstitution(state);
+  cards += substitution?.gain ?? 0;
   const treasuryMultiplier = owns(state, rulesFor(state.block).treasuryDoubler) ? 2 : 1;
   const treasuryValue = treasury * treasuryMultiplier;
-  return { cards, held, heldCards, treasuryMultiplier, treasuryValue, total: cards + treasuryValue };
+  return { cards, held, heldCards, treasuryMultiplier, treasuryValue, substitution, total: cards + treasuryValue };
 }
 
 /** Value available for Advances this turn: commodities not held, plus treasury. */

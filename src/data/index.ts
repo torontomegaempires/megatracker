@@ -52,6 +52,12 @@ export interface RuleData {
   tradePowers: TradePower[];
   /** Advance that doubles treasury value when buying advances. */
   treasuryDoubler: string;
+  /**
+   * Advance that lets one commodity card stand in for a missing card of an incomplete set
+   * when buying: Trade Empire in West/East (a card of at least the same face value) and
+   * Silk Routes in the Far East (a card of higher face value).
+   */
+  setSubstitute: { advance: string; higherOnly: boolean };
 }
 
 export function vpForPrice(price: number): 1 | 3 | 6 {
@@ -127,6 +133,7 @@ function build(rules: RuleSet, defs: AdvanceDef[], calDefs: CalamityDef[]): Rule
     calamities,
     tradePowers,
     treasuryDoubler: rules === 'we' ? 'Mining' : 'Treasure Voyages',
+    setSubstitute: rules === 'we' ? { advance: 'Trade Empire', higherOnly: false } : { advance: 'Silk Routes', higherOnly: true },
   };
 }
 
