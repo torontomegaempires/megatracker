@@ -2059,6 +2059,13 @@ dialog.sheet::backdrop {
   text-underline-offset: 3px;
 }
 
+.prose a.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
 .menu-list {
   display: grid;
   gap: 8px;

@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { BLOCKS, COLOR_NAMES, COLORS, rulesFor } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
-import { Icon, type IconName } from '../components/Icon';
+import { GitHubIcon, Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
 import { useGame } from '../state/store';
@@ -208,7 +208,7 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
 
 function AboutSheet({ onClose }: { onClose: () => void }) {
   return (
-    <Sheet title="About Megatracker" subtitle="Toronto Mega Empires group" onClose={onClose}>
+    <Sheet title="About Megatracker" onClose={onClose}>
       <div className="prose">
         <p>
           Megatracker is built on the{' '}
@@ -222,11 +222,22 @@ function AboutSheet({ onClose }: { onClose: () => void }) {
           . Its rules data and calculations are adapted here with a new interface.
         </p>
         <p>
-          The calculator is licensed to Colossus Games for commercial purposes and to users under the{' '}
+          The calculator is licensed to users under the{' '}
           <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer">
             Creative Commons Attribution-NonCommercial-ShareAlike 4.0
           </a>{' '}
           license. Megatracker is © 2026 Rob McArthur and is shared under the same license.
+        </p>
+        <p>The full source code is available on GitHub.</p>
+        <p>
+          <a
+            className="github-link"
+            href="https://github.com/torontomegaempires/megatracker"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <GitHubIcon /> torontomegaempires/megatracker
+          </a>
         </p>
         <p className="muted">Your game is saved on this device only.</p>
         <p className="muted">
