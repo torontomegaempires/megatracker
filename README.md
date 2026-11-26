@@ -65,8 +65,13 @@ group website's `game_player_nation` table.
 - `src/engine/standings.ts` — shared-game scoring, ranking and A.S.T. eras; `src/shared/` —
   the API's types and client; `server/` and `netlify/functions/` — the API.
 
-Deployed as a static site on Netlify (`netlify.toml`): every push to `main` builds and
-deploys https://megatracker.torontomegaempires.com.
+Deployed on Netlify (`netlify.toml`) from two branches:
+
+- `production` deploys https://megatracker.torontomegaempires.com. It only moves when a release
+  merges, so players see new features once they are released.
+- `main` deploys the staging site, https://main--megatracker.netlify.app, as soon as a pull
+  request merges. Use it to try changes before releasing them. It uses Netlify's Branch deploys
+  environment variables, so point its `DATABASE_URL` at a Neon branch other than production's.
 
 ## Versions and releases
 
@@ -80,7 +85,7 @@ Megatracker uses [semantic versioning](https://semver.org/); the version lives i
 
 `main` is protected: every change goes through a pull request. Before it can merge, the
 branch must be up to date with `main` and the **Test and build** check (tests, type check
-and production build) must pass. Netlify deploys `main` when a pull request merges.
+and production build) must pass. Merging deploys to the staging site, not to players.
 
 1. `git fetch origin`, then branch from `origin/main`. Make the change, and add a line under
    `[Unreleased]` in `CHANGELOG.md` if players will notice it.
@@ -104,8 +109,9 @@ npm run release:major   # breaks saved games etc.   0.1.0 -> 1.0.0
 
 Each cuts a `release/vX.Y.Z` branch from `origin/main`, runs the tests and type check,
 bumps `package.json`, dates the `[Unreleased]` section of the changelog, commits
-"Release vX.Y.Z", pushes, and opens a pull request. Merging it deploys the release, and the
-Tag release workflow tags `vX.Y.Z` on `main`.
+"Release vX.Y.Z", pushes, and opens a pull request. When it merges, the Tag release workflow
+tags `vX.Y.Z` on `main` and moves the `production` branch to it, which deploys the release to
+players. Nobody pushes to `production` by hand; it is protected so only that workflow can.
 
 ## Reporting problems
 

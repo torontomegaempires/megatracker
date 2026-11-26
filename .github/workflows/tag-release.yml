@@ -1,4 +1,7 @@
-# Tags vX.Y.Z on main when a merged change bumps the version in package.json.
+# When a merged change bumps the version in package.json (a release PR), tags vX.Y.Z on main
+# and moves the production branch to it. Netlify deploys the production branch to
+# megatracker.torontomegaempires.com, so the live site only changes when a release merges;
+# main itself deploys to the staging site.
 name: Tag release
 
 on:
@@ -19,8 +22,15 @@ jobs:
           tag="v$(node -p "require('./package.json').version")"
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
             echo "$tag already exists"
+            git fetch --depth=1 origin "refs/tags/$tag:refs/tags/$tag"
           else
             git tag "$tag"
             git push origin "$tag"
             echo "Tagged $tag"
           fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+      - name: Release it to production
+        # Not forced: production only ever moves forward, to a release that contains it.
+        run: |
+          git push origin "$TAG^{commit}:refs/heads/production"
+          echo "production is now at $TAG"
