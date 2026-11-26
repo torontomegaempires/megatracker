@@ -323,28 +323,23 @@ p {
 }
 
 .brand-nation {
-  /* A 1px outline in the ink color, shown only when the nation's color is hard to read on the
-     header ground in the current theme. */
-  --halo: calc(var(--nation-halo-light) * 1px);
-  color: var(--nation);
+  /* Your nation on a pill in its token color, the same size as the VP box. The text is white or
+     near-black, whichever contrasts more; the faint inner edge keeps pale pills distinct from
+     the light ground. */
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--r-card);
+  background: var(--nation);
+  color: var(--on-nation);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.14);
+  line-height: 36px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow:
-    var(--halo) var(--halo) 0 var(--ink),
-    calc(var(--halo) * -1) var(--halo) 0 var(--ink),
-    var(--halo) calc(var(--halo) * -1) 0 var(--ink),
-    calc(var(--halo) * -1) calc(var(--halo) * -1) 0 var(--ink);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .brand-nation {
-    --halo: calc(var(--nation-halo-dark) * 1px);
-  }
-}
-
-:root[data-theme='dark'] .brand-nation {
-  --halo: calc(var(--nation-halo-dark) * 1px);
+.brand:has(.brand-nation) {
+  align-items: center;
 }
 
 .topbar-spacer {

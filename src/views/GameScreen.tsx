@@ -25,13 +25,13 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'game', label: 'Game', icon: 'standings' },
 ];
 
-/** The header's grounds in light and dark: the nation's name needs 3:1 against them (large text). */
-const GROUNDS = { light: '#dcdfe2', dark: '#121315' };
+/** Text on a nation pill: white or near-black (as on yellow Advance cards), whichever contrasts more. */
+const ON_LIGHT = '#1d1a0c';
+const ON_DARK = '#ffffff';
 
 /**
- * The game's name, or your nation's name in its token color: the nation you joined a shared game
- * as, or else the civilization you picked for Special Buildings.
- * Colors too pale (or too dark) for the header get an outline in the ink color for that theme.
+ * The game's name, or your nation's name on a pill in its token color: the nation you joined a
+ * shared game as, or else the civilization you picked for Special Buildings.
  */
 function BrandName() {
   const { game } = useGame();
@@ -44,8 +44,7 @@ function BrandName() {
   const style = color
     ? ({
         '--nation': color,
-        '--nation-halo-light': contrastRatio(color, GROUNDS.light) < 3 ? 1 : 0,
-        '--nation-halo-dark': contrastRatio(color, GROUNDS.dark) < 3 ? 1 : 0,
+        '--on-nation': contrastRatio(color, ON_DARK) >= contrastRatio(color, ON_LIGHT) ? ON_DARK : ON_LIGHT,
       } as CSSProperties)
     : undefined;
   return (
