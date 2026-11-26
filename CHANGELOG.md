@@ -20,6 +20,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 ### Added
 - Turn on the Special Buildings expansion when you start a game, in any game, including The Far East's 12 nations and their buildings.
 - Nations show their token color next to their name in a shared game's standings and on the Cities tab.
+- Once you've joined a shared game, the header shows your nation's name in its color instead of the game's name.
 - An Advance's green + calamity tag is filled in when it would help against a calamity your owned Advances currently make worse.
 
 ### Fixed

@@ -322,6 +322,31 @@ p {
   letter-spacing: 0.02em;
 }
 
+.brand-nation {
+  /* A 1px outline in the ink color, shown only when the nation's color is hard to read on the
+     header ground in the current theme. */
+  --halo: calc(var(--nation-halo-light) * 1px);
+  color: var(--nation);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow:
+    var(--halo) var(--halo) 0 var(--ink),
+    calc(var(--halo) * -1) var(--halo) 0 var(--ink),
+    var(--halo) calc(var(--halo) * -1) 0 var(--ink),
+    calc(var(--halo) * -1) calc(var(--halo) * -1) 0 var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .brand-nation {
+    --halo: calc(var(--nation-halo-dark) * 1px);
+  }
+}
+
+:root[data-theme='dark'] .brand-nation {
+  --halo: calc(var(--nation-halo-dark) * 1px);
+}
+
 .topbar-spacer {
   flex: 1;
 }

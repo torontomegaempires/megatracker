@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCKS, buildingsIn, commoditiesFor, nationByName, RULES, rulesFor, SPECIAL_BUILDINGS } from '../data';
+import { BLOCKS, buildingsIn, commoditiesFor, contrastRatio, nationByName, RULES, rulesFor, SPECIAL_BUILDINGS } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, PLAYER_COUNTS, playerCountLabel, reducer, zeroCredits } from './game';
@@ -389,6 +389,8 @@ describe('special buildings', () => {
     expect(nationByName(' Dai  Viet ')?.id).toBe('daiviet');
     expect(nationByName('The Celt')?.id).toBe('celt');
     expect(nationByName('Atlantis')).toBeUndefined();
+    expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21);
+    expect(contrastRatio('#ffffff', '#ffffff')).toBe(1);
   });
 
   it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {

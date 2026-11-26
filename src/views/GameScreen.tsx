@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
-import { BLOCKS, COLOR_NAMES, COLORS } from '../data';
+import { useCallback, useState, type CSSProperties } from 'react';
+import { BLOCKS, COLOR_NAMES, COLORS, contrastRatio, nationByName } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
 import { GitHubIcon, Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
+import { useShared } from '../state/shared';
 import { useGame } from '../state/store';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
@@ -23,6 +24,33 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'specials', label: 'Specials', icon: 'specials' },
   { id: 'game', label: 'Game', icon: 'standings' },
 ];
+
+/** The header's grounds in light and dark: the nation's name needs 3:1 against them (large text). */
+const GROUNDS = { light: '#dcdfe2', dark: '#121315' };
+
+/**
+ * The game's name, or once you've joined a shared game, your nation's name in its token color.
+ * Colors too pale (or too dark) for the header get an outline in the ink color for that theme.
+ */
+function BrandName() {
+  const { game } = useGame();
+  const { seat, view } = useShared();
+  const nation = seat && view?.code === seat.code ? view.standings.find((r) => r.seatId === seat.seatId)?.nation : undefined;
+  if (!nation) return <span className="brand-name">{BLOCKS[game.block].name}</span>;
+  const color = nationByName(nation)?.color;
+  const style = color
+    ? ({
+        '--nation': color,
+        '--nation-halo-light': contrastRatio(color, GROUNDS.light) < 3 ? 1 : 0,
+        '--nation-halo-dark': contrastRatio(color, GROUNDS.dark) < 3 ? 1 : 0,
+      } as CSSProperties)
+    : undefined;
+  return (
+    <span className={`brand-name${color ? ' brand-nation' : ''}`} style={style} title={BLOCKS[game.block].name}>
+      {nation}
+    </span>
+  );
+}
 
 type Overlay = null | { kind: 'menu' } | { kind: 'about' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
 
@@ -45,7 +73,7 @@ export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | nul
             <Icon name="menu" />
           </button>
           <div className="brand">
-            <span className="brand-name">{BLOCKS[game.block].name}</span>
+            <BrandName />
           </div>
           <div className="topbar-spacer" />
           <span className="vp-label" aria-hidden>
