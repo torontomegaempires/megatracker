@@ -218,6 +218,35 @@ export function fundsBreakdown(state: GameState): FundsBreakdown {
   return { cards, held, heldCards, treasuryMultiplier, treasuryValue, substitution, buildingCards, total: cards + treasuryValue };
 }
 
+export interface Payment {
+  /** Commodity sets turned in, with what each counts for (substitution and buildings included). */
+  sets: { commodity: Commodity; value: number }[];
+  /** Treasury tokens spent. */
+  treasury: number;
+  /** What those tokens count for: double with Mining (West/East) or Treasure Voyages (Far East). */
+  treasuryValue: number;
+}
+
+/**
+ * How buying the Advances being considered is paid for: every commodity set that isn't kept
+ * is turned in, then only as many treasury tokens as the rest of the cost needs.
+ */
+export function payment(state: GameState): Payment {
+  const f = fundsBreakdown(state);
+  const sub = f.substitution;
+  const sets = turnedIn(state)
+    .piles.map(({ c, n }) => {
+      const fromBuildings = f.buildingCards?.sets.find((s) => s.set.id === c.id)?.cards ?? 0;
+      const counted = n + (sub?.set.id === c.id ? 1 : 0) - (sub?.substitute.id === c.id ? 1 : 0) + fromBuildings;
+      return { commodity: c, value: setValue(c.value, counted) };
+    })
+    .filter((s) => s.value > 0)
+    .sort((a, b) => a.commodity.value - b.commodity.value || a.commodity.name.localeCompare(b.commodity.name));
+  const due = Math.max(0, costSummary(state).total - f.cards);
+  const treasury = Math.min(state.funding.treasury, Math.ceil(due / f.treasuryMultiplier));
+  return { sets, treasury, treasuryValue: treasury * f.treasuryMultiplier };
+}
+
 /** Value available for Advances this turn: commodities not held, plus treasury. */
 export function funds(state: GameState): number {
   return fundsBreakdown(state).total;

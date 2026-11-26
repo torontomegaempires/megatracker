@@ -1,6 +1,6 @@
 import type { BlockId, BuildingEra, Credits, ExtraCredit } from '../data';
 import { buildingById, COLORS, rulesFor } from '../data';
-import { buildingsOn, costSummary, freePickMatches, fundsBreakdown } from './selectors';
+import { buildingsOn, freePickMatches, payment } from './selectors';
 
 export type FilterId = 'unowned' | 'affordable' | 'almostAffordable' | 'goal' | 'owned' | 'all';
 export type SortId = 'alpha' | 'cost' | 'vp' | 'economy' | 'discount' | 'color' | 'chains';
@@ -241,10 +241,8 @@ function buy(state: GameState): GameState {
     if (available) freePick = 'cheapScience';
   }
 
-  // Turn in every commodity that isn't held, then only as much treasury as the rest of the cost needs.
-  const f = fundsBreakdown(state);
-  const due = Math.max(0, costSummary(state).total - f.cards);
-  const treasury = Math.max(0, state.funding.treasury - Math.ceil(due / f.treasuryMultiplier));
+  // Turn in every commodity that isn't kept, then only as much treasury as the rest of the cost needs.
+  const treasury = state.funding.treasury - payment(state).treasury;
   const hand = Object.fromEntries(state.funding.held.map((id) => [id, state.funding.hand[id] ?? 0]).filter(([, n]) => n));
 
   const filter = state.view.filter === 'affordable' || state.view.filter === 'almostAffordable' ? 'unowned' : state.view.filter;

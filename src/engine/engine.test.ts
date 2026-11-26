@@ -3,7 +3,7 @@ import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, payment, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -301,6 +301,29 @@ describe('trade hand', () => {
     expect(g.funding.hand).toEqual({ gold: 2 });
     expect(g.funding.held).toEqual([]);
     expect(g.funding.treasury).toBe(50 - (price - 12));
+  });
+
+  it('shows how a purchase is paid: every set not kept, then the treasury needed', () => {
+    let g = hand(newGame('west', 0), { fish: 2, gold: 2 }); // 12 + 36 kept
+    g = reducer(g, { type: 'toggleHeld', id: 'gold' });
+    g = reducer(g, { type: 'setTreasury', treasury: 50 });
+    g = consider(g, 'Pottery');
+    const price = costSummary(g).total;
+    const paid = payment(g);
+    expect(paid.sets.map((s) => [s.commodity.id, s.value])).toEqual([['fish', 12]]);
+    expect(paid.treasury).toBe(price - 12);
+    expect(paid.treasuryValue).toBe(price - 12);
+  });
+
+  it('counts doubled treasury in the payment and spends none when cards cover it', () => {
+    let g = { ...newGame('west', 0), owned: ['Mining'] };
+    g = reducer(g, { type: 'setTreasury', treasury: 40 });
+    g = consider(g, 'Pottery');
+    const price = costSummary(g).total;
+    expect(payment(g)).toMatchObject({ sets: [], treasury: Math.ceil(price / 2), treasuryValue: Math.ceil(price / 2) * 2 });
+    g = hand(g, { gold: 3 });
+    expect(payment(g)).toMatchObject({ treasury: 0, treasuryValue: 0 });
+    expect(payment(g).sets[0].value).toBe(fundsBreakdown(g).cards);
   });
 
   it('spends doubled treasury at half the tokens, rounding up', () => {

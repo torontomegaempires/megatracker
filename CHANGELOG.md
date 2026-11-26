@@ -11,11 +11,13 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 ## [Unreleased]
 
 ### Added
+- Your purchase now shows how it is paid for, such as "Pay with Fruit 24, Treasury 7": every set you aren't keeping, then the treasury tokens still needed.
 - The Special Buildings expansion (The West and The East): turn it on in the Menu. On the Cities tab, below city building, pick your civilization and A.S.T. era, add a building to your purchase (30, 40 or 50, and Library can discount it) or mark one already built, and track the buildings you control. Their VP (2 for owning, 1 per building controlled, 2 more for your civilization's) are shown there, apart from your Advances VP. On the Trade tab you can sacrifice controlled buildings as cards of incomplete sets, placed where they add the most alongside Trade Empire; the Calamities tab offers your building's sacrifice against a calamity.
 
 ### Changed
 - The VP at the top of the screen now says "Advances" beside it: it counts only your Advances.
 - Extra trade cards (the stacks you can buy from and their token prices) moved from the Trade tab to the top of the Specials tab, without the cities count; the Trade tab now starts with your hand.
+- Commodity sets you save for next turn are now "kept" rather than "held": tap Keep on the Trade tab.
 
 ### Removed
 - The Goal tab's Ideas (Advances suggested by theme, such as Cheaper Advances or the next AST age). Add Advances to your goal with "Add to goal" in an Advance's details.

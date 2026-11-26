@@ -17,10 +17,10 @@ calculations — with a new interface. Group-specific enhancements will be added
 - **Credits and VP** — face credits are added automatically; extra-credit choices
   (Monument, Written Record, The Four Arts, Literature, Paper Money, Movable Type Printing)
   and free picks (Anatomy, Primal Philosophy) are walked through step by step.
-- **Funds** — the commodity cards in your hand (value × cards² per commodity) and treasury (doubled with Mining / Treasure Voyages), minus any sets held for next turn.
+- **Funds** — the commodity cards in your hand (value × cards² per commodity) and treasury (doubled with Mining / Treasure Voyages), minus any sets kept for next turn.
 - **Cities** — how many cities you can build and support from your tokens. With the Special
   Buildings expansion on (West/East), also your special building and the ones you control.
-- **Trade** — your hand of commodity cards, treasury and held sets.
+- **Trade** — your hand of commodity cards, treasury and kept sets.
 - **Calamities** — every calamity with the Advances that help or hurt you.
 - **Goal** — the Advances you plan to buy over the game: how many are left, what they cost
   today and the VP you'll have when done. Add to it from any Advance's details.

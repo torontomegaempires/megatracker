@@ -183,7 +183,7 @@ function FundsSummary() {
         {f.heldCards > 0 && (
           <>
             <br />
-            Holding {f.heldCards} {f.heldCards === 1 ? 'card' : 'cards'} worth {f.held} for next turn
+            Keeping {f.heldCards} {f.heldCards === 1 ? 'card' : 'cards'} worth {f.held} for next turn
           </>
         )}
         {f.substitution && (
@@ -243,7 +243,7 @@ function HandList() {
   const f = fundsBreakdown(game);
 
   if (items.length === 0) {
-    return <p className="hand-empty">No commodity cards yet. Pick the ones you hold below.</p>;
+    return <p className="hand-empty">No commodity cards yet. Pick the ones you have below.</p>;
   }
   return (
     <>
@@ -261,7 +261,7 @@ function HandList() {
               <span className="row-main">
                 <span className="row-title">{c.name}</span>
                 <span className="hand-worth">
-                  {isHeld ? 'Held · ' : ''}worth <b className="num">{setValue(c.value, counted)}</b>
+                  {isHeld ? 'Kept · ' : ''}worth <b className="num">{setValue(c.value, counted)}</b>
                   {sub?.set.id === c.id && <> +1 {sub.substitute.name}</>}
                   {sub?.substitute.id === c.id && <> · 1 as {sub.set.name}</>}
                   {fromBuildings > 0 && <> +{fromBuildings === 1 ? '1 building' : `${fromBuildings} buildings`}</>}
@@ -269,7 +269,7 @@ function HandList() {
               </span>
               <Stepper label={`${c.name} cards`} value={n} min={0} max={Math.max(c.max, n)} onChange={(count) => dispatch({ type: 'setCommodity', id: c.id, count })} />
               <button type="button" className="chip hold-chip" aria-pressed={isHeld} onClick={() => dispatch({ type: 'toggleHeld', id: c.id })}>
-                {isHeld ? 'Held' : 'Hold'}
+                {isHeld ? 'Kept' : 'Keep'}
               </button>
             </li>
           );
@@ -277,7 +277,7 @@ function HandList() {
       </ul>
       <div className="hand-foot">
         <span className="muted">
-          Hold a set to keep it for next turn; it won't count toward funds.
+          Keep a set for next turn; it won't count toward funds.
           {f.heldCards > HAND_LIMIT && (
             <strong className="bad"> You can keep only {HAND_LIMIT} commodity cards after buying.</strong>
           )}
