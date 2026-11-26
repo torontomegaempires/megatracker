@@ -336,6 +336,16 @@ p {
   font-family: var(--font-card);
 }
 
+.vp-label {
+  margin-right: 8px;
+  font-family: var(--font-card);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
 .vp strong {
   font-size: 26px;
   line-height: 36px;
@@ -2050,4 +2060,43 @@ dialog.sheet::backdrop {
 .menu-list {
   display: grid;
   gap: 8px;
+}
+
+/* ------------------------------------------------------ special buildings */
+.page-head-later {
+  margin-top: 28px;
+}
+
+.building-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.building-actions .btn-primary {
+  flex: 1 1 auto;
+}
+
+.buildings-rules p {
+  font-size: 14px;
+}
+
+.select-wrap select {
+  min-height: 38px;
+  max-width: 100%;
+}
+
+/* A building isn't an Advance, so its field carries no card color. */
+.cart-building .cart-field {
+  background: var(--ink-2);
+}
+
+.field.stack .select-wrap {
+  display: flex;
+}
+
+.field.stack .select-wrap select {
+  flex: 1;
+  min-width: 0;
 }

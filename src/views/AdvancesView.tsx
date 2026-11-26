@@ -204,7 +204,8 @@ export function AdvanceRow({
 export function Cart() {
   const { game, dispatch } = useGame();
   const summary = costSummary(game);
-  if (summary.lines.length === 0) return null;
+  const building = summary.building;
+  if (summary.lines.length === 0 && !building) return null;
   const available = funds(game);
   const remaining = available - summary.total;
   const notes: string[] = [];
@@ -228,6 +229,17 @@ export function Cart() {
             </button>
           </span>
         ))}
+        {building && (
+          <span className="cart-item cart-building">
+            <span className="cart-field">
+              <b className="mini-coin num">{building.cost}</b>
+            </span>
+            <span className="cart-name">{building.building.name}</span>
+            <button type="button" aria-label={`Remove ${building.building.name}`} onClick={() => dispatch({ type: 'considerBuilding', id: null })}>
+              <Icon name="close" />
+            </button>
+          </span>
+        )}
       </div>
       <div className="cart-row">
         <div className="cart-total">
@@ -241,11 +253,18 @@ export function Cart() {
             )}
           </div>
         </div>
-        <button type="button" className="btn" onClick={() => dispatch({ type: 'clearConsider' })}>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            dispatch({ type: 'clearConsider' });
+            dispatch({ type: 'considerBuilding', id: null });
+          }}
+        >
           Clear
         </button>
         <button type="button" className="btn btn-primary btn-buy" onClick={() => dispatch({ type: 'buy' })}>
-          {game.freePick ? 'Take' : `Buy ${summary.lines.length}`}
+          {game.freePick ? 'Take' : `Buy ${summary.lines.length + (building ? 1 : 0)}`}
         </button>
       </div>
       {(notes.length > 0 || !game.freePick) && (

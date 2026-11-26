@@ -8,6 +8,7 @@ import { COLORS } from './types';
 
 export * from './types';
 export * from './commodities';
+export * from './buildings';
 
 export type BlockId = 'west' | 'east' | 'fareast';
 export type RuleSet = 'we' | 'fe';

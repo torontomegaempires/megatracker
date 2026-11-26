@@ -1,6 +1,11 @@
-import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
-import { commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePower } from '../data';
+import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, FilterId, FreePick, GameState, SortId, StrategyOption } from './game';
+
+/** Whether this game uses special buildings: the expansion is for The West and The East. */
+export function buildingsOn(state: GameState): boolean {
+  return state.buildings.enabled && rulesFor(state.block).rules === 'we';
+}
 
 export function freePickMatches(a: Advance, pick: FreePick): boolean {
   if (pick === 'cheapScience') return a.price < 100 && a.colors.includes('green');
@@ -31,6 +36,24 @@ export function victoryPoints(state: GameState): number {
   return state.owned.reduce((t, n) => t + (rules.byName.get(n)?.vp ?? 0), 0);
 }
 
+export interface BuildingPoints {
+  /** 2 for owning a special building. */
+  owned: number;
+  /** 1 for each special building you control. */
+  controlled: number;
+  /** 2 more for controlling your civilization's historic building. */
+  historic: number;
+  total: number;
+}
+
+/** Victory points from special buildings, or null when the game doesn't use them. */
+export function buildingPoints(state: GameState): BuildingPoints | null {
+  if (!buildingsOn(state)) return null;
+  const { owned, controlled, civ } = state.buildings;
+  const p = { owned: owned ? 2 : 0, controlled: controlled.length, historic: civ && controlled.includes(civ) ? 2 : 0 };
+  return { ...p, total: p.owned + p.controlled + p.historic };
+}
+
 export interface FundsBreakdown {
   /** Value of the commodity cards that will be turned in (not held), including any substitution. */
   cards: number;
@@ -42,7 +65,21 @@ export interface FundsBreakdown {
   treasuryValue: number;
   /** The card counted as part of another set, when Trade Empire or Silk Routes adds value. */
   substitution: Substitution | null;
+  /** Special buildings being sacrificed as commodity cards, when any are. */
+  buildingCards: BuildingCards | null;
   total: number;
+}
+
+/** Sacrificed special buildings, each counted as 1 missing card of an incomplete set. */
+export interface BuildingCards {
+  /** Buildings being sacrificed. */
+  sacrificed: number;
+  /** How many of them found a set to join; the rest add nothing. */
+  used: number;
+  /** The sets they join and how many each. */
+  sets: { set: Commodity; cards: number }[];
+  /** Funds gained over counting the sets without them. */
+  gain: number;
 }
 
 /** One commodity card counted as a missing card of another, incomplete, set. */
@@ -63,27 +100,103 @@ export interface Substitution {
  * incomplete while you hold fewer cards than its commodity has in this game's deck.
  */
 export function bestSubstitution(state: GameState): Substitution | null {
-  const { advance, higherOnly } = rulesFor(state.block).setSubstitute;
-  if (!owns(state, advance)) return null;
+  return substitutions(state).reduce<Substitution | null>((best, s) => (s.gain > (best?.gain ?? 0) ? s : best), null);
+}
+
+interface Pile {
+  c: Commodity;
+  n: number;
+}
+
+/** Commodity cards being turned in (not held), with this game's deck for the most of each. */
+function turnedIn(state: GameState): { deck: Map<string, Commodity>; piles: Pile[] } {
   const { hand, held } = state.funding;
   const deck = new Map(commoditiesFor(state.block, state.playerCount).map((c) => [c.id, c]));
-  const cards = Object.entries(hand)
+  const piles = Object.entries(hand)
     .filter(([id, n]) => n > 0 && !held.includes(id))
     .map(([id, n]) => ({ c: deck.get(id) ?? commodityById(id), n }))
-    .filter((x): x is { c: Commodity; n: number } => !!x.c);
+    .filter((x): x is Pile => !!x.c);
+  return { deck, piles };
+}
 
-  let best: Substitution | null = null;
-  for (const set of cards) {
+/** Every substitution the owned advance allows, whether or not it gains anything on its own. */
+function substitutions(state: GameState): Substitution[] {
+  const { advance, higherOnly } = rulesFor(state.block).setSubstitute;
+  if (!owns(state, advance)) return [];
+  const { deck, piles } = turnedIn(state);
+  const out: Substitution[] = [];
+  for (const set of piles) {
     if (!deck.has(set.c.id) || set.n >= set.c.max) continue;
     const added = setValue(set.c.value, set.n + 1) - setValue(set.c.value, set.n);
-    for (const sub of cards) {
+    for (const sub of piles) {
       if (sub.c.id === set.c.id) continue;
       if (higherOnly ? sub.c.value <= set.c.value : sub.c.value < set.c.value) continue;
       const gain = added - (setValue(sub.c.value, sub.n) - setValue(sub.c.value, sub.n - 1));
-      if (gain > (best?.gain ?? 0)) best = { advance, substitute: sub.c, set: set.c, gain };
+      out.push({ advance, substitute: sub.c, set: set.c, gain });
     }
   }
-  return best;
+  return out;
+}
+
+/**
+ * The best way to add up to `count` building cards to incomplete sets being turned in. A set
+ * gains more with each card added, so every split is tried (sets by number of cards).
+ */
+function placeBuildingCards(deck: Map<string, Commodity>, piles: Pile[], count: number): Omit<BuildingCards, 'sacrificed'> {
+  const open = piles.filter((p) => p.n > 0 && deck.has(p.c.id) && p.n < p.c.max);
+  // best[i][r]: the most gained from sets i.. with r cards to place, and how many go to set i.
+  const best: { gain: number; take: number }[][] = Array.from({ length: open.length + 1 }, () =>
+    Array.from({ length: count + 1 }, () => ({ gain: 0, take: 0 })),
+  );
+  for (let i = open.length - 1; i >= 0; i--) {
+    const { c, n } = open[i];
+    for (let r = 0; r <= count; r++) {
+      let top = best[i + 1][r];
+      let take = 0;
+      for (let k = 1; k <= Math.min(r, c.max - n); k++) {
+        const gain = setValue(c.value, n + k) - setValue(c.value, n) + best[i + 1][r - k].gain;
+        if (gain > top.gain) {
+          top = { gain, take: k };
+          take = k;
+        }
+      }
+      best[i][r] = { gain: top.gain, take };
+    }
+  }
+  const sets: BuildingCards['sets'] = [];
+  let r = count;
+  open.forEach((p, i) => {
+    const { take } = best[i][r];
+    if (take > 0) sets.push({ set: p.c, cards: take });
+    r -= take;
+  });
+  return { used: count - r, sets, gain: best[0][count].gain };
+}
+
+/** Sacrificed buildings this purchase can use: only ones you control. */
+function sacrificing(state: GameState): string[] {
+  if (!buildingsOn(state)) return [];
+  const { sacrificing: ids, controlled } = state.buildings;
+  return ids.filter((id) => controlled.includes(id));
+}
+
+/**
+ * The substitution (if any) and building cards that together add the most to funds. Trade
+ * Empire and sacrificed buildings may both be used, so each substitution is tried with the
+ * buildings placed around it.
+ */
+function bestCardBonuses(state: GameState): { substitution: Substitution | null; buildingCards: BuildingCards | null } {
+  const sacrificed = sacrificing(state).length;
+  if (sacrificed === 0) return { substitution: bestSubstitution(state), buildingCards: null };
+  const { deck, piles } = turnedIn(state);
+  let top: { substitution: Substitution | null; buildingCards: BuildingCards; total: number } | null = null;
+  for (const sub of [null, ...substitutions(state)]) {
+    const adjusted = piles.map((p) => ({ c: p.c, n: p.n + (p.c.id === sub?.set.id ? 1 : 0) - (p.c.id === sub?.substitute.id ? 1 : 0) }));
+    const placed = placeBuildingCards(deck, adjusted, sacrificed);
+    const total = (sub?.gain ?? 0) + placed.gain;
+    if (!top || total > top.total) top = { substitution: sub, buildingCards: { sacrificed, ...placed }, total };
+  }
+  return top!;
 }
 
 export function fundsBreakdown(state: GameState): FundsBreakdown {
@@ -98,11 +211,11 @@ export function fundsBreakdown(state: GameState): FundsBreakdown {
       heldCards += n;
     } else cards += value;
   }
-  const substitution = bestSubstitution(state);
-  cards += substitution?.gain ?? 0;
+  const { substitution, buildingCards } = bestCardBonuses(state);
+  cards += (substitution?.gain ?? 0) + (buildingCards?.gain ?? 0);
   const treasuryMultiplier = owns(state, rulesFor(state.block).treasuryDoubler) ? 2 : 1;
   const treasuryValue = treasury * treasuryMultiplier;
-  return { cards, held, heldCards, treasuryMultiplier, treasuryValue, substitution, total: cards + treasuryValue };
+  return { cards, held, heldCards, treasuryMultiplier, treasuryValue, substitution, buildingCards, total: cards + treasuryValue };
 }
 
 /** Value available for Advances this turn: commodities not held, plus treasury. */
@@ -119,6 +232,8 @@ export interface CostLine {
 export interface CostSummary {
   lines: CostLine[];
   libraryDiscount: number;
+  /** A special building being constructed in the same purchase. */
+  building: { building: SpecialBuilding; cost: number } | null;
   total: number;
 }
 
@@ -138,9 +253,12 @@ export function costSummary(state: GameState): CostSummary {
     else maxOther = Math.max(maxOther, c);
     return { advance: a, cost: c, free };
   });
-  const libraryDiscount = hasLibrary ? Math.min(maxOther, 40) : 0;
-  const total = lines.reduce((t, l) => t + (l.free ? 0 : l.cost), 0) - libraryDiscount;
-  return { lines, libraryDiscount, total };
+  const considered = buildingsOn(state) && state.buildings.considering ? buildingById(state.buildings.considering) : undefined;
+  const building = considered ? { building: considered, cost: buildingCost(state.buildings.era) } : null;
+  // A building is bought as if it were an Advance, so Library can discount it too.
+  const libraryDiscount = hasLibrary ? Math.min(Math.max(maxOther, building?.cost ?? 0), 40) : 0;
+  const total = lines.reduce((t, l) => t + (l.free ? 0 : l.cost), 0) - libraryDiscount + (building?.cost ?? 0);
+  return { lines, libraryDiscount, building, total };
 }
 
 export interface AdvanceListing {
@@ -160,7 +278,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
   let cap = (available || 9999) + (f === 'almostAffordable' ? 50 : 0) - summary.total;
   if (state.considering.includes('Library')) {
     // Raise the cap while the Library discount has not been fully used.
-    const costliest = summary.lines.filter((l) => l.advance.name !== 'Library').reduce((m, l) => Math.max(m, l.cost), 0);
+    const costliest = summary.lines.filter((l) => l.advance.name !== 'Library').reduce((m, l) => Math.max(m, l.cost), summary.building?.cost ?? 0);
     if (costliest < 40) cap += 40 - costliest;
   }
 

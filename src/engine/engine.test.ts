@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
-import { loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
+import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -332,5 +332,127 @@ describe('trade hand', () => {
     expect(loadFunding({ sets: [{ rank: 3, qty: 2 }], misc: 4, treasury: 12 })).toEqual({ hand: {}, held: [], treasury: 12 });
     expect(loadFunding(undefined)).toEqual({ hand: {}, held: [], treasury: 0 });
     expect(loadFunding({ hand: { fish: 2 }, held: ['fish', 'gold'], treasury: 3 })).toEqual({ hand: { fish: 2 }, held: ['fish'], treasury: 3 });
+  });
+});
+
+describe('special buildings', () => {
+  const withBuildings = (block: 'west' | 'fareast' = 'west', players = 5) =>
+    reducer(newGame(block, players), { type: 'setBuildings', buildings: { enabled: true } });
+  const control = (g: GameState, ...ids: string[]) => ids.reduce((s, id) => reducer(s, { type: 'toggleControl', id }), g);
+  const hand = (g: GameState, counts: Record<string, number>) =>
+    Object.entries(counts).reduce((s, [id, count]) => reducer(s, { type: 'setCommodity', id, count }), g);
+
+  it('is off in new games and only offered in The West and The East', () => {
+    expect(newGame('west', 5).buildings.enabled).toBe(false);
+    const fe = reducer(withBuildings('fareast'), { type: 'considerBuilding', id: 'hellas' });
+    expect(fe.buildings.considering).toBeNull();
+    expect(buildingPoints(fe)).toBeNull();
+  });
+
+  it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {
+    let g = reducer(withBuildings(), { type: 'considerBuilding', id: 'hellas' });
+    expect(costSummary(g).total).toBe(30);
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'iron' } });
+    g = consider(g, 'Pottery');
+    expect(costSummary(g).total).toBe(50 + cost(g, adv(g, 'Pottery')));
+    g = reducer(g, { type: 'buy' });
+    expect(g.owned).toEqual(['Pottery']);
+    expect(g.buildings).toMatchObject({ owned: 'hellas', controlled: ['hellas'], considering: null });
+  });
+
+  it('can be discounted by Library, as if it were an Advance', () => {
+    let g = reducer(withBuildings(), { type: 'considerBuilding', id: 'hellas' });
+    g = consider(g, 'Library');
+    expect(costSummary(g)).toMatchObject({ libraryDiscount: 30, total: cost(g, adv(g, 'Library')) });
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'iron' } });
+    expect(costSummary(g)).toMatchObject({ libraryDiscount: 40, total: cost(g, adv(g, 'Library')) + 10 });
+  });
+
+  it('can be bought without any Advances, paying from the treasury', () => {
+    let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { era: 'lateBronze' } });
+    g = reducer(reducer(g, { type: 'considerBuilding', id: 'rome' }), { type: 'setTreasury', treasury: 50 });
+    g = reducer(g, { type: 'buy' });
+    expect(g.buildings.owned).toBe('rome');
+    expect(g.funding.treasury).toBe(10);
+  });
+
+  it('allows only one owned building, from those not already on the board', () => {
+    let g = reducer(withBuildings(), { type: 'setOwnedBuilding', id: 'minoa' });
+    expect(reducer(g, { type: 'considerBuilding', id: 'rome' }).buildings.considering).toBeNull();
+    g = control(withBuildings(), 'hatti');
+    expect(reducer(g, { type: 'considerBuilding', id: 'hatti' }).buildings.considering).toBeNull();
+    expect(reducer(newGame('west', 5), { type: 'considerBuilding', id: 'rome' }).buildings.considering).toBeNull();
+  });
+
+  it('scores the rulesheet example', () => {
+    // Joel (Hellas) owns and controls the Parthenon.
+    let joel = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'hellas' } });
+    joel = reducer(joel, { type: 'setOwnedBuilding', id: 'hellas' });
+    expect(buildingPoints(joel)).toEqual({ owned: 2, controlled: 1, historic: 2, total: 5 });
+    // Rob (Hatti) owns the Hattusan City Walls but lost control of them.
+    let rob = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'hatti' } });
+    rob = control(reducer(rob, { type: 'setOwnedBuilding', id: 'hatti' }), 'hatti');
+    expect(buildingPoints(rob)?.total).toBe(2);
+    // Linda (Minoa) owns the Great Palace without controlling it, and controls the Hattusan City Walls.
+    let linda = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'minoa' } });
+    linda = control(reducer(linda, { type: 'setOwnedBuilding', id: 'minoa' }), 'minoa', 'hatti');
+    expect(buildingPoints(linda)?.total).toBe(3);
+    // Building VP stay apart from Advance VP.
+    expect(victoryPoints(buy(linda, 'Pottery'))).toBe(1);
+  });
+
+  it('counts sacrificed buildings as missing cards of incomplete sets', () => {
+    let g = control(withBuildings(), 'hellas', 'rome');
+    g = hand(g, { resin: 4 }); // 112
+    g = reducer(g, { type: 'toggleSacrifice', id: 'hellas' });
+    expect(fundsBreakdown(g)).toMatchObject({ cards: 175, buildingCards: { sacrificed: 1, used: 1, gain: 63 } });
+    g = reducer(hand(g, { resin: 3 }), { type: 'toggleSacrifice', id: 'rome' });
+    expect(fundsBreakdown(g).cards).toBe(175); // 3 Resin + 2 buildings, as on the rulesheet
+    // A complete set has no room: 5 Resin is every card in the deck.
+    g = hand(g, { resin: 5 });
+    expect(fundsBreakdown(g)).toMatchObject({ cards: 175, buildingCards: { used: 0, gain: 0 } });
+  });
+
+  it('puts building cards where they add the most, alongside Trade Empire', () => {
+    let g = control({ ...withBuildings(), owned: ['Trade Empire'] }, 'hellas', 'rome');
+    g = hand(g, { iron: 3, fruit: 1, gold: 1 }); // 18 + 3 + 9
+    g = reducer(reducer(g, { type: 'toggleSacrifice', id: 'hellas' }), { type: 'toggleSacrifice', id: 'rome' });
+    // Best: both buildings to Gold (9 x 9 = 81, +72) and Fruit standing in for Iron (+11).
+    const f = fundsBreakdown(g);
+    expect(f.buildingCards?.sets).toEqual([{ set: expect.objectContaining({ id: 'gold' }), cards: 2 }]);
+    expect(f.substitution).toMatchObject({ substitute: { id: 'fruit' }, set: { id: 'iron' } });
+    expect(f.cards).toBe(30 + 72 + 11);
+  });
+
+  it('removes sacrificed buildings when buying, and ownership with them', () => {
+    let g = reducer(withBuildings(), { type: 'setOwnedBuilding', id: 'hellas' });
+    g = control(g, 'rome');
+    g = hand(g, { resin: 4 });
+    g = reducer(g, { type: 'toggleSacrifice', id: 'hellas' });
+    g = buy(g, 'Pottery');
+    expect(g.buildings).toMatchObject({ owned: null, controlled: ['rome'], sacrificing: [] });
+  });
+
+  it('sacrifices an owned building to soften a calamity', () => {
+    let g = reducer(withBuildings(), { type: 'setOwnedBuilding', id: 'hellas' });
+    g = reducer(g, { type: 'sacrificeBuilding', id: 'hellas' });
+    expect(g.buildings).toMatchObject({ owned: null, controlled: [] });
+  });
+
+  it('stops planning a sacrifice once control is lost, and drops plans when switched off', () => {
+    let g = control(withBuildings(), 'rome');
+    g = reducer(g, { type: 'toggleSacrifice', id: 'rome' });
+    expect(control(g, 'rome').buildings.sacrificing).toEqual([]);
+    g = reducer(g, { type: 'considerBuilding', id: 'hellas' });
+    g = reducer(g, { type: 'setBuildings', buildings: { enabled: false } });
+    expect(g.buildings).toMatchObject({ considering: null, sacrificing: [], controlled: ['rome'] });
+    expect(costSummary(g).total).toBe(0);
+  });
+
+  it('loads saved buildings, starting older games with the expansion off', () => {
+    expect(loadBuildings(undefined)).toEqual(newGame('west', 5).buildings);
+    expect(
+      loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: 'hellas', sacrificing: ['rome', 'hellas'] }),
+    ).toEqual({ enabled: true, civ: null, era: 'iron', owned: 'rome', controlled: ['rome'], considering: null, sacrificing: ['rome'] });
   });
 });
