@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Opens a release pull request: bumps package.json, dates the Unreleased section of
 // CHANGELOG.md, and commits "Release vX.Y.Z" on a release/vX.Y.Z branch cut from origin/main.
-// Merging the PR deploys it, and the Tag release workflow tags vX.Y.Z on main.
+// When the PR merges, the Tag release workflow tags vX.Y.Z on main and moves the production
+// branch to it, which deploys the release to players.
 //
 // Usage: node scripts/release.mjs patch|minor|major
 import { execFileSync } from 'node:child_process';

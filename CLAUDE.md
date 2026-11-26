@@ -15,6 +15,10 @@ are blocked.
 4. Push the branch and open the pull request with `gh pr create`. Never commit to `main` or
    push to it directly.
 
+Merging to `main` deploys the staging site (https://main--megatracker.netlify.app), not the
+live one. Players only get changes when a release merges and the Tag release workflow moves the
+`production` branch. Never push to `production` yourself.
+
 A pull request can only merge once it is up to date with `main` and the **Test and build**
 check passes.
 
