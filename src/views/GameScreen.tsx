@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { BLOCKS, COLOR_NAMES, COLORS, rulesFor } from '../data';
+import { BLOCKS, COLOR_NAMES, COLORS } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
 import { GitHubIcon, Icon, type IconName } from '../components/Icon';
@@ -168,25 +168,23 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           Tracks the Advance and VP requirements for each age. Cities are not tracked here; the Game tab counts them for shared games.
         </p>
       </div>
-      {rulesFor(game.block).rules === 'we' && (
-        <div className="section">
-          <h3>The Special Buildings expansion</h3>
-          <Segmented<'off' | 'on'>
-            label="Special Buildings expansion"
-            value={game.buildings.enabled ? 'on' : 'off'}
-            onChange={(v) => dispatch({ type: 'setBuildings', buildings: { enabled: v === 'on' } })}
-            options={[
-              { value: 'off', label: 'Off' },
-              { value: 'on', label: 'On' },
-            ]}
-          />
-          <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
-            {buildingsOn(game)
-              ? 'Build and track special buildings, and their VP, on the Cities tab.'
-              : 'Adds special buildings and their VP to the Cities tab, and their price to your purchase.'}
-          </p>
-        </div>
-      )}
+      <div className="section">
+        <h3>The Special Buildings expansion</h3>
+        <Segmented<'off' | 'on'>
+          label="Special Buildings expansion"
+          value={game.buildings.enabled ? 'on' : 'off'}
+          onChange={(v) => dispatch({ type: 'setBuildings', buildings: { enabled: v === 'on' } })}
+          options={[
+            { value: 'off', label: 'Off' },
+            { value: 'on', label: 'On' },
+          ]}
+        />
+        <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
+          {buildingsOn(game)
+            ? 'Build and track special buildings, and their VP, on the Cities tab.'
+            : 'Adds special buildings and their VP to the Cities tab, and their price to your purchase.'}
+        </p>
+      </div>
       <div className="section menu-list">
         <h3>Game</h3>
         <button type="button" className="btn btn-block" onClick={onAbout}>

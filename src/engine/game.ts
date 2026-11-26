@@ -1,5 +1,5 @@
 import type { BlockId, BuildingEra, Credits, ExtraCredit } from '../data';
-import { buildingById, COLORS, rulesFor } from '../data';
+import { BLOCKS, buildingIn, COLORS, rulesFor } from '../data';
 import { buildingsOn, freePickMatches, payment } from './selectors';
 
 export type FilterId = 'unowned' | 'affordable' | 'almostAffordable' | 'goal' | 'owned' | 'all';
@@ -17,7 +17,7 @@ export interface Funding {
   treasury: number;
 }
 
-/** The Special Buildings expansion (West/East only). Buildings are named by their civilization's id. */
+/** The Special Buildings expansion. Buildings are named by their civilization's id. */
 export interface BuildingsState {
   enabled: boolean;
   /** Your civilization: controlling its historic building is worth 2 more VP. */
@@ -77,7 +77,8 @@ export interface GameState {
 export const TOKEN_POOL = 55;
 
 /**
- * Player count choices. Ranges are grouped by the trade card deck they use (3–8, 9, 10–11,
+ * Every player count a game can be saved with, across all games (each game offers its own
+ * choices in BLOCKS). Ranges are grouped by the trade card deck they use (3–8, 9, 10–11,
  * 12–14, 15–18), with 3–6 and 12 on their own for starting credits; the value is the
  * lowest count in the range.
  */
@@ -93,6 +94,12 @@ export const PLAYER_COUNTS = [
   { value: 13, label: '13–14' },
   { value: 15, label: '15–18' },
 ] as const;
+
+/** How a game's player count reads, using that game's own ranges (The Far East's 6 is 6–8). */
+export function playerCountLabel(block: BlockId, playerCount: number): string {
+  const label = (list: readonly { value: number; label: string }[]) => list.find((p) => p.value === playerCount)?.label;
+  return label(BLOCKS[block].playerCounts) ?? label(PLAYER_COUNTS) ?? String(playerCount);
+}
 
 export function zeroCredits(): Credits {
   return { blue: 0, green: 0, orange: 0, red: 0, yellow: 0 };
@@ -110,15 +117,15 @@ export function loadFunding(saved: unknown): Funding {
   return { hand: { ...f.hand }, held: f.held.filter((id) => (f.hand![id] ?? 0) > 0), treasury };
 }
 
-export function newBuildings(): BuildingsState {
-  return { enabled: false, civ: null, era: 'bronze', owned: null, controlled: [], considering: null, sacrificing: [] };
+export function newBuildings(enabled = false): BuildingsState {
+  return { enabled, civ: null, era: 'bronze', owned: null, controlled: [], considering: null, sacrificing: [] };
 }
 
 /** Special buildings from a saved game, dropping anything unknown; games saved before them start with the expansion off. */
-export function loadBuildings(saved: unknown): BuildingsState {
+export function loadBuildings(saved: unknown, block: BlockId): BuildingsState {
   const fresh = newBuildings();
   const b = (saved ?? {}) as Partial<BuildingsState>;
-  const known = (id: unknown): id is string => typeof id === 'string' && !!buildingById(id);
+  const known = (id: unknown): id is string => !!buildingIn(block, id);
   const list = (ids: unknown) => (Array.isArray(ids) ? [...new Set(ids.filter(known))] : []);
   const controlled = list(b.controlled);
   const owned = known(b.owned) ? b.owned : null;
@@ -152,7 +159,7 @@ export function startingCredits(playerCount: number): number {
   return 0;
 }
 
-export function newGame(block: BlockId, playerCount: number): GameState {
+export function newGame(block: BlockId, playerCount: number, buildings = false): GameState {
   const c = startingCredits(playerCount);
   return {
     schema: 1,
@@ -172,7 +179,7 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     freePick: null,
     queue: [],
     board: { cities: 0, tokens: 1, tokensAsReserve: false, astPosition: 1 },
-    buildings: newBuildings(),
+    buildings: newBuildings(buildings),
   };
 }
 
@@ -344,7 +351,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, board: { ...state.board, ...action.board } };
     case 'setBuildings': {
       const { civ } = action.buildings;
-      if (civ != null && !buildingById(civ)) return state;
+      if (civ != null && !buildingIn(state.block, civ)) return state;
       const buildings = { ...state.buildings, ...action.buildings };
       // Nothing is planned while the expansion is off.
       if (!buildings.enabled) Object.assign(buildings, { considering: null, sacrificing: [] });
@@ -355,19 +362,19 @@ export function reducer(state: GameState, action: Action): GameState {
       const { id } = action;
       if (id === null) return { ...state, buildings: { ...b, considering: null } };
       // One building in your own region, built from those still in the supply, not as a free pick.
-      if (!buildingsOn(state) || b.owned || state.freePick || !buildingById(id) || b.controlled.includes(id)) return state;
+      if (!buildingsOn(state) || b.owned || state.freePick || !buildingIn(state.block, id) || b.controlled.includes(id)) return state;
       return { ...state, buildings: { ...b, considering: id } };
     }
     case 'setOwnedBuilding': {
       // A building already standing in your region, for games tracked from partway through.
       const b = state.buildings;
-      if (!buildingsOn(state) || b.owned || !buildingById(action.id)) return state;
+      if (!buildingsOn(state) || b.owned || !buildingIn(state.block, action.id)) return state;
       const controlled = b.controlled.includes(action.id) ? b.controlled : [...b.controlled, action.id];
       return { ...state, buildings: { ...b, owned: action.id, controlled, considering: null } };
     }
     case 'toggleControl': {
       const b = state.buildings;
-      if (!buildingById(action.id) || b.considering === action.id) return state;
+      if (!buildingIn(state.block, action.id) || b.considering === action.id) return state;
       if (b.controlled.includes(action.id)) {
         const controlled = b.controlled.filter((id) => id !== action.id);
         return { ...state, buildings: { ...b, controlled, sacrificing: b.sacrificing.filter((id) => id !== action.id) } };

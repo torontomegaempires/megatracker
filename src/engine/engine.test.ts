@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { commoditiesFor, RULES, rulesFor } from '../data';
+import { BLOCKS, buildingsIn, commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
-import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
+import { loadBuildings, loadFunding, loadGoal, loadView, newGame, PLAYER_COUNTS, playerCountLabel, reducer, zeroCredits } from './game';
 import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, payment, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances, worsenedCalamities } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
@@ -35,6 +35,24 @@ describe('setup', () => {
     expect(newGame('west', 0).credits.blue).toBe(0);
     for (const n of [7, 9, 10, 13, 15]) expect(newGame('west', n).credits.blue).toBe(0); // 7–8 up to 15–18, apart from 12
     expect(newGame('west', 12).credits.blue).toBe(5);
+  });
+
+  it('offers each game its own player counts', () => {
+    const labels = (block: keyof typeof BLOCKS) => BLOCKS[block].playerCounts.map((p) => p.label);
+    expect(labels('west')).toEqual(['3', '4', '5', '6', '7–8', '9']);
+    expect(labels('east')).toEqual(labels('west'));
+    expect(labels('fareast')).toEqual(['3', '4', '5', '6–8', '9–11']);
+    expect(labels('mega')).toEqual(['10–11', '12', '13–14', '15–18']);
+    // Every choice is one the shared game server accepts.
+    for (const b of Object.values(BLOCKS)) for (const p of b.playerCounts) expect(PLAYER_COUNTS.some((x) => x.value === p.value)).toBe(true);
+    expect(playerCountLabel('fareast', 6)).toBe('6–8');
+    expect(playerCountLabel('west', 6)).toBe('6');
+    expect(playerCountLabel('west', 13)).toBe('13–14'); // games saved before Mega Empires was its own choice
+  });
+
+  it('can start with the Special Buildings expansion on', () => {
+    expect(newGame('mega', 12, true).buildings.enabled).toBe(true);
+    expect(newGame('fareast', 3).buildings.enabled).toBe(false);
   });
 });
 
@@ -229,6 +247,8 @@ describe('trade hand', () => {
     expect(deck('west', 15)).toEqual(deck('east', 15));
     expect(Object.keys(deck('west', 15))).toHaveLength(45);
     expect(commoditiesFor('west', 15).every((c, i, a) => i === 0 || a[i - 1].value <= c.value)).toBe(true);
+    // Mega Empires uses the same decks as West/East games of that size
+    for (const n of [10, 12, 13, 15]) expect(commoditiesFor('mega', n)).toEqual(commoditiesFor('west', n));
   });
 
   it('gives the Far East its own commodities, even where names match West/East cards', () => {
@@ -349,11 +369,18 @@ describe('special buildings', () => {
   const hand = (g: GameState, counts: Record<string, number>) =>
     Object.entries(counts).reduce((s, [id, count]) => reducer(s, { type: 'setCommodity', id, count }), g);
 
-  it('is off in new games and only offered in The West and The East', () => {
+  it('is off in new games and offers each game only its own nations’ buildings', () => {
     expect(newGame('west', 5).buildings.enabled).toBe(false);
+    expect(buildingsIn('west')).toHaveLength(18);
+    expect(buildingsIn('mega')).toEqual(buildingsIn('west'));
+    expect(buildingsIn('fareast').map((b) => b.civ)).toContain('Heian');
+    expect(buildingsIn('fareast')).toHaveLength(12);
+    expect(buildingsIn('fareast').find((b) => b.id === 'ming')?.name).toBe('Forbidden City of Beijing');
     const fe = reducer(withBuildings('fareast'), { type: 'considerBuilding', id: 'hellas' });
     expect(fe.buildings.considering).toBeNull();
-    expect(buildingPoints(fe)).toBeNull();
+    expect(reducer(fe, { type: 'considerBuilding', id: 'heian' }).buildings.considering).toBe('heian');
+    expect(buildingPoints(fe)).not.toBeNull();
+    expect(reducer(newGame('west', 5), { type: 'setBuildings', buildings: { civ: 'tang' } }).buildings.civ).toBeNull();
   });
 
   it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {
@@ -457,9 +484,10 @@ describe('special buildings', () => {
   });
 
   it('loads saved buildings, starting older games with the expansion off', () => {
-    expect(loadBuildings(undefined)).toEqual(newGame('west', 5).buildings);
+    expect(loadBuildings(undefined, 'west')).toEqual(newGame('west', 5).buildings);
+    expect(loadBuildings({ enabled: true, owned: 'rome', controlled: ['rome', 'tang'] }, 'fareast')).toMatchObject({ owned: null, controlled: ['tang'] });
     expect(
-      loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: 'hellas', sacrificing: ['rome', 'hellas'] }),
+      loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: 'hellas', sacrificing: ['rome', 'hellas'] }, 'west'),
     ).toEqual({ enabled: true, civ: null, era: 'iron', owned: 'rome', controlled: ['rome'], considering: null, sacrificing: ['rome'] });
   });
 });

@@ -43,6 +43,8 @@
   --block-west: #14a01e;
   --block-east: #a949ee;
   --block-fareast: #f50730;
+  /* Mega Empires: the blue of mega-empires.com's active panels; white letters clear 3:1 */
+  --block-mega: #4a97c2;
   /* Printed card stock: the coin and sheet sublines stay white in both schemes */
   --stock: #ffffff;
   --stock-ink: #17181a;
@@ -2006,6 +2008,7 @@ dialog.sheet::backdrop {
 .block-west { --block: var(--block-west); }
 .block-east { --block: var(--block-east); }
 .block-fareast { --block: var(--block-fareast); }
+.block-mega { --block: var(--block-mega); }
 
 .block-option[aria-pressed='true'] {
   transform: translateX(6px);
@@ -2025,6 +2028,7 @@ dialog.sheet::backdrop {
 }
 
 .block-option > span:last-child {
+  align-self: center;
   padding: 10px 14px;
 }
 
@@ -2033,11 +2037,6 @@ dialog.sheet::backdrop {
   font-weight: 700;
   font-size: 22px;
   text-transform: uppercase;
-}
-
-.block-option .blurb {
-  font-size: 14px;
-  color: var(--ink-2);
 }
 
 .setup-note {

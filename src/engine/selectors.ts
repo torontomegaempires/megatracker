@@ -2,9 +2,9 @@ import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePowe
 import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, BuildingsState, FilterId, FreePick, GameState, SortId } from './game';
 
-/** Whether this game uses special buildings: the expansion is for The West and The East. */
+/** Whether this game uses the Special Buildings expansion. */
 export function buildingsOn(state: GameState): boolean {
-  return state.buildings.enabled && rulesFor(state.block).rules === 'we';
+  return state.buildings.enabled;
 }
 
 export function freePickMatches(a: Advance, pick: FreePick): boolean {

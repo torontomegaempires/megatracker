@@ -1,7 +1,7 @@
 import { useId, useState } from 'react';
-import { BLOCKS, rulesFor, SPECIAL_BUILDINGS } from '../data';
+import { BLOCKS, buildingById, buildingsIn } from '../data';
 import type { GameState } from '../engine/game';
-import { newGame, PLAYER_COUNTS } from '../engine/game';
+import { newGame, playerCountLabel } from '../engine/game';
 import type { SharedAstMode } from '../engine/standings';
 import { AST_MAX, AST_START, LATE_IRON_AGE_POSITION, MAX_CITIES, snapshotOf } from '../engine/standings';
 import { Icon } from '../components/Icon';
@@ -13,7 +13,6 @@ import { api } from '../shared/client';
 import { savedPlayerName, useShared, useStandingsPolling } from '../state/shared';
 import { useGame, useStore } from '../state/store';
 
-const playerLabel = (n: number) => PLAYER_COUNTS.find((p) => p.value === n)?.label ?? String(n);
 const astLabel = (m: SharedAstMode) => (m === 'basic' ? 'Basic A.S.T.' : 'Expert A.S.T.');
 const errorText = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
 
@@ -96,7 +95,7 @@ function Standings({ view }: { view: GameView }) {
         <ShareCode code={view.code} />
       </div>
       <p className="shared-meta muted">
-        {BLOCKS[view.block].name} · {playerLabel(view.playerCount)} players · {astLabel(view.astMode)}
+        {BLOCKS[view.block].name} · {playerCountLabel(view.block, view.playerCount)} players · {astLabel(view.astMode)}
         {view.block !== game.block && ` · This phone is tracking ${BLOCKS[game.block].name}`}
       </p>
 
@@ -249,9 +248,9 @@ function ShareCode({ code }: { code: string }) {
   );
 }
 
-/** Nations to suggest: the 18 civilizations of The West and The East. */
+/** Nations to suggest: the civilizations of this game. */
 function nationOptions(block: GameState['block']): string[] {
-  return rulesFor(block).rules === 'we' ? SPECIAL_BUILDINGS.map((b) => b.civ).sort() : [];
+  return buildingsIn(block).map((b) => b.civ).sort();
 }
 
 function PlayerFields({
@@ -294,7 +293,7 @@ function PlayerFields({
 
 function defaultNation(game: GameState | null): string {
   const civ = game?.buildings.civ;
-  return civ ? (SPECIAL_BUILDINGS.find((b) => b.id === civ)?.civ ?? '') : '';
+  return civ ? (buildingById(civ)?.civ ?? '') : '';
 }
 
 function CreateSheet({ onClose }: { onClose: () => void }) {
@@ -322,7 +321,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet
       title="Create a shared game"
-      subtitle={`${BLOCKS[game.block].name} · ${playerLabel(game.playerCount)} players`}
+      subtitle={`${BLOCKS[game.block].name} · ${playerCountLabel(game.block, game.playerCount)} players`}
       onClose={onClose}
       footer={
         <button type="button" className="btn btn-primary" disabled={busy || !name.trim() || !nation.trim()} onClick={submit}>
@@ -409,7 +408,7 @@ export function JoinSheet({ initialCode, onClose }: { initialCode: string; onClo
   return (
     <Sheet
       title={found ? `Join game ${found.code}` : 'Join a shared game'}
-      subtitle={found ? `${BLOCKS[found.block].name} · ${playerLabel(found.playerCount)} players · ${astLabel(found.astMode)}` : undefined}
+      subtitle={found ? `${BLOCKS[found.block].name} · ${playerCountLabel(found.block, found.playerCount)} players · ${astLabel(found.astMode)}` : undefined}
       onClose={onClose}
       footer={
         found ? (
