@@ -46,9 +46,12 @@ export function GameScreen() {
             <span className="brand-name">{BLOCKS[game.block].name}</span>
           </div>
           <div className="topbar-spacer" />
+          <span className="vp-label" aria-hidden>
+            Advances
+          </span>
           <div className="vp" aria-label={`${victoryPoints(game)} victory points from Advances`}>
             <strong>{victoryPoints(game)}</strong>
-            <span>Advances VP</span>
+            <span>VP</span>
           </div>
         </div>
         <div className="credits" aria-label="Your credits">
