@@ -89,6 +89,14 @@ bumps `package.json`, dates the `[Unreleased]` section of the changelog, commits
 "Release vX.Y.Z", pushes, and opens a pull request. Merging it deploys the release, and the
 Tag release workflow tags `vX.Y.Z` on `main`.
 
+## Reporting problems
+
+Found a bug, a wrong Advance or calamity value, or have an idea? Open an issue with one of
+the [issue forms](https://github.com/torontomegaempires/megatracker/issues/new/choose); the
+About sheet in the app links there too. Include the app version from the Menu or About.
+Contributions are shared under the same [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+licence as the rest of Megatracker (see [CONTRIBUTING.md](CONTRIBUTING.md) for pull requests).
+
 ## License
 
 Megatracker adapts the Mega Empires Calculator, which is licensed to users under

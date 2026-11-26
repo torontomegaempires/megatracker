@@ -12,6 +12,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ### Changed
 - The About page links to Megatracker's source code on GitHub and drops the group subtitle and the note about commercial licensing.
+- About now has a "Report a problem" link that opens Megatracker's GitHub issue forms, with your app version filled in.
 
 ## [0.3.0] - 2026-11-26
 

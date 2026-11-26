@@ -1,0 +1,19 @@
+name: Feature request
+description: Suggest something that would help at the table.
+title: "[Idea]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem at the table?
+      description: What were you trying to do during a game, and what got in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: Describe what you'd like Megatracker to do. Rough ideas are fine.
+    validations:
+      required: true

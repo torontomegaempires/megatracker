@@ -1,0 +1,53 @@
+name: Wrong rules data
+description: An Advance or calamity shows a cost, credit or effect that doesn't match the rules.
+title: "[Rules data]: "
+labels: ["rules-data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Megatracker's rules data comes from Matt Crawford's [Mega Empires Calculator](https://calculator.mega-empires.com/), imported by `scripts/import-calculator-data.mjs`. If the calculator shows the same wrong value, the fix may belong upstream there as well as here.
+  - type: input
+    id: item
+    attributes:
+      label: Advance or calamity
+      placeholder: Monarchy
+    validations:
+      required: true
+  - type: dropdown
+    id: block
+    attributes:
+      label: Block
+      options:
+        - The West
+        - The East
+        - The Far East
+        - All of them
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: Value shown in Megatracker
+      description: The cost, credit, VP or effect text the app shows.
+    validations:
+      required: true
+  - type: textarea
+    id: rules
+    attributes:
+      label: Value the rules give
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: Rulebook and page number, or another source.
+      placeholder: Mega Empires The West rulebook, p. 24
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the Menu and in About, for example "0.3.0 · build abc1234".
