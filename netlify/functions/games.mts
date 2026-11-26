@@ -1,10 +1,12 @@
 // The shared-game API: /api/games and everything under it. See server/handler.ts.
-import { handle } from '../../server/handler';
+import { AblyLive } from '../../server/ablyLive';
+import { handle, type Live } from '../../server/handler';
 import { NeonStore } from '../../server/neonStore';
 import { FileStore } from '../../server/fileStore';
 import type { GameStore } from '../../server/store';
 
 let store: GameStore | null = null;
+let live: Live | undefined;
 
 function getStore(): GameStore | null {
   if (store) return store;
@@ -22,6 +24,7 @@ const json = (status: number, body: unknown) =>
 
 export default async (req: Request) => {
   const s = getStore();
+  if (!live && process.env.ABLY_API_KEY) live = new AblyLive(process.env.ABLY_API_KEY);
   if (!s) return json(503, { error: 'Shared games aren’t set up on this server yet.' });
   const url = new URL(req.url);
   const auth = req.headers.get('authorization') ?? '';
@@ -39,7 +42,7 @@ export default async (req: Request) => {
       path: url.pathname.replace(/^\/api\/games/, ''),
       token: auth.startsWith('Bearer ') ? auth.slice(7) : null,
       body,
-    });
+    }, live);
     return json(res.status, res.body);
   } catch (e) {
     console.error(e);

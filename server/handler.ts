@@ -4,7 +4,7 @@ import { PLAYER_COUNTS } from '../src/engine/game';
 import type { SharedAstMode } from '../src/engine/standings';
 import { cleanSnapshot, standings } from '../src/engine/standings';
 import type { GameView, SeatGrant } from '../src/shared/api';
-import { CODE_ALPHABET, CODE_LENGTH, NAME_MAX, normalizeCode } from '../src/shared/api';
+import { CODE_ALPHABET, CODE_LENGTH, liveChannel, NAME_MAX, normalizeCode } from '../src/shared/api';
 import type { GameRow, GameStore, NewSeat, SeatRow } from './store';
 
 export interface ApiRequest {
@@ -19,6 +19,26 @@ export interface ApiRequest {
 export interface ApiResponse {
   status: number;
   body: unknown;
+}
+
+/** Live updates (Ably): optional, so the API works without them. */
+export interface Live {
+  /** A token request phones exchange for a subscribe-only token on one channel. */
+  tokenRequest(channel: string): Promise<unknown>;
+  publish(channel: string, view: GameView): Promise<void>;
+}
+
+/** How long a write waits for its live update before answering anyway. */
+const PUBLISH_TIMEOUT = 2_000;
+
+async function notify(live: Live | undefined, view: GameView) {
+  if (!live) return;
+  try {
+    await Promise.race([live.publish(liveChannel(view.code), view), new Promise((r) => setTimeout(r, PUBLISH_TIMEOUT))]);
+  } catch (e) {
+    // Phones still catch up by polling.
+    console.error('Live update failed', e);
+  }
 }
 
 const ok = (body: unknown, status = 200): ApiResponse => ({ status, body });
@@ -60,6 +80,7 @@ function view(game: GameRow, seats: SeatRow[]): GameView {
     status: game.status,
     createdAt: game.createdAt,
     endedAt: game.endedAt,
+    asOf: new Date().toISOString(),
     standings: rows.map((r) => ({
       seatId: r.id,
       name: r.name,
@@ -88,7 +109,7 @@ async function seatFor(seats: SeatRow[], token: string | null): Promise<SeatRow 
   return seats.find((s) => s.tokenHash === hash) ?? null;
 }
 
-export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResponse> {
+export async function handle(store: GameStore, req: ApiRequest, live?: Live): Promise<ApiResponse> {
   const parts = req.path.split('/').filter(Boolean);
   const body = (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>;
 
@@ -125,6 +146,13 @@ export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResp
     return ok(view(game, seats));
   }
 
+  // GET /api/games/:code/live-token: a subscribe-only Ably token request for this game's channel.
+  if (parts.length === 2 && parts[1] === 'live-token') {
+    if (req.method !== 'GET') return fail(405, 'Method not allowed.');
+    if (!live) return fail(503, 'Live updates aren’t set up on this server.');
+    return ok(await live.tokenRequest(liveChannel(game.code)));
+  }
+
   // POST /api/games/:code/end: the host ends the game and the results are kept.
   if (parts.length === 2 && parts[1] === 'end') {
     if (req.method !== 'POST') return fail(405, 'Method not allowed.');
@@ -136,7 +164,9 @@ export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResp
       game.id,
       final.standings.map((s) => ({ seatId: s.seatId, rank: s.rank, score: s.score })),
     );
-    return ok({ ...final, status: 'ended', endedAt: new Date().toISOString() });
+    const ended: GameView = { ...final, status: 'ended', endedAt: new Date().toISOString() };
+    await notify(live, ended);
+    return ok(ended);
   }
 
   if (parts[1] !== 'seats' || parts.length > 3) return fail(404, 'Not found.');
@@ -150,6 +180,7 @@ export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResp
     const seat = await store.addSeat(game.id, made.seat);
     if (!seat) return fail(409, `Someone is already playing ${made.seat.nation} in this game.`);
     const grant: SeatGrant = { seatId: seat.id, token: made.token, game: view(game, [...seats, seat]) };
+    await notify(live, grant.game);
     return ok(grant, 201);
   }
 
@@ -163,7 +194,9 @@ export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResp
     if (game.status === 'ended') return fail(409, 'This game has ended.');
     const snapshot = cleanSnapshot(game.block, body.snapshot);
     await store.updateSnapshot(target.id, snapshot);
-    return ok(view(game, seats.map((s) => (s.id === target.id ? { ...s, snapshot, updatedAt: new Date().toISOString() } : s))));
+    const updated = view(game, seats.map((s) => (s.id === target.id ? { ...s, snapshot, updatedAt: new Date().toISOString() } : s)));
+    await notify(live, updated);
+    return ok(updated);
   }
 
   if (req.method === 'DELETE') {
@@ -172,7 +205,9 @@ export async function handle(store: GameStore, req: ApiRequest): Promise<ApiResp
     if (target.host) return fail(409, 'The host can’t leave. End the game instead.');
     if (game.status === 'ended') return fail(409, 'This game has ended.');
     await store.removeSeat(target.id);
-    return ok(view(game, seats.filter((s) => s.id !== target.id)));
+    const remaining = view(game, seats.filter((s) => s.id !== target.id));
+    await notify(live, remaining);
+    return ok(remaining);
   }
 
   return fail(405, 'Method not allowed.');

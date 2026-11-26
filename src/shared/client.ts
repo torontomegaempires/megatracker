@@ -39,5 +39,6 @@ export const api = {
   update: (code: string, seatId: string, token: string, req: UpdateSeatRequest) =>
     call<GameView>('PUT', `/${encodeURIComponent(code)}/seats/${seatId}`, req, token),
   remove: (code: string, seatId: string, token: string) => call<GameView>('DELETE', `/${encodeURIComponent(code)}/seats/${seatId}`, undefined, token),
+  liveToken: (code: string) => call<unknown>('GET', `/${encodeURIComponent(code)}/live-token`),
   end: (code: string, token: string) => call<GameView>('POST', `/${encodeURIComponent(code)}/end`, {}, token),
 };
