@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { BLOCKS, COLOR_NAMES, COLORS, rulesFor } from '../data';
 import type { AstMode } from '../engine/game';
-import { astStatus, buildingPoints, buildingsOn, costSummary, specialAbilities, totalVictoryPoints, victoryPoints } from '../engine/selectors';
+import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
 import { Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
@@ -34,8 +34,6 @@ export function GameScreen() {
   const summary = costSummary(game);
   const showCart = (tab === 'advances' || tab === 'goal') && (summary.lines.length > 0 || !!summary.building);
   const specials = specialAbilities(game).length;
-  const vp = totalVictoryPoints(game);
-  const fromBuildings = buildingPoints(game)?.total;
 
   return (
     <div className="shell">
@@ -48,16 +46,9 @@ export function GameScreen() {
             <span className="brand-name">{BLOCKS[game.block].name}</span>
           </div>
           <div className="topbar-spacer" />
-          <div
-            className="vp"
-            aria-label={
-              fromBuildings === undefined
-                ? `${vp} victory points from Advances`
-                : `${vp} victory points: ${victoryPoints(game)} from Advances, ${fromBuildings} from special buildings`
-            }
-          >
-            <strong>{vp}</strong>
-            <span>VP</span>
+          <div className="vp" aria-label={`${victoryPoints(game)} victory points from Advances`}>
+            <strong>{victoryPoints(game)}</strong>
+            <span>Advances VP</span>
           </div>
         </div>
         <div className="credits" aria-label="Your credits">
@@ -185,8 +176,8 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           />
           <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
             {buildingsOn(game)
-              ? 'Build and track special buildings on the Cities tab. Their VP are added to yours.'
-              : 'Adds special buildings to the Cities tab, their price to your purchase and their VP to yours.'}
+              ? 'Build and track special buildings, and their VP, on the Cities tab.'
+              : 'Adds special buildings and their VP to the Cities tab, and their price to your purchase.'}
           </p>
         </div>
       )}

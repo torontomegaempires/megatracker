@@ -54,11 +54,6 @@ export function buildingPoints(state: GameState): BuildingPoints | null {
   return { ...p, total: p.owned + p.controlled + p.historic };
 }
 
-/** Victory points from Advances and, when the game uses them, special buildings. */
-export function totalVictoryPoints(state: GameState): number {
-  return victoryPoints(state) + (buildingPoints(state)?.total ?? 0);
-}
-
 export interface FundsBreakdown {
   /** Value of the commodity cards that will be turned in (not held), including any substitution. */
   cards: number;

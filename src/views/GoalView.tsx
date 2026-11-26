@@ -1,6 +1,6 @@
 import type { GoalId } from '../data';
 import type { StrategyOption } from '../engine/game';
-import { goalProgress, goalSuggestions, totalVictoryPoints } from '../engine/selectors';
+import { goalProgress, goalSuggestions, victoryPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { useGame } from '../state/store';
 import { AdvanceRow } from './AdvancesView';
@@ -56,7 +56,7 @@ export function GoalView({ onOpen }: { onOpen: (name: string) => void }) {
               </div>
               <div className="fact">
                 <div className="label">VP when done</div>
-                <div className="value">{totalVictoryPoints(game) + progress.vpLeft}</div>
+                <div className="value">{victoryPoints(game) + progress.vpLeft}</div>
               </div>
             </div>
           ) : (

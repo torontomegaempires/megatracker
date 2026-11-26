@@ -11,7 +11,10 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 ## [Unreleased]
 
 ### Added
-- The Special Buildings expansion (The West and The East): turn it on in the Menu. On the Cities tab, below city building, pick your civilization and A.S.T. era, add a building to your purchase (30, 40 or 50, and Library can discount it) or mark one already built, and track the buildings you control. Their VP (2 for owning, 1 per building controlled, 2 more for your civilization's) are added to your total. On the Trade tab you can sacrifice controlled buildings as cards of incomplete sets, placed where they add the most alongside Trade Empire; the Calamities tab offers your building's sacrifice against a calamity.
+- The Special Buildings expansion (The West and The East): turn it on in the Menu. On the Cities tab, below city building, pick your civilization and A.S.T. era, add a building to your purchase (30, 40 or 50, and Library can discount it) or mark one already built, and track the buildings you control. Their VP (2 for owning, 1 per building controlled, 2 more for your civilization's) are shown there, apart from your Advances VP. On the Trade tab you can sacrifice controlled buildings as cards of incomplete sets, placed where they add the most alongside Trade Empire; the Calamities tab offers your building's sacrifice against a calamity.
+
+### Changed
+- The VP at the top of the screen is now labelled "Advances VP": it counts only your Advances.
 
 ## [0.2.0] - 2026-11-26
 

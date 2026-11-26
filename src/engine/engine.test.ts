@@ -3,7 +3,7 @@ import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, reducer, zeroCredits } from './game';
-import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, totalVictoryPoints, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { astStatus, bestSubstitution, buildingPoints, cost, costSummary, funds, fundsBreakdown, goalProgress, goalSuggestions, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -397,7 +397,8 @@ describe('special buildings', () => {
     let linda = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'minoa' } });
     linda = control(reducer(linda, { type: 'setOwnedBuilding', id: 'minoa' }), 'minoa', 'hatti');
     expect(buildingPoints(linda)?.total).toBe(3);
-    expect(totalVictoryPoints(buy(linda, 'Pottery'))).toBe(victoryPoints(buy(linda, 'Pottery')) + 3);
+    // Building VP stay apart from Advance VP.
+    expect(victoryPoints(buy(linda, 'Pottery'))).toBe(1);
   });
 
   it('counts sacrificed buildings as missing cards of incomplete sets', () => {
