@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
-import { BLOCKS, COLOR_NAMES, COLORS } from '../data';
+import { BLOCKS, COLOR_NAMES, COLORS, rulesFor } from '../data';
 import type { AstMode } from '../engine/game';
-import { astStatus, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
+import { astStatus, buildingPoints, buildingsOn, costSummary, specialAbilities, totalVictoryPoints, victoryPoints } from '../engine/selectors';
 import { Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
@@ -31,8 +31,11 @@ export function GameScreen() {
   const [focusHand, setFocusHand] = useState(false);
   const clearFocusHand = useCallback(() => setFocusHand(false), []);
   const close = () => setOverlay(null);
-  const showCart = (tab === 'advances' || tab === 'goal') && costSummary(game).lines.length > 0;
+  const summary = costSummary(game);
+  const showCart = (tab === 'advances' || tab === 'goal') && (summary.lines.length > 0 || !!summary.building);
   const specials = specialAbilities(game).length;
+  const vp = totalVictoryPoints(game);
+  const fromBuildings = buildingPoints(game)?.total;
 
   return (
     <div className="shell">
@@ -45,8 +48,15 @@ export function GameScreen() {
             <span className="brand-name">{BLOCKS[game.block].name}</span>
           </div>
           <div className="topbar-spacer" />
-          <div className="vp" aria-label={`${victoryPoints(game)} victory points from Advances`}>
-            <strong>{victoryPoints(game)}</strong>
+          <div
+            className="vp"
+            aria-label={
+              fromBuildings === undefined
+                ? `${vp} victory points from Advances`
+                : `${vp} victory points: ${victoryPoints(game)} from Advances, ${fromBuildings} from special buildings`
+            }
+          >
+            <strong>{vp}</strong>
             <span>VP</span>
           </div>
         </div>
@@ -161,6 +171,25 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           Tracks the Advance and VP requirements for each age. Cities are not tracked.
         </p>
       </div>
+      {rulesFor(game.block).rules === 'we' && (
+        <div className="section">
+          <h3>The Special Buildings expansion</h3>
+          <Segmented<'off' | 'on'>
+            label="Special Buildings expansion"
+            value={game.buildings.enabled ? 'on' : 'off'}
+            onChange={(v) => dispatch({ type: 'setBuildings', buildings: { enabled: v === 'on' } })}
+            options={[
+              { value: 'off', label: 'Off' },
+              { value: 'on', label: 'On' },
+            ]}
+          />
+          <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
+            {buildingsOn(game)
+              ? 'Build and track special buildings on the Specials tab. Their VP are added to yours.'
+              : 'Adds special buildings to the Specials tab, their price to your purchase and their VP to yours.'}
+          </p>
+        </div>
+      )}
       <div className="section menu-list">
         <h3>Game</h3>
         <button type="button" className="btn btn-block" onClick={onAbout}>

@@ -25,6 +25,8 @@ calculations — with a new interface. Group-specific enhancements will be added
   today and the VP you'll have when done. Ideas by theme (cheaper Advances, treasury, trade
   cards, the next AST age and more) help you add to it.
 - **Specials** — your owned special abilities, with one-tap use where the app can help.
+- **Special buildings** — optional (West/East): build one with your Advances, track the ones you
+  control and their VP, and sacrifice them for funds or against a calamity.
 - **AST guide** — optional Basic/Expert Archaeological Succession Table progress.
 
 The game is saved in the browser on each device (localStorage).

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Commodity } from '../data';
-import { commoditiesFor, commodityById, rulesFor, setValue } from '../data';
-import { calamityDescription, cityModifiers, fundsBreakdown, ownedTradePowers, potentialCities, specialAbilities, tradeCardCost, visibleCalamities } from '../engine/selectors';
+import { buildingById, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import { buildingsOn, calamityDescription, cityModifiers, fundsBreakdown, ownedTradePowers, potentialCities, specialAbilities, tradeCardCost, visibleCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { RulesText, Segmented, Stepper } from '../components/ui';
 import { TOKEN_POOL } from '../engine/game';
 import { useGame } from '../state/store';
+import { BuildingsView, confirmSacrifice } from './BuildingsView';
 
 function BoardInputs({ tokens = true }: { tokens?: boolean }) {
   const { game, dispatch } = useGame();
@@ -118,6 +119,7 @@ export function TradeView({ focusHand, onFocused }: { focusHand?: boolean; onFoc
       <FundsSummary />
       <TreasuryInput />
       <HandList />
+      <BuildingSacrifice />
       <CommodityPicker />
     </>
   );
@@ -193,6 +195,13 @@ function FundsSummary() {
             Counting 1 {f.substitution.substitute.name} as {f.substitution.set.name} ({f.substitution.advance}) adds {f.substitution.gain}
           </>
         )}
+        {f.buildingCards && f.buildingCards.used > 0 && (
+          <>
+            <br />
+            Sacrificing {f.buildingCards.used === 1 ? '1 building' : `${f.buildingCards.used} buildings`} as{' '}
+            {f.buildingCards.sets.map((s) => `${s.cards} ${s.set.name}`).join(' and ')} adds {f.buildingCards.gain}
+          </>
+        )}
       </div>
     </div>
   );
@@ -245,7 +254,8 @@ function HandList() {
         {items.map(({ c, n }) => {
           const isHeld = held.includes(c.id);
           const sub = f.substitution;
-          const counted = sub?.set.id === c.id ? n + 1 : sub?.substitute.id === c.id ? n - 1 : n;
+          const fromBuildings = f.buildingCards?.sets.find((s) => s.set.id === c.id)?.cards ?? 0;
+          const counted = (sub?.set.id === c.id ? n + 1 : sub?.substitute.id === c.id ? n - 1 : n) + fromBuildings;
           return (
             <li key={c.id} className={`hand-row${isHeld ? ' is-held' : ''}`}>
               <span className="stack-num" aria-label={`Face value ${c.value}`}>
@@ -257,6 +267,7 @@ function HandList() {
                   {isHeld ? 'Held · ' : ''}worth <b className="num">{setValue(c.value, counted)}</b>
                   {sub?.set.id === c.id && <> +1 {sub.substitute.name}</>}
                   {sub?.substitute.id === c.id && <> · 1 as {sub.set.name}</>}
+                  {fromBuildings > 0 && <> +{fromBuildings === 1 ? '1 building' : `${fromBuildings} buildings`}</>}
                 </span>
               </span>
               <Stepper label={`${c.name} cards`} value={n} min={0} max={Math.max(c.max, n)} onChange={(count) => dispatch({ type: 'setCommodity', id: c.id, count })} />
@@ -279,6 +290,37 @@ function HandList() {
         </button>
       </div>
     </>
+  );
+}
+
+/** Controlled special buildings to sacrifice as commodity cards with this purchase. */
+function BuildingSacrifice() {
+  const { game, dispatch } = useGame();
+  if (!buildingsOn(game) || game.buildings.controlled.length === 0) return null;
+  const { controlled, sacrificing } = game.buildings;
+  const cards = fundsBreakdown(game).buildingCards;
+  const unused = cards ? cards.sacrificed - cards.used : 0;
+  return (
+    <div className="panel picker">
+      <h4 className="picker-head">Sacrifice special buildings</h4>
+      <p className="muted" style={{ fontSize: 13, margin: '0 0 8px' }}>
+        Each counts as 1 card of an incomplete set you turn in, and leaves the board when you buy. You lose its VP.
+      </p>
+      <div className="chips">
+        {controlled.map((id) => (
+          <button key={id} type="button" className="chip" aria-pressed={sacrificing.includes(id)} onClick={() => dispatch({ type: 'toggleSacrifice', id })}>
+            {buildingById(id)!.name}
+          </button>
+        ))}
+      </div>
+      {unused > 0 && (
+        <p className="bad" style={{ fontSize: 13, marginTop: 8 }}>
+          {cards!.used === 0
+            ? 'No incomplete set to add to: these buildings would add nothing.'
+            : `Only ${cards!.used} can join an incomplete set; the other ${unused === 1 ? 'adds' : `${unused} add`} nothing.`}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -357,6 +399,7 @@ export function CalamitiesView({ onOpen }: { onOpen: (name: string) => void }) {
       <div className="page-head">
         <h2>Calamities</h2>
       </div>
+      <CalamityBuilding />
       <div className="toggles" role="group" aria-label="Show">
         <button type="button" className="chip" aria-pressed={v.major} onClick={() => toggle('major')}>
           Major
@@ -410,6 +453,25 @@ export function CalamitiesView({ onOpen }: { onOpen: (name: string) => void }) {
   );
 }
 
+/** The building you own and control can be sacrificed to soften one calamity. */
+function CalamityBuilding() {
+  const { game, dispatch } = useGame();
+  const { owned, controlled } = game.buildings;
+  if (!buildingsOn(game) || !owned || !controlled.includes(owned)) return null;
+  const b = buildingById(owned)!;
+  return (
+    <div className="notice">
+      <div className="grow">
+        <strong>{b.name}:</strong> sacrifice it against one calamity to prevent up to 10 damage, the reduction of up to 2 cities, or 1 step
+        of Regression.
+      </div>
+      <button type="button" className="btn" onClick={() => confirmSacrifice(b) && dispatch({ type: 'sacrificeBuilding', id: b.id })}>
+        Sacrifice
+      </button>
+    </div>
+  );
+}
+
 // --------------------------------------------------------------- specials
 
 export function SpecialsView({ onActivated }: { onActivated: (goToAdvances: boolean) => void }) {
@@ -417,7 +479,8 @@ export function SpecialsView({ onActivated }: { onActivated: (goToAdvances: bool
   const list = specialAbilities(game);
   return (
     <>
-      <div className="page-head">
+      {buildingsOn(game) && <BuildingsView onPurchase={() => onActivated(true)} />}
+      <div className={`page-head${buildingsOn(game) ? ' page-head-later' : ''}`}>
         <h2>Special abilities</h2>
         <span className="muted">after calamities</span>
       </div>
