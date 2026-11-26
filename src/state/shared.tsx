@@ -3,6 +3,7 @@ import type { SeatSnapshot, SharedAstMode } from '../engine/standings';
 import { snapshotOf } from '../engine/standings';
 import type { GameView } from '../shared/api';
 import { api, ApiFailure } from '../shared/client';
+import { connectLive } from '../shared/live';
 import { useStore } from './store';
 
 const SEAT_KEY = 'megatracker:shared';
@@ -26,6 +27,8 @@ interface Shared {
   seat: Seat | null;
   view: GameView | null;
   status: SyncStatus;
+  /** Whether standings arrive live (Ably) rather than by polling. */
+  live: boolean;
   /** Something to tell the player, e.g. that the host removed them. */
   notice: string | null;
   clearNotice: () => void;
@@ -81,12 +84,22 @@ export function SharedProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<SyncStatus>('saved');
   const [notice, setNotice] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+  const [live, setLive] = useState(false);
   /** The snapshot the server last accepted, as JSON. */
   const sent = useRef<string | null>(null);
+  /** When the shown view was built: an older one arriving late (poll or live) is ignored. */
+  const shownAsOf = useRef('');
+
+  const show = useCallback((v: GameView) => {
+    if (v.asOf < shownAsOf.current) return;
+    shownAsOf.current = v.asOf;
+    setView(v);
+  }, []);
 
   const setSeat = useCallback((s: Seat | null) => {
     setSeatState(s);
     write(SEAT_KEY, s);
+    shownAsOf.current = '';
     if (!s) {
       setView(null);
       sent.current = null;
@@ -105,9 +118,9 @@ export function SharedProvider({ children }: { children: ReactNode }) {
   const accept = useCallback(
     (v: GameView, s: Seat) => {
       if (!v.standings.some((r) => r.seatId === s.seatId)) lost(`You’re no longer in game ${s.code}: the host removed your nation.`);
-      else setView(v);
+      else show(v);
     },
-    [lost],
+    [lost, show],
   );
 
   const failed = useCallback(
@@ -174,10 +187,10 @@ export function SharedProvider({ children }: { children: ReactNode }) {
       write(NAME_KEY, name);
       sent.current = JSON.stringify(snap);
       setSeat({ code: grant.game.code, seatId: grant.seatId, token: grant.token, host: true });
-      setView(grant.game);
+      show(grant.game);
       setStatus('saved');
     },
-    [game, setSeat],
+    [game, setSeat, show],
   );
 
   const join = useCallback(
@@ -186,11 +199,11 @@ export function SharedProvider({ children }: { children: ReactNode }) {
       write(NAME_KEY, name);
       sent.current = JSON.stringify(snap);
       setSeat({ code: grant.game.code, seatId: grant.seatId, token: grant.token, host: false });
-      setView(grant.game);
+      show(grant.game);
       setStatus('saved');
       return grant.game;
     },
-    [setSeat],
+    [setSeat, show],
   );
 
   const leave = useCallback(async () => {
@@ -207,23 +220,55 @@ export function SharedProvider({ children }: { children: ReactNode }) {
 
   const end = useCallback(async () => {
     if (!seat) return;
-    setView(await api.end(seat.code, seat.token));
-  }, [seat]);
+    show(await api.end(seat.code, seat.token));
+  }, [seat, show]);
 
   const remove = useCallback(
     async (seatId: string) => {
       if (!seat) return;
-      setView(await api.remove(seat.code, seatId, seat.token));
+      show(await api.remove(seat.code, seatId, seat.token));
     },
-    [seat],
+    [seat, show],
   );
+
+  // Live standings over Ably while the game is on. Without it (not set up, or blocked), polling carries on.
+  const code = seat?.code ?? null;
+  const ended = view?.status === 'ended';
+  const acceptRef = useRef(accept);
+  acceptRef.current = accept;
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
+  useEffect(() => {
+    if (!code || ended) return;
+    let closed = false;
+    let close = () => {};
+    void connectLive(code, {
+      onView: (v) => {
+        const s = read<Seat>(SEAT_KEY);
+        if (s?.code === code) acceptRef.current(v, s);
+      },
+      onConnected: (connected) => {
+        setLive(connected);
+        // Catch up on anything sent while the connection was down.
+        if (connected) void refreshRef.current();
+      },
+    }).then((stop) => {
+      if (closed) stop();
+      else close = stop;
+    });
+    return () => {
+      closed = true;
+      close();
+      setLive(false);
+    };
+  }, [code, ended]);
 
   const forget = useCallback(() => setSeat(null), [setSeat]);
   const clearNotice = useCallback(() => setNotice(null), []);
 
   const value = useMemo(
-    () => ({ seat, view, status, notice, clearNotice, create, join, leave, forget, end, remove, refresh }),
-    [seat, view, status, notice, clearNotice, create, join, leave, forget, end, remove, refresh],
+    () => ({ seat, view, status, live, notice, clearNotice, create, join, leave, forget, end, remove, refresh }),
+    [seat, view, status, live, notice, clearNotice, create, join, leave, forget, end, remove, refresh],
   );
   return <SharedContext.Provider value={value}>{children}</SharedContext.Provider>;
 }
@@ -236,7 +281,7 @@ export function useShared(): Shared {
 
 /** Keeps the standings fresh while a screen showing them is open and the page is visible. */
 export function useStandingsPolling(active: boolean) {
-  const { seat, view, refresh } = useShared();
+  const { seat, view, live, refresh } = useShared();
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   const ended = view?.status === 'ended';
@@ -246,12 +291,12 @@ export function useStandingsPolling(active: boolean) {
       if (document.visibilityState === 'visible') void refreshRef.current();
     };
     tick();
-    if (ended) return;
+    if (ended || live) return;
     const timer = setInterval(tick, POLL_INTERVAL);
     document.addEventListener('visibilitychange', tick);
     return () => {
       clearInterval(timer);
       document.removeEventListener('visibilitychange', tick);
     };
-  }, [active, seat, ended]);
+  }, [active, seat, ended, live]);
 }

@@ -71,7 +71,7 @@ export function SharedGameView({ joinCode, onJoinHandled }: { joinCode: string |
 
 function Standings({ view }: { view: GameView }) {
   const { game, dispatch } = useGame();
-  const { seat, status, leave, end, remove, forget } = useShared();
+  const { seat, status, live, leave, end, remove, forget } = useShared();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const ended = view.status === 'ended';
@@ -122,7 +122,7 @@ function Standings({ view }: { view: GameView }) {
           </div>
           <p className={`shared-sync${status === 'offline' ? ' is-offline' : ''}`} role="status">
             {status === 'saving' && 'Sending your score…'}
-            {status === 'saved' && 'Your score is shared with the table.'}
+            {status === 'saved' && (live ? 'Your score is shared. Standings update live.' : 'Your score is shared. Standings refresh every few seconds.')}
             {status === 'offline' && 'Offline. Your changes will be sent when the connection is back.'}
           </p>
         </div>

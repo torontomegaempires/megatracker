@@ -49,7 +49,10 @@ npm run build    # type-check and build to dist/
 Shared games run on a Netlify Function (`netlify/functions/games.mts`, logic in `server/`)
 backed by Neon Postgres. The function reads the database URL from `NETLIFY_DATABASE_URL`
 (set by Netlify DB) or `DATABASE_URL`, and creates its tables on first use
-(`server/schema.ts`). Under `netlify dev` with neither set, games are kept in
+(`server/schema.ts`). With `ABLY_API_KEY` set, every change is published on the game's Ably
+channel (`megatracker:game:CODE`) and phones subscribe with subscribe-only tokens from
+`/api/games/CODE/live-token`; without it, the Game tab polls every 8 seconds instead. Under
+`netlify dev` with no database URL set, games are kept in
 `.netlify/shared-games.json` instead. When a game ends, each seat's final score, cities,
 A.S.T. position, 1/3/6 VP Advance counts and building flags are stored in the same shape as the
 group website's `game_player_nation` table.

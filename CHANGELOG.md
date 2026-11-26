@@ -11,7 +11,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 ## [Unreleased]
 
 ### Added
-- Shared games: one player creates a game on the new Game tab and everyone else joins with its four-character code or a join link. Each phone shows every nation's score, rank and the A.S.T. era it has reached, and the host ends the game to save the final standings.
+- Shared games: one player creates a game on the new Game tab and everyone else joins with its four-character code or a join link. Each phone shows every nation's score, rank and the A.S.T. era it has reached, updated live as players change them, and the host ends the game to save the final standings.
 - Enter your A.S.T. position on the Game tab. Scores are Advance VP + cities + 5 per A.S.T. space moved + special-building VP, plus 5 VP for the only nation to reach the Late Iron Age.
 
 ### Changed

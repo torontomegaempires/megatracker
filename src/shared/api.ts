@@ -23,6 +23,8 @@ export interface GameView {
   status: GameStatus;
   createdAt: string;
   endedAt: string | null;
+  /** When the server built this view: phones ignore a view older than the one they show. */
+  asOf: string;
   standings: StandingView[];
 }
 
@@ -60,6 +62,14 @@ export interface ApiError {
 export const CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export const CODE_LENGTH = 4;
 export const NAME_MAX = 30;
+
+/** The Ably channel a game's standings are published on. */
+export function liveChannel(code: string): string {
+  return `megatracker:game:${code}`;
+}
+
+/** The Ably message name for a new GameView. */
+export const STANDINGS_EVENT = 'standings';
 
 export function normalizeCode(code: string): string {
   return code
