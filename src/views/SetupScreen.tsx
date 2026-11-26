@@ -4,12 +4,14 @@ import { BLOCKS } from '../data';
 import { PLAYER_COUNTS, startingCredits } from '../engine/game';
 import { Segmented } from '../components/ui';
 import { useStore } from '../state/store';
+import { JoinSheet } from './SharedGameView';
 import { versionLabel } from '../version';
 
 const MARKS: Record<BlockId, string> = { west: 'W', east: 'E', fareast: 'FE' };
 
-export function SetupScreen() {
+export function SetupScreen({ joinCode, onJoinHandled }: { joinCode: string | null; onJoinHandled: () => void }) {
   const { dispatch } = useStore();
+  const [joining, setJoining] = useState(!!joinCode);
   const [block, setBlock] = useState<BlockId | null>(null);
   const [players, setPlayers] = useState<number | null>(null);
   const credits = players === null ? 0 : startingCredits(players);
@@ -62,6 +64,22 @@ export function SetupScreen() {
           Start the game
         </button>
       </div>
+
+      <div className="setup-join">
+        <span className="muted">Playing with others using Megatracker?</span>
+        <button type="button" className="btn btn-block" onClick={() => setJoining(true)}>
+          Join a shared game
+        </button>
+      </div>
+      {joining && (
+        <JoinSheet
+          initialCode={joinCode ?? ''}
+          onClose={() => {
+            setJoining(false);
+            onJoinHandled();
+          }}
+        />
+      )}
 
       <p className="credit-foot">
         Based on the Mega Empires Calculator by{' '}

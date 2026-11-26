@@ -5,6 +5,14 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# `netlify dev` runs Vite and the shared-game functions together on http://localhost:8888.
+[dev]
+  command = "npm run dev"
+  targetPort = 5173
+  port = 8888
+  framework = "#custom"
+  autoLaunch = false
+
 # Single-page app: serve index.html for any unknown path.
 [[redirects]]
   from = "/*"
