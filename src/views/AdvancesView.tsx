@@ -11,7 +11,7 @@ import { useGame } from '../state/store';
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'unowned', label: 'Unowned' },
   { id: 'affordable', label: 'Affordable' },
-  { id: 'almostAffordable', label: 'Nearly affordable' },
+  { id: 'almostAffordable', label: 'Within reach' },
   { id: 'goal', label: 'Goal' },
   { id: 'owned', label: 'Owned' },
   { id: 'all', label: 'All' },
@@ -19,12 +19,12 @@ const FILTERS: { id: FilterId; label: string }[] = [
 
 export const SORTS: { id: SortId; label: string }[] = [
   { id: 'alpha', label: 'Name' },
-  { id: 'cost', label: 'Lowest cost' },
-  { id: 'vp', label: 'Most VP' },
-  { id: 'economy', label: 'Best VP per cost' },
-  { id: 'discount', label: 'Biggest discount' },
-  { id: 'color', label: 'Color group' },
-  { id: 'chains', label: 'Strategic chains' },
+  { id: 'cost', label: 'Cost' },
+  { id: 'vp', label: 'VP' },
+  { id: 'economy', label: 'VP per cost' },
+  { id: 'discount', label: 'Discount' },
+  { id: 'color', label: 'Color' },
+  { id: 'chains', label: 'Chains' },
 ];
 
 const FREE_PICK_TEXT = {
@@ -52,41 +52,38 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
         </div>
       ) : (
         <div className="toolbar">
-          <div className="chips" role="group" aria-label="Show">
-            {FILTERS.map((f) => (
-              <button key={f.id} type="button" className="chip" aria-pressed={game.view.filter === f.id} onClick={() => setView({ filter: f.id })}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-          <div className="toolbar-row">
-            <label className="select">
-              Sort
-              <span className="select-wrap">
-              <select value={game.view.sort} onChange={(e) => setView({ sort: e.target.value as SortId })}>
-                {SORTS.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-              <Icon name="chevronDown" />
-              </span>
-            </label>
-          </div>
-          <div className="funds-strip">
-            {available > 0 ? (
-              <span>
-                Funds to spend <strong className="num">{available}</strong>
-              </span>
-            ) : (
-              <span className="muted">Add your trade cards and treasury to see what you can afford.</span>
-            )}
-            <button type="button" className="btn" onClick={onFunds}>
-              <Icon name="wallet" />
-              {available > 0 ? 'Hand' : 'Add'}
-            </button>
-          </div>
+          <label className="picker">
+            <span className="picker-label">Show</span>
+            <select aria-label="Show" value={game.view.filter} onChange={(e) => setView({ filter: e.target.value as FilterId })}>
+              {FILTERS.map((f) => (
+                <option key={f.id} value={f.id}>
+                  {f.label}
+                </option>
+              ))}
+            </select>
+            <Icon name="chevronDown" />
+          </label>
+          <label className="picker">
+            <span className="picker-label">Sort</span>
+            <select aria-label="Sort" value={game.view.sort} onChange={(e) => setView({ sort: e.target.value as SortId })}>
+              {SORTS.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+            <Icon name="chevronDown" />
+          </label>
+          <button
+            type="button"
+            className="picker picker-funds"
+            aria-label={available > 0 ? `Funds to spend ${available}. Edit your hand` : 'Add your trade cards and treasury'}
+            onClick={onFunds}
+          >
+            <span className="picker-label">Funds</span>
+            <span className="picker-value num">{available > 0 ? available : 'Add'}</span>
+            <Icon name="wallet" />
+          </button>
         </div>
       )}
 

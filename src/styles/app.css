@@ -581,11 +581,89 @@ p {
 }
 
 /* --------------------------------------------------------------- toolbar */
+/* Show, Sort and Funds share one row: each control carries a small label
+   above its value so the whole toolbar costs a single 44px line. */
 .toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 10px;
+}
+
+.picker {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: block;
+}
+
+.picker select,
+.picker-funds {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 15px 28px 0 10px;
+  border-radius: var(--r-ui);
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--font-card);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.picker-label {
+  position: absolute;
+  left: 11px;
+  top: 5px;
+  font-family: var(--font-card);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  pointer-events: none;
+}
+
+.picker > .icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--ink);
+}
+
+.picker-funds {
+  flex: none;
+  width: auto;
+  min-width: 78px;
+  padding-right: 32px;
+}
+
+.picker-funds:hover {
+  background: var(--card-2);
+}
+
+.picker-funds > .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.picker-value {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .chips {
@@ -613,13 +691,6 @@ p {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--on-ink);
-}
-
-.toolbar-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
 }
 
 .select {
@@ -666,26 +737,6 @@ p {
   background: var(--card);
   color: var(--ink);
   font-size: 15px;
-}
-
-.funds-strip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: space-between;
-  min-height: 52px;
-  padding: 4px 4px 4px 14px;
-  border-radius: var(--r-card);
-  background: var(--card);
-  box-shadow: var(--lift);
-  font-size: 14px;
-}
-
-.funds-strip strong {
-  font-family: var(--font-card);
-  font-size: 26px;
-  font-weight: 700;
-  margin-left: 4px;
 }
 
 /* -------------------------------------------------- the stack of cards */
