@@ -32,7 +32,9 @@ jobs:
           tag="v$(node -p "require('./package.json').version")"
           if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
             echo "$tag already exists"
-            git fetch --depth=1 origin "refs/tags/$tag:refs/tags/$tag"
+            # Not --depth=1: on this full clone that would make it shallow again, cutting the tag
+            # off from its history so that moving production looks like a non-fast-forward.
+            git fetch origin "refs/tags/$tag:refs/tags/$tag"
           else
             git tag "$tag"
             git push origin "$tag"
