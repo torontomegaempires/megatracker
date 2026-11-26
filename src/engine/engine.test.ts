@@ -219,14 +219,15 @@ describe('trade hand', () => {
     expect(deck('west', 9)).toMatchObject({ Bone: 8, Amber: 4 });
     expect(deck('east', 9)).toMatchObject({ Bone: 8, Flax: 9 });
     expect(deck('east', 10)).toEqual(deck('west', 9)); // 10–11 use the West's 9-player deck
-    // 12–14: each block mixes both editions, with no extra sets
-    expect(deck('west', 12)).toMatchObject({ Ochre: 9, Clay: 5, Hides: 4, Gold: 3, Pearls: 2 });
-    expect(deck('west', 13).Silk).toBeUndefined();
+    // 12–14: the West and East split decks only set where cards are drawn; both blocks hold all of them
+    expect(deck('west', 12)).toMatchObject({ Ochre: 9, Flax: 9, Clay: 9, Hides: 9, Iron: 8, Gold: 5, Pearls: 5, Silk: 4 });
+    expect(deck('east', 12)).toEqual(deck('west', 12));
     expect(deck('west', 13).Bone).toBeUndefined();
-    expect(deck('east', 12)).toMatchObject({ Flax: 9, Clay: 4, Hides: 5, Silk: 4, Gold: 2 });
-    // 15–18 adds the extra sets at lower counts
-    expect(deck('east', 15)).toMatchObject({ Bone: 4, Amber: 2, Pearls: 3 });
-    expect(Object.keys(deck('west', 15))).toHaveLength(36);
+    expect(Object.keys(deck('west', 12))).toHaveLength(36);
+    // 15–18 adds the extra sets
+    expect(deck('east', 15)).toMatchObject({ Iron: 8, Bone: 8, Amber: 4, Pearls: 5 });
+    expect(deck('west', 15)).toEqual(deck('east', 15));
+    expect(Object.keys(deck('west', 15))).toHaveLength(45);
     expect(commoditiesFor('west', 15).every((c, i, a) => i === 0 || a[i - 1].value <= c.value)).toBe(true);
   });
 

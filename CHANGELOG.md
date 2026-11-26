@@ -10,6 +10,14 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+### Changed
+- Advances are sorted by cost unless you pick another order.
+- The tabs are now in the order Advances, Goal, Cities, Trade, Calamities, Specials, Game.
+- The special buildings' Trade benefit is its own paragraph on the Cities tab.
+
+### Fixed
+- With 12 or more players (the Mega Empires split decks), every trade card counts toward both the West and East blocks' sets, so Iron goes up to 8 cards rather than 4. The split only decides where a card is drawn.
+
 ## [0.4.0] - 2026-11-26
 
 ### Added

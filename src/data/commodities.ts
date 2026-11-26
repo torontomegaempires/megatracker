@@ -21,7 +21,7 @@ const c = ([name, value, max]: Row, id = name.toLowerCase()): Commodity => ({ id
 /**
  * West and East decks. Each column is the number of cards in one deck (0 = not used):
  * The West / The East with 3-8 players, with 9 players (the West's 9-player deck is also the
- * deck for 10-11 players), and the West and East blocks of 12-14 and 15-18 player games.
+ * deck for 10-11 players), and the West and East split decks of 12-14 and 15-18 player games.
  */
 const WE_DECKS = ['west', 'east', 'west9', 'east9', 'west12', 'east12', 'west15', 'east15'] as const;
 type WestEastDeck = (typeof WE_DECKS)[number];
@@ -76,21 +76,25 @@ const WE_TABLE: [name: string, value: number, ...counts: number[]][] = [
   ['Amber',     9, 0, 0, 4, 4, 0, 0, 2, 2],
 ];
 
-function westEastDeck(deck: WestEastDeck): Commodity[] {
-  const col = WE_DECKS.indexOf(deck);
-  return WE_TABLE.map(([name, value, ...counts]) => c([name, value, counts[col]])).filter((x) => x.max > 0);
+/** Cards per commodity in one deck, or in several decks combined. */
+function westEastDeck(...decks: WestEastDeck[]): Commodity[] {
+  const cols = decks.map((d) => WE_DECKS.indexOf(d));
+  const count = (counts: number[]) => cols.reduce((n, col) => n + counts[col], 0);
+  return WE_TABLE.map(([name, value, ...counts]) => c([name, value, count(counts)])).filter((x) => x.max > 0);
 }
 
 /**
- * Which West/East deck a game uses. Player counts are the PLAYER_COUNTS values: 7 is 7-8,
+ * Which West/East decks make up a game's cards. Player counts are the PLAYER_COUNTS values: 7 is 7-8,
  * 10 is 10-11, 13 is 13-14, 15 is 15-18, and 0 is an old "other" game (9-player deck).
  */
-function westEastDeckFor(block: 'west' | 'east', playerCount: number): WestEastDeck {
-  if (playerCount >= 15) return block === 'west' ? 'west15' : 'east15';
-  if (playerCount >= 12) return block === 'west' ? 'west12' : 'east12';
-  if (playerCount >= 10) return 'west9'; // 10-11 players use the West's 9-player deck
-  if (playerCount === 9 || playerCount === 0) return block === 'west' ? 'west9' : 'east9';
-  return block;
+function westEastDecksFor(block: 'west' | 'east', playerCount: number): WestEastDeck[] {
+  // 12+ players split the cards into a West and an East deck, but that only decides where a card
+  // is drawn: every card is in play for both blocks, so a hand can hold either deck's cards.
+  if (playerCount >= 15) return ['west15', 'east15'];
+  if (playerCount >= 12) return ['west12', 'east12'];
+  if (playerCount >= 10) return ['west9']; // 10-11 players use the West's 9-player deck
+  if (playerCount === 9 || playerCount === 0) return [block === 'west' ? 'west9' : 'east9'];
+  return [block];
 }
 
 /**
@@ -150,7 +154,7 @@ export function commoditiesFor(block: BlockId, playerCount: number): Commodity[]
     const extra = playerCount === 0 || playerCount >= 9;
     return extra ? [...FAR_EAST, ...FAR_EAST_ADDITIONAL].sort((a, b) => a.value - b.value) : FAR_EAST;
   }
-  return westEastDeck(westEastDeckFor(block, playerCount));
+  return westEastDeck(...westEastDecksFor(block, playerCount));
 }
 
 /** A set of identical commodities is worth face value × cards². */
