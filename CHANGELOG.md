@@ -12,6 +12,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ### Added
 - Goal tab: plan the Advances you want to buy over the game. It shows how many are left, what they cost today and the VP you'll have when done, and you can buy them from there. Ideas by theme (Cheaper Advances, More treasury, Trade cards, the next AST age and the rest) help you add to it, as does "Add to goal" on any Advance's details. Advances on your goal are flagged on the Advances tab.
+- Advance rows show the credits each card gives as small boxes in its colours, under the name.
 - Trade Empire (West/East) and Silk Routes (Far East) now count toward funds: the Trade tab counts the 1 commodity card that adds the most as a missing card of an incomplete set, and says which card it used.
 
 ### Changed
