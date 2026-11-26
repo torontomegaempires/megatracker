@@ -111,7 +111,9 @@ Each cuts a `release/vX.Y.Z` branch from `origin/main`, runs the tests and type 
 bumps `package.json`, dates the `[Unreleased]` section of the changelog, commits
 "Release vX.Y.Z", pushes, and opens a pull request. When it merges, the Tag release workflow
 tags `vX.Y.Z` on `main` and moves the `production` branch to it, which deploys the release to
-players. Nobody pushes to `production` by hand; it is protected so only that workflow can.
+players. Nobody pushes to `production` by hand. Its ruleset blocks deleting it and force
+pushes, so it can only move forward, but it doesn't stop someone with write access pushing to
+it, so leave that to the workflow.
 
 ## Reporting problems
 
