@@ -1,0 +1,80 @@
+name: Bug report
+description: Something in Megatracker doesn't work or looks wrong.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. If an Advance or calamity shows the wrong cost, credit or effect, use **Wrong rules data** instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, and what did you see?
+      placeholder: On the Advances tab I and…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown in the Menu and in About, for example "0.3.0 · build abc1234".
+      placeholder: 0.3.0 · build abc1234
+    validations:
+      required: true
+  - type: dropdown
+    id: block
+    attributes:
+      label: Block
+      options:
+        - The West
+        - The East
+        - The Far East
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: players
+    attributes:
+      label: Player count
+      placeholder: "7"
+  - type: dropdown
+    id: buildings
+    attributes:
+      label: Is the Special Buildings expansion on?
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+  - type: dropdown
+    id: tab
+    attributes:
+      label: Which tab?
+      description: Where in the app the problem shows up.
+      options:
+        - Advances
+        - Cities
+        - Trade
+        - Calamities
+        - Goal
+        - Specials
+        - Menu or About
+        - Setting up a new game
+        - Other
+  - type: input
+    id: device
+    attributes:
+      label: Phone and browser
+      placeholder: iPhone 15, Safari
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: Drag images here if they help show the problem.

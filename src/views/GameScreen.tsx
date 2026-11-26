@@ -206,6 +206,13 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
   );
 }
 
+const REPO_URL = 'https://github.com/torontomegaempires/megatracker';
+const ISSUES_URL = `${REPO_URL}/issues`;
+/** The bug report form, with the version field filled in (issue forms accept field ids as query parameters). */
+const BUG_REPORT_URL = `${ISSUES_URL}/new?template=bug_report.yml&version=${encodeURIComponent(
+  `${APP_VERSION} · build ${APP_COMMIT}`,
+)}`;
+
 function AboutSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="About Megatracker" onClose={onClose}>
@@ -228,15 +235,21 @@ function AboutSheet({ onClose }: { onClose: () => void }) {
           </a>{' '}
           license. Megatracker is © 2026 Rob McArthur and is shared under the same license.
         </p>
-        <p>The full source code is available on GitHub.</p>
         <p>
-          <a
-            className="github-link"
-            href="https://github.com/torontomegaempires/megatracker"
-            target="_blank"
-            rel="noreferrer"
-          >
+          The full source code is available on GitHub. Something wrong? Report a problem there, or{' '}
+          <a href={`${ISSUES_URL}/new/choose`} target="_blank" rel="noreferrer">
+            pick another form
+          </a>{' '}
+          for wrong rules data or ideas.
+        </p>
+        <p>
+          <a className="github-link" href={REPO_URL} target="_blank" rel="noreferrer">
             <GitHubIcon /> torontomegaempires/megatracker
+          </a>
+        </p>
+        <p>
+          <a className="github-link" href={BUG_REPORT_URL} target="_blank" rel="noreferrer">
+            <GitHubIcon /> Report a problem
           </a>
         </p>
         <p className="muted">Your game is saved on this device only.</p>
