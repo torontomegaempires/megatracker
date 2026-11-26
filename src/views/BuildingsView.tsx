@@ -83,8 +83,10 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
         </p>
         <p>
           <b>Calamities:</b> sacrifice the building you own and control to prevent up to 10 damage, the reduction of up to 2 cities, or 1
-          step of Regression, against one calamity. <b>Trade:</b> sacrifice any you control as 1 card each of incomplete sets when buying
-          (on the Trade tab).
+          step of Regression, against one calamity.
+        </p>
+        <p>
+          <b>Trade:</b> sacrifice any you control as 1 card each of incomplete sets when buying (on the Trade tab).
         </p>
       </div>
     </>

@@ -165,7 +165,7 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     goal: [],
     view: {
       filter: 'unowned',
-      sort: 'alpha',
+      sort: 'cost',
       ast: 'off',
       calamities: { minor: false, major: true, unowned: false },
     },
