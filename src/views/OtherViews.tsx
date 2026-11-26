@@ -187,6 +187,12 @@ function FundsSummary() {
             Holding {f.heldCards} {f.heldCards === 1 ? 'card' : 'cards'} worth {f.held} for next turn
           </>
         )}
+        {f.substitution && (
+          <>
+            <br />
+            Counting 1 {f.substitution.substitute.name} as {f.substitution.set.name} ({f.substitution.advance}) adds {f.substitution.gain}
+          </>
+        )}
       </div>
     </div>
   );
@@ -222,8 +228,10 @@ const HAND_LIMIT = 8;
 function HandList() {
   const { game, dispatch } = useGame();
   const { hand, held } = game.funding;
+  // Use this game's deck for the most cards of each commodity; other ids fall back to any edition.
+  const deck = new Map(commoditiesFor(game.block, game.playerCount).map((c) => [c.id, c]));
   const items = Object.entries(hand)
-    .map(([id, n]) => ({ c: commodityById(id), n }))
+    .map(([id, n]) => ({ c: deck.get(id) ?? commodityById(id), n }))
     .filter((x): x is { c: Commodity; n: number } => !!x.c)
     .sort((a, b) => a.c.value - b.c.value || a.c.name.localeCompare(b.c.name));
   const f = fundsBreakdown(game);
@@ -236,6 +244,8 @@ function HandList() {
       <ul className="rows hand-list" aria-label="Commodity cards in your hand">
         {items.map(({ c, n }) => {
           const isHeld = held.includes(c.id);
+          const sub = f.substitution;
+          const counted = sub?.set.id === c.id ? n + 1 : sub?.substitute.id === c.id ? n - 1 : n;
           return (
             <li key={c.id} className={`hand-row${isHeld ? ' is-held' : ''}`}>
               <span className="stack-num" aria-label={`Face value ${c.value}`}>
@@ -244,10 +254,12 @@ function HandList() {
               <span className="row-main">
                 <span className="row-title">{c.name}</span>
                 <span className="hand-worth">
-                  {isHeld ? 'Held · ' : ''}worth <b className="num">{setValue(c.value, n)}</b>
+                  {isHeld ? 'Held · ' : ''}worth <b className="num">{setValue(c.value, counted)}</b>
+                  {sub?.set.id === c.id && <> +1 {sub.substitute.name}</>}
+                  {sub?.substitute.id === c.id && <> · 1 as {sub.set.name}</>}
                 </span>
               </span>
-              <Stepper label={`${c.name} cards`} value={n} min={0} max={c.max} onChange={(count) => dispatch({ type: 'setCommodity', id: c.id, count })} />
+              <Stepper label={`${c.name} cards`} value={n} min={0} max={Math.max(c.max, n)} onChange={(count) => dispatch({ type: 'setCommodity', id: c.id, count })} />
               <button type="button" className="chip hold-chip" aria-pressed={isHeld} onClick={() => dispatch({ type: 'toggleHeld', id: c.id })}>
                 {isHeld ? 'Held' : 'Hold'}
               </button>

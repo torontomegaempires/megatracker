@@ -3,7 +3,7 @@ import { commoditiesFor, RULES, rulesFor } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadFunding, newGame, reducer, zeroCredits } from './game';
-import { astStatus, cost, costSummary, funds, fundsBreakdown, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
+import { astStatus, bestSubstitution, cost, costSummary, funds, fundsBreakdown, potentialCities, specialAbilities, tradeCardCost, victoryPoints, visibleAdvances } from './selectors';
 
 const adv = (s: GameState, n: string) => rulesFor(s.block).byName.get(n)!;
 const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) => reducer(g, { type: 'toggleConsider', name }), s);
@@ -220,6 +220,38 @@ describe('trade hand', () => {
     g = reducer(g, { type: 'setCommodity', id: 'fish', count: 0 });
     expect(g.funding).toEqual({ hand: {}, held: [], treasury: 0 });
     expect(reducer(g, { type: 'toggleHeld', id: 'fish' })).toBe(g);
+  });
+
+  it('counts 1 card as a missing card of an incomplete set with Trade Empire', () => {
+    let g = hand(newGame('west', 5), { iron: 3, fruit: 1 }); // 18 + 3
+    expect(funds(g)).toBe(21);
+    g = { ...g, owned: ['Trade Empire'] };
+    expect(fundsBreakdown(g)).toMatchObject({ cards: 32, total: 32 }); // 2 x 16
+    expect(bestSubstitution(g)).toMatchObject({ substitute: { id: 'fruit' }, set: { id: 'iron' }, gain: 11 });
+    // A card of the same face value can stand in too.
+    expect(bestSubstitution(hand({ ...newGame('west', 5), owned: ['Trade Empire'] }, { iron: 3, papyri: 1 }))?.gain).toBe(12);
+  });
+
+  it('substitutes only a card worth at least the set, into an incomplete set, for a gain', () => {
+    const te = (counts: Record<string, number>) => bestSubstitution(hand({ ...newGame('west', 5), owned: ['Trade Empire'] }, counts));
+    expect(te({ fish: 3, ochre: 1 })).toBeNull(); // Ochre is worth less than Fish
+    expect(te({ marble: 4, gold: 1 })).toBeNull(); // 4 Marble is the whole set
+    expect(te({ fruit: 3, wool: 4 })).toBeNull(); // a 5th Fruit adds 21, a Wool from the set costs 28
+    expect(te({ iron: 3, gold: 2, fish: 1 })).toMatchObject({ substitute: { id: 'fish' }, set: { id: 'iron' } });
+  });
+
+  it('leaves held sets out of substitution', () => {
+    let g = hand({ ...newGame('west', 5), owned: ['Trade Empire'] }, { iron: 3, fruit: 1 });
+    g = reducer(g, { type: 'toggleHeld', id: 'iron' });
+    expect(bestSubstitution(g)).toBeNull();
+    expect(fundsBreakdown(g)).toMatchObject({ cards: 3, held: 18 });
+  });
+
+  it('needs a higher face value for Silk Routes in the Far East', () => {
+    const sr = (counts: Record<string, number>) => bestSubstitution(hand({ ...newGame('fareast', 5), owned: ['Silk Routes'] }, counts));
+    expect(sr({ 'fe-bamboo': 3, 'fe-stone': 1 })).toBeNull();
+    expect(sr({ 'fe-bamboo': 3, 'fe-terracotta': 1 })).toMatchObject({ advance: 'Silk Routes', gain: 11 });
+    expect(bestSubstitution(hand({ ...newGame('fareast', 5), owned: ['Trade Empire'] }, { 'fe-bamboo': 3, 'fe-terracotta': 1 }))).toBeNull();
   });
 
   it('turns in unheld cards when buying, keeps held ones, and spends only the treasury needed', () => {
