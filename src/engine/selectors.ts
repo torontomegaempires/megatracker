@@ -1,6 +1,6 @@
 import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePower } from '../data';
 import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
-import type { AstMode, FilterId, FreePick, GameState, SortId, StrategyOption } from './game';
+import type { AstMode, FilterId, FreePick, GameState, SortId } from './game';
 
 /** Whether this game uses special buildings: the expansion is for The West and The East. */
 export function buildingsOn(state: GameState): boolean {
@@ -365,20 +365,6 @@ export function goalProgress(state: GameState): GoalProgress {
   };
 }
 
-/** Whether an Advance fits a theme: one of its goal tags, or helping reach the next AST age. */
-export function matchesStrategy(state: GameState, a: Advance, strategy: StrategyOption): boolean {
-  if (strategy === 'ast') return !!astStatus(state)?.next?.filter(a);
-  return !!a.goals?.[strategy];
-}
-
-/** Unowned Advances not yet on the goal that fit the chosen theme, cheapest first. */
-export function goalSuggestions(state: GameState): Advance[] {
-  const { strategy } = state.view;
-  return rulesFor(state.block)
-    .advances.filter((a) => !owns(state, a.name) && !onGoal(state, a.name) && matchesStrategy(state, a, strategy))
-    .sort((a, b) => cost(state, a) - cost(state, b) || a.price - b.price);
-}
-
 // ---------------------------------------------------------------------------
 // Archaeological Succession Table guide
 
@@ -391,21 +377,18 @@ export interface AstAge {
   minPrice: number;
   maxPrice: number;
   vp: number;
-  /** Which advances help reach this age (for the "AST advancement" goal). */
-  filter: (a: Advance) => boolean;
 }
 
-const any = () => true;
-const age = (abbr: string, name: string, text: string, cards = 0, minPrice = 0, maxPrice = 999, vp = 0, filter: (a: Advance) => boolean = any): AstAge => ({ abbr, name, text, cards, minPrice, maxPrice, vp, filter });
+const age = (abbr: string, name: string, text: string, cards = 0, minPrice = 0, maxPrice = 999, vp = 0): AstAge => ({ abbr, name, text, cards, minPrice, maxPrice, vp });
 
 export const AST: Record<Exclude<AstMode, 'off'>, AstAge[]> = {
   basic: [
     age('SA', 'Stone Age', 'No requirement'),
     age('EBA', 'Early Bronze Age', '2 cities'),
     age('MBA', 'Middle Bronze Age', '3 cities, 3 Advances', 3),
-    age('LBA', 'Late Bronze Age', '3 cities, 3 Advances priced 100+', 3, 100, 999, 0, (a) => a.price >= 100),
-    age('EIA', 'Early Iron Age', '4 cities, 2 Advances priced 200+', 2, 200, 999, 0, (a) => a.price >= 200),
-    age('LIA', 'Late Iron Age', '5 cities, 3 Advances priced 200+', 3, 200, 999, 0, (a) => a.price >= 200),
+    age('LBA', 'Late Bronze Age', '3 cities, 3 Advances priced 100+', 3, 100, 999),
+    age('EIA', 'Early Iron Age', '4 cities, 2 Advances priced 200+', 2, 200, 999),
+    age('LIA', 'Late Iron Age', '5 cities, 3 Advances priced 200+', 3, 200, 999),
   ],
   expert: [
     age('SA', 'Stone Age', 'No requirement'),

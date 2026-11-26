@@ -1,11 +1,9 @@
-import type { BlockId, BuildingEra, Credits, ExtraCredit, GoalId } from '../data';
+import type { BlockId, BuildingEra, Credits, ExtraCredit } from '../data';
 import { buildingById, COLORS, rulesFor } from '../data';
 import { buildingsOn, costSummary, freePickMatches, fundsBreakdown } from './selectors';
 
 export type FilterId = 'unowned' | 'affordable' | 'almostAffordable' | 'goal' | 'owned' | 'all';
 export type SortId = 'alpha' | 'cost' | 'vp' | 'economy' | 'discount' | 'color' | 'chains';
-/** A theme for finding Advances to add to your goal: one of the data's goal tags, or the next AST age. */
-export type StrategyOption = GoalId | 'ast';
 export type AstMode = 'off' | 'basic' | 'expert';
 /** A free advance being taken: Anatomy's cheap science, or Primal Philosophy's 1-VP advance. */
 export type FreePick = 'cheapScience' | 'oneVP';
@@ -43,8 +41,6 @@ export type QueueItem =
 
 export interface ViewSettings {
   filter: FilterId;
-  /** The theme the Goal tab suggests Advances for. */
-  strategy: StrategyOption;
   sort: SortId;
   ast: AstMode;
   calamities: { minor: boolean; major: boolean; unowned: boolean };
@@ -136,13 +132,10 @@ export function loadBuildings(saved: unknown): BuildingsState {
   };
 }
 
-/** View settings from a saved game; games saved before the Goal tab kept the theme as `goal`. */
+/** View settings from a saved game, dropping the Goal tab's old idea themes (`strategy`, or `goal` before that). */
 export function loadView(saved: unknown, fresh: ViewSettings): ViewSettings {
-  const { goal, ...v } = (saved ?? {}) as Partial<ViewSettings> & { goal?: StrategyOption };
-  const view = { ...fresh, ...v };
-  if (!v.strategy && goal) view.strategy = goal;
-  if (view.ast === 'off' && view.strategy === 'ast') view.strategy = fresh.strategy;
-  return view;
+  const { goal: _goal, strategy: _strategy, ...v } = (saved ?? {}) as Partial<ViewSettings> & { goal?: unknown; strategy?: unknown };
+  return { ...fresh, ...v };
 }
 
 /** The goal list from a saved game, keeping only Advances in this block. */
@@ -171,7 +164,6 @@ export function newGame(block: BlockId, playerCount: number): GameState {
     goal: [],
     view: {
       filter: 'unowned',
-      strategy: 'advances',
       sort: 'alpha',
       ast: 'off',
       calamities: { minor: false, major: true, unowned: false },
@@ -313,12 +305,8 @@ export function reducer(state: GameState, action: Action): GameState {
       return { ...state, goal: [] };
     case 'skipFreePick':
       return { ...state, freePick: null, considering: [] };
-    case 'setView': {
-      const view = { ...state.view, ...action.view };
-      // The AST theme only exists while the AST guide is on.
-      if (view.ast === 'off' && view.strategy === 'ast') view.strategy = 'advances';
-      return { ...state, view };
-    }
+    case 'setView':
+      return { ...state, view: { ...state.view, ...action.view } };
     case 'setCommodity': {
       const count = Math.max(0, Math.floor(action.count));
       const hand = { ...state.funding.hand };

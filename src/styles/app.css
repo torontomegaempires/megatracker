@@ -1553,10 +1553,6 @@ dialog.sheet::backdrop {
   box-shadow: var(--lift);
 }
 
-.goal-theme {
-  margin: 0 2px 10px;
-}
-
 .goal-clear {
   margin-top: 18px;
 }

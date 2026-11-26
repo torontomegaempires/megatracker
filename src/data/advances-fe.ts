@@ -13,9 +13,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "red": 10,
       "yellow": 5
     },
-    "goals": {
-      "treasury": true
-    },
     "nextname": "Paper Money"
   },
   {
@@ -28,10 +25,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 5,
       "red": 20
     },
-    "goals": {
-      "cities": true,
-      "treasury": true
-    },
     "special": "Gain up to 10 treasury tokens from stock."
   },
   {
@@ -41,9 +34,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "yellow": 10
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Gunpowder",
     "special": "Name a commodity and pay its face value in treasury. Look at the top trade card of a stack. If it is the card named, reveal and take it. Otherwise, put it back without revealing."
@@ -57,9 +47,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "red": 5,
       "yellow": 10
     },
-    "goals": {
-      "trade": true
-    },
     "nextname": "Performing Arts",
     "trade": "any stack, once per turn, by discarding a card of equal or greater face value (to the market board, if in use)."
   },
@@ -70,9 +57,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 10,
       "green": 5
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "School of Principle",
     "trade": [
@@ -96,9 +80,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 20,
       "yellow": 5
     },
-    "goals": {
-      "advances": true
-    },
     "special": "Exchange 10 credits of one color for 10 credits of one other color.",
     "activate": "10for10"
   },
@@ -111,9 +92,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 5,
       "red": 10
     },
-    "goals": {
-      "aggression": true
-    },
     "nextname": "Mechanical Clock"
   },
   {
@@ -124,10 +102,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "green": 20,
       "orange": 5
-    },
-    "goals": {
-      "aggression": true,
-      "mobility": true
     }
   },
   {
@@ -139,9 +113,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 10,
       "yellow": 5
     },
-    "goals": {
-      "mobility": true
-    },
     "nextname": "Postal System"
   },
   {
@@ -152,10 +123,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "green": 10
-    },
-    "goals": {
-      "trade": true,
-      "advances": true
     },
     "nextname": "Pound Lock",
     "trade": [
@@ -174,9 +141,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 10,
       "red": 5
     },
-    "goals": {
-      "trade": true
-    },
     "nextname": "Court Culture",
     "extraCredit": -5
   },
@@ -189,10 +153,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 10,
       "orange": 5
     },
-    "goals": {
-      "mobility": true,
-      "sea": true
-    },
     "nextname": "Maritime Dominance"
   },
   {
@@ -203,10 +163,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "red": 10
-    },
-    "goals": {
-      "aggression": true,
-      "sea": true
     },
     "nextname": "Political Influence",
     "special": "Move any number of pirate ships from areas containing your units or coastal spaces containing your ships, up to three spaces to coastal areas, then add 3 barbarian tokens to those areas."
@@ -220,10 +176,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 5,
       "red": 10
     },
-    "goals": {
-      "defense": true,
-      "aggression": true
-    },
     "nextname": "Military Strategy"
   },
   {
@@ -233,9 +185,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "green": 20
-    },
-    "goals": {
-      "advances": true
     },
     "special": "Take 10 credits in one color of your choice.",
     "activate": "gain10"
@@ -248,10 +197,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "orange": 10,
       "red": 5
-    },
-    "goals": {
-      "trade": true,
-      "treasury": true
     },
     "nextname": "Treasure Voyages",
     "trade": [
@@ -270,9 +215,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 5,
       "red": 10
     },
-    "goals": {
-      "aggression": true
-    },
     "nextname": "The Great Wall"
   },
   {
@@ -283,9 +225,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "green": 10,
       "yellow": 5
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Standardization",
     "trade": [
@@ -310,9 +249,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 5,
       "yellow": 10
     },
-    "goals": {
-      "tokens": true
-    },
     "nextname": "Horsemanship"
   },
   {
@@ -324,9 +260,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 10,
       "yellow": 5
     },
-    "goals": {
-      "tokens": true
-    },
     "nextname": "Feudalism"
   },
   {
@@ -337,9 +270,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 5,
       "orange": 10
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Advanced Tax System",
     "extraCredit": -10
@@ -353,9 +283,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "red": 5,
       "yellow": 10
     },
-    "goals": {
-      "aggression": true
-    },
     "nextname": "Esoteric Doctrine",
     "special": "Annex up to 3 tokens from areas adjacent by land to your units, no more than 1 token from any single player or The Barbarians. You cannot annex tokens belonging to players holding Peaceful Integration or Esoteric Doctrine."
   },
@@ -366,9 +293,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 10,
       "orange": 5
-    },
-    "goals": {
-      "tokens": true
     },
     "nextname": "Religious Conversion",
     "special": "Annex up to 5 barbarian tokens in areas adjacent by land to your units."
@@ -392,9 +316,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 20,
       "red": 5
     },
-    "goals": {
-      "aggression": true
-    },
     "special": "Annex all units of one player in one area adjacent by land or water to your units or in an area containing your ship. Give that player a commodity card with a face value of at least 2. Players holding Political Influence or Gunpowder are immune."
   },
   {
@@ -405,9 +326,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "red": 20,
       "yellow": 5
-    },
-    "goals": {
-      "mobility": true
     }
   },
   {
@@ -419,9 +337,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 10,
       "red": 5
     },
-    "goals": {
-      "mobility": true
-    },
     "nextname": "Silk Routes"
   },
   {
@@ -432,9 +347,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 10,
       "red": 5,
       "yellow": 5
-    },
-    "goals": {
-      "advances": true
     },
     "nextname": "Alchemy",
     "special": "If you are the single player with the fewest Civilization Advances, you may acquire 1 Advance worth 1 VP for free.",
@@ -448,9 +360,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 5,
       "yellow": 20
     },
-    "goals": {
-      "aggression": true
-    },
     "special": "Annex 1 city in an area adjacent by land to your units. A pirate city may be annexed this way. You cannot annex cities belonging to players holding Religious Conversion, Esoteric Doctrine or Peaceful Integration."
   },
   {
@@ -462,10 +371,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "green": 5,
       "orange": 10
     },
-    "goals": {
-      "mobility": true,
-      "sea": true
-    },
     "nextname": "Metallurgy"
   },
   {
@@ -476,9 +381,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "green": 20,
       "red": 5
-    },
-    "goals": {
-      "tokens": true
     }
   },
   {
@@ -489,9 +391,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "red": 5,
       "yellow": 20
-    },
-    "goals": {
-      "cities": true
     }
   },
   {
@@ -503,9 +402,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 5,
       "yellow": 10
     },
-    "goals": {
-      "defense": true
-    },
     "nextname": "Spiritual Guidance"
   },
   {
@@ -516,9 +412,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "orange": 20,
       "yellow": 5
-    },
-    "goals": {
-      "advances": true
     }
   },
   {
@@ -539,9 +432,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "green": 5,
       "orange": 20
-    },
-    "goals": {
-      "cities": true
     },
     "special": "Pay 5 treasury to construct one city on a city site that contains at least 1 of your population tokens and no city or other tokens. Remove your token(s)."
   },
@@ -564,9 +454,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "blue": 10,
       "yellow": 5
-    },
-    "goals": {
-      "cities": true
     },
     "nextname": "The Pinnacle Temple"
   },
@@ -591,9 +478,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 5,
       "orange": 20
     },
-    "goals": {
-      "defense": true
-    },
     "special": "Build 1 wall on the land border of an area containing your units."
   },
   {
@@ -604,9 +488,6 @@ export const advancesFarEast: AdvanceDef[] = [
     "credits": {
       "orange": 5,
       "yellow": 20
-    },
-    "goals": {
-      "trade": true
     },
     "trade": [
       {
@@ -634,9 +515,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 5,
       "red": 20
     },
-    "goals": {
-      "treasury": true
-    },
     "special": "Select any number of players who have units adjacent by land or water to your units or ships. They must each discard a commodity card with a face value of at least 2. Then you may gain treasury tokens from stock up to twice the sum of the face values of the discarded cards. You cannot select players holding Treasure Voyages or Maritime Dominance."
   },
   {
@@ -649,9 +527,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "orange": 5,
       "red": 10
     },
-    "goals": {
-      "cities": true
-    },
     "nextname": "Temple Construction"
   },
   {
@@ -663,9 +538,6 @@ export const advancesFarEast: AdvanceDef[] = [
       "blue": 5,
       "orange": 10,
       "red": 5
-    },
-    "goals": {
-      "trade": true
     },
     "nextname": "Pharmacology"
   }

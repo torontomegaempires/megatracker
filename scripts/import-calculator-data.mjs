@@ -19,7 +19,7 @@ const clean = (v) => (typeof v === 'string' ? v.replace(/ /g, ' ').trim() : v);
 
 function advance(a) {
   const o = {};
-  for (const k of ['name', 'price', 'color', 'description', 'shortDescription', 'credits', 'goals', 'nextname',
+  for (const k of ['name', 'price', 'color', 'description', 'shortDescription', 'credits', 'nextname',
     'bonus', 'trade', 'special', 'extraCredit', 'activate', 'warningTFA']) {
     if (a[k] !== undefined) o[k] = clean(a[k]);
   }

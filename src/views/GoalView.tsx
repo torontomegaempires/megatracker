@@ -1,28 +1,12 @@
-import type { GoalId } from '../data';
-import type { StrategyOption } from '../engine/game';
-import { goalProgress, goalSuggestions, victoryPoints } from '../engine/selectors';
+import { goalProgress, victoryPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { useGame } from '../state/store';
 import { AdvanceRow } from './AdvancesView';
 
-const STRATEGIES: { id: GoalId; label: string }[] = [
-  { id: 'advances', label: 'Cheaper Advances' },
-  { id: 'treasury', label: 'More treasury' },
-  { id: 'trade', label: 'Trade cards' },
-  { id: 'bend', label: 'Bend the rules' },
-  { id: 'tokens', label: 'More tokens on the map' },
-  { id: 'mobility', label: 'Token mobility' },
-  { id: 'cities', label: 'Build or hold cities' },
-  { id: 'sea', label: 'Sea power' },
-  { id: 'aggression', label: 'Aggression' },
-  { id: 'defense', label: 'Defense' },
-];
-
-/** The Advances the player plans to buy over the game, and themed ideas for adding more. */
+/** The Advances the player plans to buy over the game. */
 export function GoalView({ onOpen }: { onOpen: (name: string) => void }) {
   const { game, dispatch } = useGame();
   const progress = goalProgress(game);
-  const suggestions = goalSuggestions(game);
   const total = game.goal.length;
   const toggle = (name: string) => dispatch({ type: 'toggleGoal', name });
 
@@ -39,8 +23,8 @@ export function GoalView({ onOpen }: { onOpen: (name: string) => void }) {
 
       {total === 0 ? (
         <p className="goal-intro muted">
-          Plan the Advances you want to buy over the game. They are flagged on the Advances tab, and the Goal filter there shows just
-          them. Add them from the ideas below, or from any Advance’s details.
+          Plan the Advances you want to buy over the game. Add them with “Add to goal” in any Advance’s details. They are flagged
+          on the Advances tab, and the Goal filter there shows just them.
         </p>
       ) : (
         <>
@@ -87,31 +71,6 @@ export function GoalView({ onOpen }: { onOpen: (name: string) => void }) {
             </>
           )}
         </>
-      )}
-
-      <h3 className="group-head">Ideas</h3>
-      <label className="select goal-theme">
-        For
-        <span className="select-wrap">
-          <select value={game.view.strategy} onChange={(e) => dispatch({ type: 'setView', view: { strategy: e.target.value as StrategyOption } })}>
-            {game.view.ast !== 'off' && <option value="ast">Reach the next AST age</option>}
-            {STRATEGIES.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.label}
-              </option>
-            ))}
-          </select>
-          <Icon name="chevronDown" />
-        </span>
-      </label>
-      {suggestions.length === 0 ? (
-        <p className="empty">Every unowned Advance for this is already on your goal.</p>
-      ) : (
-        <ul className="adv-list">
-          {suggestions.map((a) => (
-            <AdvanceRow key={a.name} game={game} advance={a} onOpen={onOpen} action={<GoalButton name={a.name} on={false} onClick={() => toggle(a.name)} />} />
-          ))}
-        </ul>
       )}
 
       {total > 0 && (

@@ -11,18 +11,6 @@ export const COLOR_NAMES: Record<Color, string> = {
   yellow: 'Religion',
 };
 
-export type GoalId =
-  | 'treasury'
-  | 'trade'
-  | 'advances'
-  | 'bend'
-  | 'tokens'
-  | 'mobility'
-  | 'cities'
-  | 'sea'
-  | 'aggression'
-  | 'defense';
-
 export interface TradeOffer {
   /** Usually a stack number; a few powers use text such as "0 (water) up to twice". */
   stack: number | string;
@@ -50,7 +38,6 @@ export interface AdvanceDef {
   description?: string;
   shortDescription?: string;
   credits: Partial<Credits>;
-  goals?: Partial<Record<GoalId, boolean>>;
   nextname?: string;
   bonus?: string;
   trade?: string | TradeOffer[];

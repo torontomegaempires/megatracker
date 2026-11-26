@@ -23,8 +23,7 @@ calculations — with a new interface. Group-specific enhancements will be added
 - **Trade** — your hand of commodity cards, treasury and held sets.
 - **Calamities** — every calamity with the Advances that help or hurt you.
 - **Goal** — the Advances you plan to buy over the game: how many are left, what they cost
-  today and the VP you'll have when done. Ideas by theme (cheaper Advances, treasury, trade
-  cards, the next AST age and more) help you add to it.
+  today and the VP you'll have when done. Add to it from any Advance's details.
 - **Specials** — which trade card stacks you can buy extra cards from and for how many tokens, and
   your owned special abilities, with one-tap use where the app can help.
 - **Special buildings** — optional (West/East), on the Cities tab: build one with your Advances,
