@@ -82,7 +82,7 @@ export function GameScreen() {
           />
         )}
         {tab === 'goal' && <GoalView onOpen={(name) => setOverlay({ kind: 'advance', name })} />}
-        {tab === 'cities' && <CitiesView />}
+        {tab === 'cities' && <CitiesView onPurchase={() => setTab('advances')} />}
         {tab === 'trade' && <TradeView focusHand={focusHand} onFocused={clearFocusHand} />}
         {tab === 'calamities' && <CalamitiesView onOpen={(name) => setOverlay({ kind: 'calamity', name })} />}
         {tab === 'specials' && <SpecialsView onActivated={(toAdvances) => toAdvances && setTab('advances')} />}
@@ -185,8 +185,8 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           />
           <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
             {buildingsOn(game)
-              ? 'Build and track special buildings on the Specials tab. Their VP are added to yours.'
-              : 'Adds special buildings to the Specials tab, their price to your purchase and their VP to yours.'}
+              ? 'Build and track special buildings on the Cities tab. Their VP are added to yours.'
+              : 'Adds special buildings to the Cities tab, their price to your purchase and their VP to yours.'}
           </p>
         </div>
       )}

@@ -63,7 +63,7 @@ function TokenInput() {
 
 // ----------------------------------------------------------------- cities
 
-export function CitiesView() {
+export function CitiesView({ onPurchase }: { onPurchase: () => void }) {
   const { game } = useGame();
   const est = potentialCities(game);
   const mods = cityModifiers(game);
@@ -91,6 +91,7 @@ export function CitiesView() {
           {mods.length ? `Includes ${mods.join(', ')}.` : 'No owned Advances change this.'} Assumes tokens are where you need them.
         </p>
       </div>
+      {buildingsOn(game) && <BuildingsView onPurchase={onPurchase} />}
     </>
   );
 }
@@ -479,8 +480,7 @@ export function SpecialsView({ onActivated }: { onActivated: (goToAdvances: bool
   const list = specialAbilities(game);
   return (
     <>
-      {buildingsOn(game) && <BuildingsView onPurchase={() => onActivated(true)} />}
-      <div className={`page-head${buildingsOn(game) ? ' page-head-later' : ''}`}>
+      <div className="page-head">
         <h2>Special abilities</h2>
         <span className="muted">after calamities</span>
       </div>

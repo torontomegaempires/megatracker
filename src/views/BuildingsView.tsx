@@ -14,7 +14,7 @@ export function confirmSacrifice(b: SpecialBuilding): boolean {
   return window.confirm(`Sacrifice the ${b.name}? It leaves the board, and you lose its VP.`);
 }
 
-/** Your special building, the others you control and their VP, for the Specials tab. */
+/** Your special building, the others you control and their VP, below city building on the Cities tab. */
 export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
   const { game, dispatch } = useGame();
   const b = game.buildings;
@@ -23,7 +23,7 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
 
   return (
     <>
-      <div className="page-head">
+      <div className="page-head page-head-later">
         <h2>Special buildings</h2>
         <span className="muted num">{points.total} VP</span>
       </div>
