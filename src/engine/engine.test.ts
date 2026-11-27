@@ -10,6 +10,16 @@ const consider = (s: GameState, ...names: string[]) => names.reduce((g, name) =>
 const buy = (s: GameState, ...names: string[]) => reducer(consider(s, ...names), { type: 'buy' });
 
 describe('data', () => {
+  it('gives every commodity card its printed colour', () => {
+    for (const [block, players] of [['west', 15], ['east', 9], ['mega', 9], ['fareast', 10]] as const) {
+      for (const c of commoditiesFor(block, players)) {
+        expect(c.color, c.id).toMatch(/^#[0-9a-f]{6}$/);
+        // The colour shows behind the large bold face value only, so the large-text contrast bar applies.
+        expect(contrastRatio(c.color, c.onColor), c.id).toBeGreaterThanOrEqual(3);
+      }
+    }
+  });
+
   it('links every advance into a chain of three', () => {
     for (const rules of Object.values(RULES)) {
       const counts = new Map<number, number>();

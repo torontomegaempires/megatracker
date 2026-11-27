@@ -255,7 +255,7 @@ function HandList() {
           const counted = (sub?.set.id === c.id ? n + 1 : sub?.substitute.id === c.id ? n - 1 : n) + fromBuildings;
           return (
             <li key={c.id} className={`hand-row${isHeld ? ' is-held' : ''}`}>
-              <span className="stack-num" aria-label={`Face value ${c.value}`}>
+              <span className="stack-num card-tile" style={{ background: c.color, color: c.onColor }} aria-label={`Face value ${c.value}`}>
                 {c.value}
               </span>
               <span className="row-main">
@@ -349,6 +349,7 @@ function CommodityPicker() {
                     aria-pressed={open === c.id}
                     onClick={() => setOpen(open === c.id ? null : c.id)}
                   >
+                    <span className="card-swatch" style={{ background: c.color }} aria-hidden="true" />
                     {c.name}
                     {hand[c.id] ? <span className="chip-count num">×{hand[c.id]}</span> : null}
                   </button>
