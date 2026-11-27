@@ -8,6 +8,18 @@
     <meta name="description" content="Track Civilization Advances, credits, trade and calamities in Mega Empires." />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <title>Megatracker</title>
+    <script>
+      // Apply the player's light/dark choice before first paint (see src/state/theme.ts).
+      try {
+        var t = localStorage.getItem('megatracker:theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.dataset.theme = t;
+          document.querySelectorAll('meta[name="theme-color"]').forEach(function (m) {
+            m.content = t === 'dark' ? '#101113' : '#dcdfe2';
+          });
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
