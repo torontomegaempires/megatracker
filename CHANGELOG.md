@@ -10,6 +10,9 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+### Added
+- Add Megatracker to your phone's home screen and it gets the Megatracker icon and opens like an app.
+
 ## [0.6.0] - 2026-11-26
 
 ### Added
