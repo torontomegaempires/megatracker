@@ -2,6 +2,7 @@
 // rulebooks: The West (chapter 12), The East (chapter 10) and its Scenarios book (10-18
 // players), and The Far East (chapter 14). Hand-written: the original calculator has no
 // commodity data.
+import { contrastRatio } from './buildings';
 import type { BlockId } from './index';
 
 export interface Commodity {
@@ -12,11 +13,48 @@ export interface Commodity {
   value: number;
   /** Cards of this commodity in your deck: the most one player can hold. */
   max: number;
+  /** The main colour of the printed card's background, as #rrggbb. */
+  color: string;
+  /** Text colour that reads on `color`. */
+  onColor: string;
 }
 
 type Row = [name: string, value: number, max: number];
 
-const c = ([name, value, max]: Row, id = name.toLowerCase()): Commodity => ({ id, name, value, max });
+/**
+ * Card colours. West and East colours are read from photos of the printed cards; the Far East has
+ * no full photo set yet, so its colours are guessed from what each commodity looks like.
+ */
+// prettier-ignore
+const COLORS: Record<string, string> = {
+  // West and East
+  ochre: '#c9962e', flax: '#4e8a3a', clay: '#7a86a0', hides: '#5a4030', bone: '#e6dfbc',
+  papyri: '#f0d9c4', stone: '#8c8c88', iron: '#b0602a', furs: '#9a9088', wax: '#f09a28',
+  fish: '#6e7378', timber: '#a86e3c', fruit: '#e2532a', salt: '#c8c0d0', ceramics: '#d9a08a',
+  wool: '#e4ded4', cotton: '#d6d4d0', oil: '#c8d82a', sugar: '#b8893a', grain: '#c79a4a',
+  wine: '#d2302e', lacquer: '#8e2a2a', textiles: '#8c7a5a', livestock: '#7a5236', glass: '#2e6fb8',
+  tin: '#9ca0ac', silver: '#d4d4d4', copper: '#c06a2a', bronze: '#7e7464', lead: '#55565c',
+  resin: '#c8a050', jade: '#9cb88a', incense: '#1e2a48', spice: '#4a4440', herbs: '#5c7a2e',
+  marble: '#e8eaf0', dye: '#a82a6a', gemstones: '#3aa8d0', tea: '#7ab030', obsidian: '#2a2a2c',
+  ivory: '#e8e0cc', silk: '#ededed', gold: '#f0b020', pearls: '#b4b8c0', amber: '#c88418',
+  // The Far East (guessed)
+  'fe-fish': '#6e7378', 'fe-meat': '#b04848', 'fe-bamboo': '#9ab848', 'fe-stone': '#8c8c88',
+  'fe-terracotta': '#c0643c', 'fe-charcoal': '#333436', 'fe-beans': '#7a3a2a', 'fe-grain': '#c79a4a',
+  'fe-horses': '#8a5a34', 'fe-buffalo': '#4a4038', 'fe-silver': '#d4d4d4', 'fe-copper': '#c06a2a',
+  'fe-tea': '#7ab030', 'fe-incense': '#1e2a48', 'fe-jade': '#4fa07a', 'fe-dye': '#a82a6a',
+  'fe-porcelain': '#2f5aa8', 'fe-silk': '#ededed', 'fe-fruit': '#e2532a', 'fe-lumber': '#a86e3c',
+  'fe-paper': '#efe6d2', 'fe-oil': '#c8d82a', 'fe-swine': '#e0a0a0', 'fe-mercury': '#a8b0b8',
+  'fe-cinnamon': '#8b4a22', 'fe-marble': '#e8eaf0', 'fe-ivory': '#e8e0cc',
+};
+
+const ON_DARK = '#ffffff';
+const ON_LIGHT = '#17181a';
+
+const c = ([name, value, max]: Row, id = name.toLowerCase()): Commodity => {
+  const color = COLORS[id];
+  const onColor = contrastRatio(color, ON_DARK) >= contrastRatio(color, ON_LIGHT) ? ON_DARK : ON_LIGHT;
+  return { id, name, value, max, color, onColor };
+};
 
 /**
  * West and East decks. Each column is the number of cards in one deck (0 = not used):
