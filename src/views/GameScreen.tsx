@@ -7,6 +7,7 @@ import { Sheet } from '../components/Sheet';
 import { Segmented } from '../components/ui';
 import { useShared } from '../state/shared';
 import { useGame } from '../state/store';
+import { useTheme, type Theme } from '../state/theme';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
 import { GoalView } from './GoalView';
@@ -180,6 +181,7 @@ function AstBar() {
 
 function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => void }) {
   const { game, dispatch } = useGame();
+  const [theme, setTheme] = useTheme();
   return (
     <Sheet title="Menu" onClose={onClose}>
       <div className="section">
@@ -213,6 +215,22 @@ function MenuSheet({ onClose, onAbout }: { onClose: () => void; onAbout: () => v
           {buildingsOn(game)
             ? 'Build and track special buildings, and their VP, on the Cities tab.'
             : 'Adds special buildings and their VP to the Cities tab, and their price to your purchase.'}
+        </p>
+      </div>
+      <div className="section">
+        <h3>Appearance</h3>
+        <Segmented<Theme>
+          label="Appearance"
+          value={theme}
+          onChange={setTheme}
+          options={[
+            { value: 'system', label: 'Device' },
+            { value: 'light', label: 'Light' },
+            { value: 'dark', label: 'Dark' },
+          ]}
+        />
+        <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
+          Device follows your phone's light or dark setting.
         </p>
       </div>
       <div className="section menu-list">

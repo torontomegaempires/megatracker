@@ -12,6 +12,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ### Added
 - Commodity cards on the Trade tab show the colour of the printed card. The Far East's colours are a best guess until we can check them against the cards.
+- Choose light or dark mode in the Menu, or let it follow your device.
 
 ## [0.5.0] - 2026-11-26
 
