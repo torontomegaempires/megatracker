@@ -340,13 +340,11 @@ p {
 
 .brand-name {
   border: 0;
-  background: none;
-  color: inherit;
   cursor: pointer;
-  padding: 0;
 }
 
 .brand-choose {
+  color: var(--ink);
   height: 36px;
   padding: 0 10px;
   border-radius: var(--r-card);
