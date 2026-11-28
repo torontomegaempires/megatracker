@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCKS, buildingsIn, commoditiesFor, contrastRatio, nationByName, RULES, rulesFor, SPECIAL_BUILDINGS } from '../data';
+import { BLOCKS, buildingsIn, nationsByAst, commoditiesFor, contrastRatio, nationByName, RULES, rulesFor, SPECIAL_BUILDINGS } from '../data';
 import { choiceReady, choiceTap } from './credits';
 import type { GameState } from './game';
 import { loadBuildings, loadFunding, loadGoal, loadView, newGame, PLAYER_COUNTS, playerCountLabel, reducer, zeroCredits } from './game';
@@ -189,11 +189,11 @@ describe('goal', () => {
     expect(p.vpLeft).toBe(adv(g, 'Pottery').vp + adv(g, 'Democracy').vp);
   });
 
-  it('filters the Advances tab to unowned goal Advances', () => {
+  it('lists owned and unowned Advances on the goal', () => {
     let g = toggle(newGame('west', 0), 'Pottery', 'Democracy');
     g = buy(g, 'Pottery');
     g = reducer(g, { type: 'setView', view: { filter: 'goal' } });
-    expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Democracy']);
+    expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Pottery', 'Democracy']);
   });
 
   it('loads saved games, dropping the Goal tab’s old idea themes', () => {
@@ -381,14 +381,16 @@ describe('special buildings', () => {
 
   it('is off in new games and offers each game only its own nations’ buildings', () => {
     expect(newGame('west', 5).buildings.enabled).toBe(false);
-    expect(buildingsIn('west')).toHaveLength(18);
-    expect(buildingsIn('mega')).toEqual(buildingsIn('west'));
+    expect(buildingsIn('west')).toHaveLength(9);
+    expect(buildingsIn('east')).toHaveLength(9);
+    expect(buildingsIn('mega')).toHaveLength(18);
+    expect(buildingsIn('mega')).toEqual(expect.arrayContaining([...buildingsIn('west'), ...buildingsIn('east')]));
     expect(buildingsIn('fareast').map((b) => b.civ)).toContain('Heian');
-    expect(buildingsIn('fareast')).toHaveLength(12);
+    expect(buildingsIn('fareast')).toHaveLength(11);
+    expect(buildingsIn('fareast').map((b) => b.id)).not.toContain('tibet');
     expect(buildingsIn('fareast').find((b) => b.id === 'ming')?.name).toBe('Forbidden City of Beijing');
-    const fe = reducer(withBuildings('fareast'), { type: 'considerBuilding', id: 'hellas' });
-    expect(fe.buildings.considering).toBeNull();
-    expect(reducer(fe, { type: 'considerBuilding', id: 'heian' }).buildings.considering).toBe('heian');
+    const fe = withBuildings('fareast');
+    expect(reducer(fe, { type: 'toggleSpecialBuilding' }).buildings.considering).toBe(true);
     expect(buildingPoints(fe)).not.toBeNull();
     expect(reducer(newGame('west', 5), { type: 'setBuildings', buildings: { civ: 'tang' } }).buildings.civ).toBeNull();
   });
@@ -403,39 +405,91 @@ describe('special buildings', () => {
     expect(contrastRatio('#ffffff', '#ffffff')).toBe(1);
   });
 
+  it('numbers each nation by its place on the A.S.T.', () => {
+    expect(nationsByAst(buildingsIn('mega')).map((b) => b.ast)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
+    expect(nationsByAst(buildingsIn('west')).map((b) => b.ast)).toEqual([1, 3, 5, 7, 9, 11, 13, 15, 17]);
+    expect(nationsByAst(buildingsIn('east')).map((b) => b.ast)).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18]);
+    expect(nationsByAst(buildingsIn('west'))[0].civ).toBe('Minoa');
+    expect(nationsByAst(buildingsIn('fareast')).map((b) => b.ast)).toEqual([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 20]);
+  });
+
   it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {
-    let g = reducer(withBuildings(), { type: 'considerBuilding', id: 'hellas' });
+    let g = reducer(withBuildings(), { type: 'toggleSpecialBuilding' });
+    expect(g.buildings.era).toBe('eba');
     expect(costSummary(g).total).toBe(30);
-    g = reducer(g, { type: 'setBuildings', buildings: { era: 'iron' } });
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'mba' } });
+    expect(costSummary(g).total).toBe(30);
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'lia' } });
     g = consider(g, 'Pottery');
     expect(costSummary(g).total).toBe(50 + cost(g, adv(g, 'Pottery')));
     g = reducer(g, { type: 'buy' });
     expect(g.owned).toEqual(['Pottery']);
-    expect(g.buildings).toMatchObject({ owned: 'hellas', controlled: ['hellas'], considering: null });
+    // Which building it is gets chosen after the purchase.
+    expect(g.queue[0]).toEqual({ kind: 'building' });
+    expect(g.buildings).toMatchObject({ owned: null, considering: false });
+    g = reducer(g, { type: 'chooseBuilding', id: 'hellas' });
+    expect(g.buildings).toMatchObject({ owned: 'hellas', controlled: ['hellas'] });
+    expect(g.queue.every((q) => q.kind === 'face') || g.queue.length === 0).toBe(true);
+  });
+
+  it('offers the Special Building in the Advances list, worth 5 when sorting', () => {
+    const find = (g: GameState) => visibleAdvances(g).items.findIndex((i) => i.kind === 'building');
+    expect(find(newGame('west', 5))).toBe(-1);
+    const g = withBuildings();
+    expect(find(g)).toBeGreaterThan(-1);
+    expect(find(reducer(g, { type: 'setView', view: { sort: 'vp' } }))).toBeLessThan(
+      visibleAdvances(reducer(g, { type: 'setView', view: { sort: 'vp' } })).items.findIndex((i) => i.kind === 'advance' && i.advance.vp < 5),
+    );
+    expect(find(reducer(g, { type: 'setOwnedBuilding', id: 'rome' }))).toBe(-1);
+  });
+
+  it('lists controlled buildings with Owned items, worth what they are to you but outside the Advances VP', () => {
+    let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'rome' } });
+    g = reducer(g, { type: 'setOwnedBuilding', id: 'hellas' });
+    g = control(g, 'rome', 'egypt');
+    g = reducer(g, { type: 'setView', view: { filter: 'owned' } });
+    const items = visibleAdvances(g).items.flatMap((i) => (i.kind === 'controlled' ? [[i.id, i.vp, i.owned]] : []));
+    expect(items).toEqual(expect.arrayContaining([['hellas', 3, true], ['rome', 3, false], ['egypt', 1, false]]));
+    expect(items).toHaveLength(3);
+    expect(victoryPoints(g)).toBe(0);
+  });
+
+  it('returns to the list, and to the goal, when the building you own is sacrificed', () => {
+    const listed = (g: GameState) => visibleAdvances(g).items.some((i) => i.kind === 'building');
+    let g = reducer(withBuildings(), { type: 'toggleBuildingGoal' });
+    g = reducer(g, { type: 'toggleSpecialBuilding' });
+    g = reducer(reducer(g, { type: 'buy' }), { type: 'chooseBuilding', id: 'rome' });
+    expect(listed(reducer(g, { type: 'setView', view: { filter: 'goal' } }))).toBe(false);
+    const gone = reducer(g, { type: 'sacrificeBuilding', id: 'rome' });
+    expect(listed(reducer(gone, { type: 'setView', view: { filter: 'unowned' } }))).toBe(true);
+    expect(listed(reducer(gone, { type: 'setView', view: { filter: 'goal' } }))).toBe(true);
   });
 
   it('can be discounted by Library, as if it were an Advance', () => {
-    let g = reducer(withBuildings(), { type: 'considerBuilding', id: 'hellas' });
+    let g = reducer(withBuildings(), { type: 'toggleSpecialBuilding' });
     g = consider(g, 'Library');
     expect(costSummary(g)).toMatchObject({ libraryDiscount: 30, total: cost(g, adv(g, 'Library')) });
-    g = reducer(g, { type: 'setBuildings', buildings: { era: 'iron' } });
+    g = reducer(g, { type: 'setBuildings', buildings: { era: 'eia' } });
     expect(costSummary(g)).toMatchObject({ libraryDiscount: 40, total: cost(g, adv(g, 'Library')) + 10 });
   });
 
   it('can be bought without any Advances, paying from the treasury', () => {
-    let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { era: 'lateBronze' } });
-    g = reducer(reducer(g, { type: 'considerBuilding', id: 'rome' }), { type: 'setTreasury', treasury: 50 });
+    let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { era: 'lba' } });
+    g = reducer(reducer(g, { type: 'toggleSpecialBuilding' }), { type: 'setTreasury', treasury: 50 });
     g = reducer(g, { type: 'buy' });
+    g = reducer(g, { type: 'chooseBuilding', id: 'rome' });
     expect(g.buildings.owned).toBe('rome');
     expect(g.funding.treasury).toBe(10);
   });
 
   it('allows only one owned building, from those not already on the board', () => {
     let g = reducer(withBuildings(), { type: 'setOwnedBuilding', id: 'minoa' });
-    expect(reducer(g, { type: 'considerBuilding', id: 'rome' }).buildings.considering).toBeNull();
-    g = control(withBuildings(), 'hatti');
-    expect(reducer(g, { type: 'considerBuilding', id: 'hatti' }).buildings.considering).toBeNull();
-    expect(reducer(newGame('west', 5), { type: 'considerBuilding', id: 'rome' }).buildings.considering).toBeNull();
+    expect(reducer(g, { type: 'toggleSpecialBuilding' }).buildings.considering).toBe(false);
+    expect(reducer(newGame('west', 5), { type: 'toggleSpecialBuilding' }).buildings.considering).toBe(false);
+    g = reducer(withBuildings(), { type: 'toggleSpecialBuilding' });
+    g = reducer(g, { type: 'buy' });
+    g = control(g, 'hatti');
+    expect(reducer(g, { type: 'chooseBuilding', id: 'hatti' }).buildings.owned).toBeNull();
   });
 
   it('scores the rulesheet example', () => {
@@ -497,9 +551,9 @@ describe('special buildings', () => {
     let g = control(withBuildings(), 'rome');
     g = reducer(g, { type: 'toggleSacrifice', id: 'rome' });
     expect(control(g, 'rome').buildings.sacrificing).toEqual([]);
-    g = reducer(g, { type: 'considerBuilding', id: 'hellas' });
+    g = reducer(g, { type: 'toggleSpecialBuilding' });
     g = reducer(g, { type: 'setBuildings', buildings: { enabled: false } });
-    expect(g.buildings).toMatchObject({ considering: null, sacrificing: [], controlled: ['rome'] });
+    expect(g.buildings).toMatchObject({ considering: false, sacrificing: [], controlled: ['rome'] });
     expect(costSummary(g).total).toBe(0);
   });
 
@@ -507,8 +561,8 @@ describe('special buildings', () => {
     expect(loadBuildings(undefined, 'west')).toEqual(newGame('west', 5).buildings);
     expect(loadBuildings({ enabled: true, owned: 'rome', controlled: ['rome', 'tang'] }, 'fareast')).toMatchObject({ owned: null, controlled: ['tang'] });
     expect(
-      loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: 'hellas', sacrificing: ['rome', 'hellas'] }, 'west'),
-    ).toEqual({ enabled: true, civ: null, era: 'iron', owned: 'rome', controlled: ['rome'], considering: null, sacrificing: ['rome'] });
+      loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: true, sacrificing: ['rome', 'hellas'] }, 'west'),
+    ).toEqual({ enabled: true, civ: null, era: 'eia', owned: 'rome', controlled: ['rome'], considering: false, goal: false, sacrificing: ['rome'] });
   });
 });
 

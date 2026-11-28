@@ -1,6 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Advance, Color, Credits } from '../data';
-import { COLOR_NAMES, COLORS, nationByName } from '../data';
+import { COLOR_NAMES, COLORS, contrastRatio, nationByName } from '../data';
 import { Icon } from './Icon';
 
 /** CSS variables that paint an advance's one or two colors. */
@@ -15,6 +15,24 @@ export function advanceColors(a: Pick<Advance, 'colors'>): CSSProperties {
     '--on-b': y === 'yellow' || y === 'orange' ? 'var(--on-yellow)' : 'var(--on-swatch)',
   } as CSSProperties;
 }
+
+/** Text on a nation's color: white or near-black (as on yellow Advance cards), whichever contrasts more. */
+export function nationStyle(color: string): CSSProperties {
+  return {
+    '--nation': color,
+    '--on-nation': contrastRatio(color, '#ffffff') >= contrastRatio(color, '#1d1a0c') ? '#ffffff' : '#1d1a0c',
+  } as CSSProperties;
+}
+
+/** The Special Building has no card color, so its field is grey. */
+export const GREY_FIELD: CSSProperties = {
+  '--swatch-a': '#7b8088',
+  '--swatch-b': '#7b8088',
+  '--tint-a': 'var(--card-3)',
+  '--tint-b': 'var(--card-3)',
+  '--on-a': '#ffffff',
+  '--on-b': '#ffffff',
+} as CSSProperties;
 
 export function colorNames(a: Pick<Advance, 'colors'>): string {
   return a.colors.map((c) => COLOR_NAMES[c]).join(' / ');

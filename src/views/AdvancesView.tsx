@@ -1,12 +1,13 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Advance } from '../data';
-import { COLOR_NAMES, COLORS } from '../data';
+import { buildingById, COLOR_NAMES, COLORS, SPECIAL_BUILDING_VP } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
-import { chainDiscount, cost, costSummary, funds, onGoal, payment, visibleAdvances, worsenedCalamities } from '../engine/selectors';
+import { chainDiscount, cost, costSummary, funds, onGoal, payment, SPECIAL_BUILDING_NAME, visibleAdvances, worsenedCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { advanceColors } from '../components/ui';
+import { advanceColors, GREY_FIELD } from '../components/ui';
 import { useGame } from '../state/store';
+import { BuildingSheet } from './Sheets';
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'unowned', label: 'Unowned' },
@@ -37,6 +38,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
   const listing = visibleAdvances(game);
   const available = funds(game);
   const setView = (view: Partial<GameState['view']>) => dispatch({ type: 'setView', view });
+  const [rules, setRules] = useState(false);
 
   return (
     <>
@@ -87,16 +89,21 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
         </div>
       )}
 
-      {listing.advances.length === 0 ? (
-        <p className="empty">{emptyMessage(listing.filter, available, game.goal.length > 0)}</p>
+      {listing.items.length === 0 ? (
+        <p className="empty">{emptyMessage(listing.filter, available)}</p>
       ) : (
         <ul className="adv-list">
-          {listing.advances.map((a) => (
+          {listing.items.map((item) =>
+            item.kind === 'building' ? (
+              <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} onOpen={() => setRules(true)} goalList={listing.filter === 'goal'} />
+            ) : item.kind === 'controlled' ? (
+              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} onOpen={() => setRules(true)} goalList={listing.filter === 'goal'} />
+            ) : (
             <AdvanceRow
-              key={a.name}
+              key={item.advance.name}
               game={game}
-              advance={a}
-              chainStart={listing.chainStarts.has(a.name)}
+              advance={item.advance}
+              chainStart={listing.chainStarts.has(item.advance.name)}
               onOpen={onOpen}
               goalMark={listing.filter !== 'goal'}
               action={
@@ -104,28 +111,106 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
                   <button
                     type="button"
                     className="adv-action"
-                    aria-label={`Remove ${a.name} from your goal`}
-                    onClick={() => dispatch({ type: 'toggleGoal', name: a.name })}
+                    aria-label={`Remove ${item.advance.name} from your goal`}
+                    onClick={() => dispatch({ type: 'toggleGoal', name: item.advance.name })}
                   >
                     <Icon name="close" />
                   </button>
                 ) : undefined
               }
             />
-          ))}
+            ),
+          )}
         </ul>
       )}
+      {rules && <BuildingSheet onClose={() => setRules(false)} />}
     </>
   );
 }
 
-function emptyMessage(filter: string, available: number, hasGoal: boolean) {
+function emptyMessage(filter: string, available: number) {
   if (filter === 'owned') return 'You have not bought any Advances yet.';
   if (filter === 'goal')
-    return hasGoal ? 'You own every Advance on your goal.' : 'Your goal is empty. Add Advances with “Add to goal” in an Advance’s details.';
+    return 'Your goal is empty. Add Advances with “Add to goal” in an Advance’s details.';
   if ((filter === 'affordable' || filter === 'almostAffordable') && available > 0)
     return 'Nothing fits your remaining funds.';
   return 'No Advances to show.';
+}
+
+/** A building you control, listed like an owned Advance. Its VP is what it is worth to you, and is not part of the Advances total. */
+function ControlledBuildingRow({ id, vp, owned, onOpen, goalList }: { id: string; vp: number; owned: boolean; onOpen: () => void; goalList: boolean }) {
+  const { dispatch } = useGame();
+  const b = buildingById(id);
+  if (!b) return null;
+  return (
+    <li className="adv owned" style={GREY_FIELD}>
+      <span className="adv-field">
+        <span className="coin">
+          <Icon name="check" />
+        </span>
+      </span>
+      <button type="button" className="adv-body" onClick={onOpen}>
+        <span className="adv-main">
+          <span className="adv-name">{b.name}</span>
+          <span className="adv-tags">
+            <span className="muted" style={{ fontSize: 13 }}>
+              {b.civ}
+            </span>
+          </span>
+        </span>
+        <span className="adv-meta">
+          <span className="adv-vp" aria-label={`${vp} victory points to you, not counted in the Advances total`}>
+            {vp}
+            <small>VP</small>
+          </span>
+          <span className="adv-price">{owned ? 'Owned' : 'Controlled'}</span>
+        </span>
+      </button>
+      {goalList && (
+        <button type="button" className="adv-action" aria-label={`Remove ${SPECIAL_BUILDING_NAME} from your goal`} onClick={() => dispatch({ type: 'toggleBuildingGoal' })}>
+          <Icon name="close" />
+        </button>
+      )}
+    </li>
+  );
+}
+
+/** The Special Building, bought with the Advances. Which building it is gets chosen after the purchase. */
+function SpecialBuildingRow({ cost: price, chainStart, onOpen, goalList }: { cost: number; chainStart: boolean; onOpen: () => void; goalList: boolean }) {
+  const { game, dispatch } = useGame();
+  const picked = game.buildings.considering;
+  const own = game.buildings.civ ? buildingById(game.buildings.civ) : undefined;
+  const toggle = () => dispatch({ type: 'toggleSpecialBuilding' });
+  return (
+    <li className={`adv${chainStart ? ' chain-start' : ''}`} style={GREY_FIELD}>
+      <button type="button" className="adv-field" aria-pressed={picked} aria-label={`${picked ? 'Remove' : 'Add'} ${SPECIAL_BUILDING_NAME}, cost ${price}`} onClick={toggle}>
+        <span className="coin">{price}</span>
+      </button>
+      <button type="button" className="adv-body" onClick={onOpen}>
+        <span className="adv-main">
+          <span className="adv-name">
+            {game.buildings.goal && !goalList && (
+              <span className="adv-goal">
+                <Icon name="flag" label="On your goal:" />
+              </span>
+            )}
+            {SPECIAL_BUILDING_NAME}
+          </span>
+          <span className="adv-tags">
+            <span className="muted" style={{ fontSize: 13 }}>
+              {own ? `${own.name} for ${own.civ}` : 'Choose the building after buying'}
+            </span>
+          </span>
+        </span>
+        <span className="adv-meta">
+          <span className="adv-vp" aria-label={`${SPECIAL_BUILDING_VP.low} or ${SPECIAL_BUILDING_VP.high} victory points`}>
+            {SPECIAL_BUILDING_VP.low}/{SPECIAL_BUILDING_VP.high}
+            <small>VP</small>
+          </span>
+        </span>
+      </button>
+    </li>
+  );
 }
 
 export function AdvanceRow({
@@ -266,8 +351,8 @@ export function Cart() {
             <span className="cart-field">
               <b className="mini-coin num">{building.cost}</b>
             </span>
-            <span className="cart-name">{building.building.name}</span>
-            <button type="button" aria-label={`Remove ${building.building.name}`} onClick={() => dispatch({ type: 'considerBuilding', id: null })}>
+            <span className="cart-name">{SPECIAL_BUILDING_NAME}</span>
+            <button type="button" aria-label={`Remove ${SPECIAL_BUILDING_NAME}`} onClick={() => dispatch({ type: 'toggleSpecialBuilding' })}>
               <Icon name="close" />
             </button>
           </span>
@@ -290,7 +375,7 @@ export function Cart() {
           className="btn"
           onClick={() => {
             dispatch({ type: 'clearConsider' });
-            dispatch({ type: 'considerBuilding', id: null });
+            if (building) dispatch({ type: 'toggleSpecialBuilding' });
           }}
         >
           Clear

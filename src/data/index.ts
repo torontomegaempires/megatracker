@@ -168,15 +168,23 @@ export const RULES: Record<RuleSet, RuleData> = {
   fe: build('fe', advancesFarEast, calamitiesFarEast),
 };
 
-/** Special buildings for this game. */
+/**
+ * The nations (and so the special buildings) in this game. The West has the nine odd A.S.T.
+ * numbers and The East the nine even ones; Mega Empires has all eighteen. The Far East has no
+ * Tibet.
+ */
 export function buildingsIn(block: BlockId): SpecialBuilding[] {
-  return buildingsFor(BLOCKS[block].rules);
+  const all = buildingsFor(BLOCKS[block].rules);
+  if (block === 'west') return all.filter((b) => b.ast % 2 === 1);
+  if (block === 'east') return all.filter((b) => b.ast % 2 === 0);
+  if (block === 'fareast') return all.filter((b) => b.id !== 'tibet');
+  return all;
 }
 
 /** A building by id, only if it belongs to this game. */
 export function buildingIn(block: BlockId, id: unknown): SpecialBuilding | undefined {
   const b = typeof id === 'string' ? buildingById(id) : undefined;
-  return b && b.rules === BLOCKS[block].rules ? b : undefined;
+  return b && buildingsIn(block).includes(b) ? b : undefined;
 }
 
 export function rulesFor(block: BlockId): RuleData {

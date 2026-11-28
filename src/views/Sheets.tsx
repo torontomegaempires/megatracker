@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { Calamity, Credits } from '../data';
-import { COLOR_NAMES, COLORS, rulesFor } from '../data';
+import { buildingById, buildingCost, buildingsIn, COLOR_NAMES, COLORS, ERAS, nationsByAst, rulesFor, SPECIAL_BUILDING_VP } from '../data';
 import { choiceCanTap, choicePrompt, choiceReady, choiceTap } from '../engine/credits';
 import { isBarred, zeroCredits } from '../engine/game';
 import { calamityDescription, chainDiscount, cost, creditFor } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
-import { advanceColors, colorNames, CreditPills, RulesText } from '../components/ui';
+import { buildingPoints } from '../engine/selectors';
+import { advanceColors, colorNames, CreditPills, GREY_FIELD, nationStyle, RulesText } from '../components/ui';
 import { useGame } from '../state/store';
 
 // --------------------------------------------------------------- advance
@@ -213,6 +214,7 @@ export function CalamitySheet({ name, onClose, onOpenAdvance }: { name: string; 
 export function CreditChoiceSheet() {
   const { game } = useGame();
   const head = game.queue[0];
+  if (head?.kind === 'building') return <BuildingChoice key={`building:${game.queue.length}`} />;
   if (head?.kind !== 'choice') return null;
   // Keyed so each queued choice starts from a clean slate.
   return <CreditChoice key={`${game.queue.length}:${head.source}`} />;
@@ -263,6 +265,203 @@ function CreditChoice() {
             <span className="have">have {game.credits[c]}</span>
           </button>
         ))}
+      </div>
+    </Sheet>
+  );
+}
+
+// ---------------------------------------------------------------- nation
+
+/** Choose your nation, listed in A.S.T. order, each on its token color. */
+export function NationSheet({ onClose, subtitle = 'In A.S.T. order' }: { onClose?: () => void; subtitle?: string }) {
+  const { game, dispatch } = useGame();
+  return (
+    <Sheet title="Choose nation" subtitle={subtitle} onClose={onClose}>
+      <ul className="nation-list">
+        {nationsByAst(buildingsIn(game.block)).map((n) => (
+          <li key={n.id}>
+            <button
+              type="button"
+              className="nation-option"
+              style={nationStyle(n.color)}
+              aria-pressed={game.buildings.civ === n.id}
+              onClick={() => {
+                dispatch({ type: 'setBuildings', buildings: { civ: n.id } });
+                onClose?.();
+              }}
+            >
+              <span className="nation-ast num">{n.ast}</span>
+              <span className="nation-name">{n.civ}</span>
+              {game.buildings.civ === n.id && <Icon name="check" />}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Sheet>
+  );
+}
+
+// ------------------------------------------------------------------- era
+
+export function EraSheet({ onClose }: { onClose: () => void }) {
+  const { game, dispatch } = useGame();
+  return (
+    <Sheet title="Choose era" subtitle="Where your marker is on the A.S.T." onClose={onClose}>
+      <ul className="nation-list">
+        {ERAS.map((e) => (
+          <li key={e.id}>
+            <button
+              type="button"
+              className="nation-option era-option"
+              aria-pressed={game.buildings.era === e.id}
+              onClick={() => {
+                dispatch({ type: 'setBuildings', buildings: { era: e.id } });
+                onClose();
+              }}
+            >
+              <span className="nation-ast">{e.abbr}</span>
+              <span className="nation-name">{e.name}</span>
+              <span className="muted num">Special Building {e.cost}</span>
+              {game.buildings.era === e.id && <Icon name="check" />}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Sheet>
+  );
+}
+
+// -------------------------------------------------------- building choice
+
+/** After buying the Special Building: which one it is, with your own nation's selected. */
+function BuildingChoice() {
+  const { game, dispatch } = useGame();
+  const b = game.buildings;
+  const era = ERAS.find((e) => e.id === b.era)!;
+  const available = nationsByAst(buildingsIn(game.block)).filter((x) => !b.controlled.includes(x.id));
+  const own = b.civ && available.some((x) => x.id === b.civ) ? b.civ : '';
+  const [picked, setPicked] = useState('');
+  const [settingEra, setSettingEra] = useState(false);
+  const pick = picked || own;
+  const civ = b.civ ? buildingById(b.civ) : undefined;
+
+  // Your nation comes first: it sets which building is suggested.
+  if (!civ) return <NationSheet subtitle="Choose your nation before you pick your building" />;
+
+  return (
+    <>
+      <Sheet
+        title="Choose your Special Building"
+        subtitle={`Paid ${buildingCost(b.era)} in the ${era.name}`}
+        footer={
+          <button type="button" className="btn btn-primary" disabled={!pick} onClick={() => dispatch({ type: 'chooseBuilding', id: pick })}>
+            Build it
+          </button>
+        }
+      >
+        <div className="section">
+          <p className="prose">
+            Your nation is <b>{civ.civ}</b>.{own ? ' Its building is selected.' : ''}
+          </p>
+          <div className="building-actions">
+            <button type="button" className="btn" onClick={() => setSettingEra(true)}>
+              Era: {era.abbr}. Change
+            </button>
+          </div>
+        </div>
+        <ul className="nation-list">
+          {available.map((n) => (
+            <li key={n.id}>
+              <button type="button" className="nation-option" style={nationStyle(n.color)} aria-pressed={pick === n.id} onClick={() => setPicked(n.id)}>
+                <span className="nation-name">
+                  {n.name} <small>{n.civ}</small>
+                </span>
+                {pick === n.id && <Icon name="check" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+      {settingEra && <EraSheet onClose={() => setSettingEra(false)} />}
+    </>
+  );
+}
+
+// -------------------------------------------------------- building rules
+
+/** The Special Building's card, laid out like an Advance's: cost, effect, and goal and purchase buttons. */
+export function BuildingSheet({ onClose }: { onClose: () => void }) {
+  const { game, dispatch } = useGame();
+  const b = game.buildings;
+  const points = buildingPoints(game);
+  const civ = b.civ ? buildingById(b.civ) : undefined;
+  const price = buildingCost(b.era);
+  const picked = b.considering;
+  const has = !!b.owned;
+
+  return (
+    <Sheet
+      title="Special Building"
+      subtitle={`Special · ${SPECIAL_BUILDING_VP.low}/${SPECIAL_BUILDING_VP.high} VP · price ${price}`}
+      band={GREY_FIELD}
+      onClose={onClose}
+      footer={
+        has ? (
+          <span className="muted" style={{ margin: 'auto' }}>
+            <Icon name="check" /> You own a Special Building
+          </span>
+        ) : (
+          <>
+            <button type="button" className="btn btn-goal" aria-pressed={b.goal} onClick={() => dispatch({ type: 'toggleBuildingGoal' })}>
+              <Icon name="flag" />
+              {b.goal ? 'On goal' : 'Add to goal'}
+            </button>
+            <button
+              type="button"
+              className={`btn ${picked ? '' : 'btn-primary'}`}
+              disabled={!!game.freePick}
+              onClick={() => {
+                dispatch({ type: 'toggleSpecialBuilding' });
+                onClose();
+              }}
+            >
+              {picked ? 'Remove from purchase' : `Consider buying for ${price}`}
+            </button>
+          </>
+        )
+      }
+    >
+      {!has && (
+        <div className="section">
+          <div className="facts">
+            <div className="fact">
+              <div className="label">Your cost</div>
+              <div className="value">{price}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="section prose buildings-rules">
+        <h3>Effect</h3>
+        <p>
+          <b>VP:</b> 2 for owning a building{points && ` (${points.owned})`}, 1 for each you control{points && ` (${points.controlled})`}, and 2 more for
+          controlling {civ ? `the ${civ.name}` : 'your civilization’s'}
+          {points && ` (${points.historic})`}. Ties go first to whoever owns and controls their civilization’s building, then to whoever owns one.
+        </p>
+        <p>
+          <b>Tax:</b> each building you control pays tax as if it were a city.
+        </p>
+        <p>
+          <b>Population:</b> a city with a building supports 1 more token; an area without a city and a limit of 1 or 2 holds 1 more.
+        </p>
+        <p>
+          <b>Calamities:</b> sacrifice the building you own and control to prevent up to 10 damage, the reduction of up to 2 cities, or 1 step of
+          Regression, against one calamity.
+        </p>
+        <p>
+          <b>Trade:</b> sacrifice any you control as 1 card each of incomplete sets when buying (on the Trade tab).
+        </p>
       </div>
     </Sheet>
   );

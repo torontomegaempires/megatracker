@@ -1,5 +1,5 @@
-import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePower } from '../data';
-import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
+import { buildingById, buildingCost, SPECIAL_BUILDING_VP, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, BuildingsState, FilterId, FreePick, GameState, SortId } from './game';
 
 /** Whether this game uses the Special Buildings expansion. */
@@ -265,7 +265,7 @@ export interface CostSummary {
   lines: CostLine[];
   libraryDiscount: number;
   /** A special building being constructed in the same purchase. */
-  building: { building: SpecialBuilding; cost: number } | null;
+  building: { cost: number } | null;
   total: number;
 }
 
@@ -285,16 +285,32 @@ export function costSummary(state: GameState): CostSummary {
     else maxOther = Math.max(maxOther, c);
     return { advance: a, cost: c, free };
   });
-  const considered = buildingsOn(state) && state.buildings.considering ? buildingById(state.buildings.considering) : undefined;
-  const building = considered ? { building: considered, cost: buildingCost(state.buildings.era) } : null;
+  const building = buildingsOn(state) && state.buildings.considering ? { cost: buildingCost(state.buildings.era) } : null;
   // A building is bought as if it were an Advance, so Library can discount it too.
   const libraryDiscount = hasLibrary ? Math.min(Math.max(maxOther, building?.cost ?? 0), 40) : 0;
   const total = lines.reduce((t, l) => t + (l.free ? 0 : l.cost), 0) - libraryDiscount + (building?.cost ?? 0);
   return { lines, libraryDiscount, building, total };
 }
 
+/** What the Advances list shows: an Advance, or the Special Building you can buy alongside them. */
+export type ListItem =
+  | { kind: 'advance'; advance: Advance }
+  | { kind: 'building'; cost: number }
+  /** A building you control: owned (in your region) or not. Its VP is what it is worth to you, and stays out of the Advances total. */
+  | { kind: 'controlled'; id: string; vp: number; owned: boolean };
+
+/** What a controlled building is worth to you: 1 for controlling it, 2 more if it is the one you own, 2 more if it is your nation's own. */
+export function controlledBuildingValue(state: GameState, id: string): number {
+  const { owned, civ } = state.buildings;
+  return 1 + (owned === id ? 2 : 0) + (civ === id ? 2 : 0);
+}
+
+export const SPECIAL_BUILDING_NAME = 'Special Building';
+
 export interface AdvanceListing {
   advances: Advance[];
+  /** The Advances plus the Special Building, in the chosen order. */
+  items: ListItem[];
   /** Names of advances that start a new strategic chain (shown with a divider). */
   chainStarts: Set<string>;
   sort: SortId | 'revCost';
@@ -314,12 +330,12 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     if (costliest < 40) cap += 40 - costliest;
   }
 
-  const list = rules.advances.filter((a) => {
+  const advances = rules.advances.filter((a) => {
     const isOwned = owns(state, a.name);
     if (f === 'all') return true;
     if (f === 'owned') return isOwned;
     if (state.considering.includes(a.name)) return true;
-    if (isOwned) return false;
+    if (isOwned && f !== 'goal') return false;
     switch (f) {
       case 'unowned':
         return true;
@@ -333,37 +349,79 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     }
   });
 
+  // The Special Building sits among the Advances until you own one.
+  const buildingCostNow = buildingCost(state.buildings.era);
+  const showBuilding =
+    buildingsOn(state) &&
+    !state.buildings.owned &&
+    !state.freePick &&
+    (state.buildings.considering || f === 'all' || f === 'unowned' || (f === 'goal' && state.buildings.goal) || ((f === 'affordable' || f === 'almostAffordable') && buildingCostNow <= cap));
+  const list: ListItem[] = advances.map((advance) => ({ kind: 'advance', advance }));
+  if (showBuilding) list.push({ kind: 'building', cost: buildingCostNow });
+
+  // Your goal lists what you own as well as what you still want, so the building you own stays on it.
+  if (buildingsOn(state) && !state.freePick && f === 'goal' && state.buildings.goal && state.buildings.owned) {
+    const id = state.buildings.owned;
+    list.push({ kind: 'controlled', id, vp: controlledBuildingValue(state, id), owned: true });
+  }
+  // Buildings you control are listed with the Advances you own.
+  if (buildingsOn(state) && !state.freePick && (f === 'owned' || f === 'all')) {
+    for (const id of state.buildings.controlled) {
+      list.push({ kind: 'controlled', id, vp: controlledBuildingValue(state, id), owned: state.buildings.owned === id });
+    }
+  }
+
   const c = (a: Advance) => cost(state, a);
+  const key = {
+    name: (i: ListItem) => (i.kind === 'advance' ? i.advance.name : i.kind === 'controlled' ? buildingById(i.id)?.name ?? i.id : SPECIAL_BUILDING_NAME),
+    cost: (i: ListItem) => (i.kind === 'advance' ? c(i.advance) : i.kind === 'building' ? i.cost : 0),
+    price: (i: ListItem) => (i.kind === 'advance' ? i.advance.price : i.kind === 'building' ? i.cost : 0),
+    // The Special Building counts as 5 VP here, though it shows 3/5.
+    vp: (i: ListItem) => (i.kind === 'advance' ? i.advance.vp : i.kind === 'building' ? SPECIAL_BUILDING_VP.high : i.vp),
+    discount: (i: ListItem) => (i.kind === 'advance' ? i.advance.price - c(i.advance) : 0),
+    color: (i: ListItem) => (i.kind === 'advance' ? i.advance.color : 'grey'),
+    chain: (i: ListItem) => (i.kind === 'advance' ? i.advance.chain : Infinity),
+  };
   const chainStarts = new Set<string>();
   switch (s) {
     case 'cost':
-      list.sort((a, b) => c(a) - c(b));
+      list.sort((a, b) => key.cost(a) - key.cost(b));
       break;
     case 'revCost':
-      list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => key.price(b) - key.price(a));
       break;
     case 'vp':
-      list.sort((a, b) => b.vp - a.vp || c(a) - c(b));
+      list.sort((a, b) => key.vp(b) - key.vp(a) || key.cost(a) - key.cost(b));
       break;
     case 'economy':
-      list.sort((a, b) => c(a) / a.vp - c(b) / b.vp || c(a) - c(b));
+      list.sort((a, b) => key.cost(a) / key.vp(a) - key.cost(b) / key.vp(b) || key.cost(a) - key.cost(b));
       break;
     case 'color':
-      list.sort((a, b) => a.color.localeCompare(b.color));
+      list.sort((a, b) => key.color(a).localeCompare(key.color(b)));
       break;
     case 'discount':
-      list.sort((a, b) => b.price - c(b) - (a.price - c(a)));
+      list.sort((a, b) => key.discount(b) - key.discount(a));
       break;
     case 'chains':
-      list.sort((a, b) => a.chain - b.chain || a.price - b.price);
+      list.sort((a, b) => (key.chain(a) === key.chain(b) ? 0 : key.chain(a) - key.chain(b)) || key.price(a) - key.price(b));
       list.forEach((a, i) => {
-        if (i > 0 && list[i - 1].chain !== a.chain) chainStarts.add(a.name);
+        if (i > 0 && key.chain(list[i - 1]) !== key.chain(a)) chainStarts.add(key.name(a));
       });
       break;
-    case 'alpha':
+    case 'alpha': {
+      // Advances keep their listed order; the building goes in by name.
+      const at = list.findIndex((i) => i.kind === 'advance' && i.advance.name.localeCompare(SPECIAL_BUILDING_NAME) > 0);
+      if (showBuilding && at >= 0) list.splice(at, 0, list.pop()!);
       break;
+    }
   }
-  return { advances: list, chainStarts, sort: s, filter: f };
+  return {
+    advances: list.flatMap((i) => (i.kind === 'advance' ? [i.advance] : [])),
+    items: list,
+    chainStarts,
+    sort: s,
+    filter: f,
+  };
 }
 
 // ---------------------------------------------------------------------------
