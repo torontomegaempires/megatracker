@@ -6,6 +6,7 @@ import { isBarred, zeroCredits } from '../engine/game';
 import { calamityDescription, chainDiscount, cost, creditFor } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
+import { buildingPoints } from '../engine/selectors';
 import { advanceColors, colorNames, CreditPills, nationStyle, RulesText } from '../components/ui';
 import { useGame } from '../state/store';
 
@@ -383,5 +384,36 @@ function BuildingChoice() {
       </Sheet>
       {settingEra && <EraSheet onClose={() => setSettingEra(false)} />}
     </>
+  );
+}
+
+// -------------------------------------------------------- building rules
+
+/** How special buildings score and what they do, opened from a building in the Advances list. */
+export function BuildingSheet({ onClose }: { onClose: () => void }) {
+  const { game } = useGame();
+  const points = buildingPoints(game);
+  const civ = game.buildings.civ ? buildingById(game.buildings.civ) : undefined;
+  return (
+    <Sheet title="Special Buildings" subtitle={points ? `${points.total} VP to you` : undefined} onClose={onClose}>
+      <div className="prose buildings-rules">
+        <p>
+          <b>VP:</b> 2 for owning a building{points && ` (${points.owned})`}, 1 for each you control{points && ` (${points.controlled})`}, and 2 more for
+          controlling {civ ? `the ${civ.name}` : 'your civilization’s'}
+          {points && ` (${points.historic})`}. Ties go first to whoever owns and controls their civilization’s building, then to whoever owns one.
+        </p>
+        <p>
+          <b>Tax:</b> each building you control pays tax as if it were a city. <b>Population:</b> a city with a building supports 1 more token; an area
+          without a city and a limit of 1 or 2 holds 1 more.
+        </p>
+        <p>
+          <b>Calamities:</b> sacrifice the building you own and control to prevent up to 10 damage, the reduction of up to 2 cities, or 1 step of
+          Regression, against one calamity.
+        </p>
+        <p>
+          <b>Trade:</b> sacrifice any you control as 1 card each of incomplete sets when buying (on the Trade tab).
+        </p>
+      </div>
+    </Sheet>
   );
 }

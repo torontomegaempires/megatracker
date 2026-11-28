@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { SpecialBuilding } from '../data';
-import { buildingById, buildingCost, buildingsIn, ERAS, nationsByAst } from '../data';
-import type { Era } from '../data';
+import { buildingById, buildingCost, buildingsIn } from '../data';
 import { buildingPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { NationSwatch, Segmented } from '../components/ui';
+import { NationSwatch } from '../components/ui';
 import { useGame } from '../state/store';
 
 const byCiv = (b: SpecialBuilding) => `${b.civ} · ${b.name}`;
@@ -16,10 +15,8 @@ export function confirmSacrifice(b: SpecialBuilding): boolean {
 
 /** Your special building, the others you control and their VP, below city building on the Cities tab. */
 export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
-  const { game, dispatch } = useGame();
-  const b = game.buildings;
+  const { game } = useGame();
   const points = buildingPoints(game)!;
-  const civ = b.civ ? buildingById(b.civ) : undefined;
 
   return (
     <>
@@ -28,67 +25,11 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
         <span className="muted num">{points.total} VP</span>
       </div>
 
-      <div className="panel">
-        <div className="field">
-          <label htmlFor="building-civ">
-            Your civilization
-            <span className="hint">Its building is worth 2 more VP to you</span>
-          </label>
-          <span className="select-wrap">
-            <select
-              id="building-civ"
-              value={b.civ ?? ''}
-              onChange={(e) => dispatch({ type: 'setBuildings', buildings: { civ: e.target.value || null } })}
-            >
-              <option value="">Choose</option>
-              {nationsByAst(buildingsIn(game.block)).map((x) => (
-                <option key={x.id} value={x.id}>
-                  {x.ast}. {x.civ}
-                </option>
-              ))}
-            </select>
-            <Icon name="chevronDown" />
-          </span>
-        </div>
-        <div className="field stack">
-          <label>
-            Your era on the A.S.T.
-            <span className="hint">Sets what a building costs: 30, 40 or 50</span>
-          </label>
-          <Segmented<Era>
-            label="Your era on the A.S.T."
-            value={b.era}
-            onChange={(era) => dispatch({ type: 'setBuildings', buildings: { era } })}
-            options={ERAS.map((e) => ({ value: e.id, label: e.abbr }))}
-          />
-        </div>
-      </div>
-
       <h3 className="group-head">In your region</h3>
       <OwnBuilding onPurchase={onPurchase} />
 
       <h3 className="group-head">Others you control</h3>
       <OtherBuildings />
-
-      <h3 className="group-head">Points and benefits</h3>
-      <div className="panel prose buildings-rules">
-        <p>
-          <b>VP:</b> 2 for owning a building ({points.owned}), 1 for each you control ({points.controlled}), and 2 more for controlling{' '}
-          {civ ? `the ${civ.name}` : 'your civilization’s'} ({points.historic}). Ties go first to whoever owns and controls their
-          civilization’s building, then to whoever owns one.
-        </p>
-        <p>
-          <b>Tax:</b> each building you control pays tax as if it were a city. <b>Population:</b> a city with a building supports 1 more
-          token; an area without a city and a limit of 1 or 2 holds 1 more.
-        </p>
-        <p>
-          <b>Calamities:</b> sacrifice the building you own and control to prevent up to 10 damage, the reduction of up to 2 cities, or 1
-          step of Regression, against one calamity.
-        </p>
-        <p>
-          <b>Trade:</b> sacrifice any you control as 1 card each of incomplete sets when buying (on the Trade tab).
-        </p>
-      </div>
     </>
   );
 }

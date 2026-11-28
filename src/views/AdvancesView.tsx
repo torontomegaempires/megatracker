@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import type { Advance } from '../data';
 import { buildingById, COLOR_NAMES, COLORS, SPECIAL_BUILDING_VP } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
@@ -7,6 +7,7 @@ import { chainDiscount, cost, costSummary, funds, onGoal, payment, SPECIAL_BUILD
 import { Icon } from '../components/Icon';
 import { advanceColors } from '../components/ui';
 import { useGame } from '../state/store';
+import { BuildingSheet } from './Sheets';
 
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'unowned', label: 'Unowned' },
@@ -37,6 +38,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
   const listing = visibleAdvances(game);
   const available = funds(game);
   const setView = (view: Partial<GameState['view']>) => dispatch({ type: 'setView', view });
+  const [rules, setRules] = useState(false);
 
   return (
     <>
@@ -93,9 +95,9 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
         <ul className="adv-list">
           {listing.items.map((item) =>
             item.kind === 'building' ? (
-              <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} />
+              <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} onOpen={() => setRules(true)} />
             ) : item.kind === 'controlled' ? (
-              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} />
+              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} onOpen={() => setRules(true)} />
             ) : (
             <AdvanceRow
               key={item.advance.name}
@@ -121,6 +123,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
           )}
         </ul>
       )}
+      {rules && <BuildingSheet onClose={() => setRules(false)} />}
     </>
   );
 }
@@ -143,7 +146,7 @@ const GREY: CSSProperties = {
 } as CSSProperties;
 
 /** A building you control, listed like an owned Advance. Its VP is what it is worth to you, and is not part of the Advances total. */
-function ControlledBuildingRow({ id, vp, owned }: { id: string; vp: number; owned: boolean }) {
+function ControlledBuildingRow({ id, vp, owned, onOpen }: { id: string; vp: number; owned: boolean; onOpen: () => void }) {
   const b = buildingById(id);
   if (!b) return null;
   return (
@@ -153,7 +156,7 @@ function ControlledBuildingRow({ id, vp, owned }: { id: string; vp: number; owne
           <Icon name="check" />
         </span>
       </span>
-      <div className="adv-body" style={{ cursor: 'default' }}>
+      <button type="button" className="adv-body" onClick={onOpen}>
         <span className="adv-main">
           <span className="adv-name">{b.name}</span>
           <span className="adv-tags">
@@ -169,13 +172,13 @@ function ControlledBuildingRow({ id, vp, owned }: { id: string; vp: number; owne
           </span>
           <span className="adv-price">{owned ? 'Owned' : 'Controlled'}</span>
         </span>
-      </div>
+      </button>
     </li>
   );
 }
 
 /** The Special Building, bought with the Advances. Which building it is gets chosen after the purchase. */
-function SpecialBuildingRow({ cost: price, chainStart }: { cost: number; chainStart: boolean }) {
+function SpecialBuildingRow({ cost: price, chainStart, onOpen }: { cost: number; chainStart: boolean; onOpen: () => void }) {
   const { game, dispatch } = useGame();
   const picked = game.buildings.considering;
   const own = game.buildings.civ ? buildingById(game.buildings.civ) : undefined;
@@ -185,7 +188,7 @@ function SpecialBuildingRow({ cost: price, chainStart }: { cost: number; chainSt
       <button type="button" className="adv-field" aria-pressed={picked} aria-label={`${picked ? 'Remove' : 'Add'} ${SPECIAL_BUILDING_NAME}, cost ${price}`} onClick={toggle}>
         <span className="coin">{price}</span>
       </button>
-      <button type="button" className="adv-body" onClick={toggle}>
+      <button type="button" className="adv-body" onClick={onOpen}>
         <span className="adv-main">
           <span className="adv-name">{SPECIAL_BUILDING_NAME}</span>
           <span className="adv-tags">
