@@ -189,11 +189,11 @@ describe('goal', () => {
     expect(p.vpLeft).toBe(adv(g, 'Pottery').vp + adv(g, 'Democracy').vp);
   });
 
-  it('filters the Advances tab to unowned goal Advances', () => {
+  it('lists owned and unowned Advances on the goal', () => {
     let g = toggle(newGame('west', 0), 'Pottery', 'Democracy');
     g = buy(g, 'Pottery');
     g = reducer(g, { type: 'setView', view: { filter: 'goal' } });
-    expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Democracy']);
+    expect(visibleAdvances(g).advances.map((a) => a.name)).toEqual(['Pottery', 'Democracy']);
   });
 
   it('loads saved games, dropping the Goal tab’s old idea themes', () => {

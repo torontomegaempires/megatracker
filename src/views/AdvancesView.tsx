@@ -90,14 +90,14 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
       )}
 
       {listing.items.length === 0 ? (
-        <p className="empty">{emptyMessage(listing.filter, available, game.goal.length > 0)}</p>
+        <p className="empty">{emptyMessage(listing.filter, available)}</p>
       ) : (
         <ul className="adv-list">
           {listing.items.map((item) =>
             item.kind === 'building' ? (
               <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} onOpen={() => setRules(true)} goalList={listing.filter === 'goal'} />
             ) : item.kind === 'controlled' ? (
-              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} onOpen={() => setRules(true)} />
+              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} onOpen={() => setRules(true)} goalList={listing.filter === 'goal'} />
             ) : (
             <AdvanceRow
               key={item.advance.name}
@@ -128,17 +128,18 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
   );
 }
 
-function emptyMessage(filter: string, available: number, hasGoal: boolean) {
+function emptyMessage(filter: string, available: number) {
   if (filter === 'owned') return 'You have not bought any Advances yet.';
   if (filter === 'goal')
-    return hasGoal ? 'You own every Advance on your goal.' : 'Your goal is empty. Add Advances with “Add to goal” in an Advance’s details.';
+    return 'Your goal is empty. Add Advances with “Add to goal” in an Advance’s details.';
   if ((filter === 'affordable' || filter === 'almostAffordable') && available > 0)
     return 'Nothing fits your remaining funds.';
   return 'No Advances to show.';
 }
 
 /** A building you control, listed like an owned Advance. Its VP is what it is worth to you, and is not part of the Advances total. */
-function ControlledBuildingRow({ id, vp, owned, onOpen }: { id: string; vp: number; owned: boolean; onOpen: () => void }) {
+function ControlledBuildingRow({ id, vp, owned, onOpen, goalList }: { id: string; vp: number; owned: boolean; onOpen: () => void; goalList: boolean }) {
+  const { dispatch } = useGame();
   const b = buildingById(id);
   if (!b) return null;
   return (
@@ -165,6 +166,11 @@ function ControlledBuildingRow({ id, vp, owned, onOpen }: { id: string; vp: numb
           <span className="adv-price">{owned ? 'Owned' : 'Controlled'}</span>
         </span>
       </button>
+      {goalList && (
+        <button type="button" className="adv-action" aria-label={`Remove ${SPECIAL_BUILDING_NAME} from your goal`} onClick={() => dispatch({ type: 'toggleBuildingGoal' })}>
+          <Icon name="close" />
+        </button>
+      )}
     </li>
   );
 }

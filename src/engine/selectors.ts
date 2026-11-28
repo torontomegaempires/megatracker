@@ -335,7 +335,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     if (f === 'all') return true;
     if (f === 'owned') return isOwned;
     if (state.considering.includes(a.name)) return true;
-    if (isOwned) return false;
+    if (isOwned && f !== 'goal') return false;
     switch (f) {
       case 'unowned':
         return true;
@@ -359,6 +359,11 @@ export function visibleAdvances(state: GameState): AdvanceListing {
   const list: ListItem[] = advances.map((advance) => ({ kind: 'advance', advance }));
   if (showBuilding) list.push({ kind: 'building', cost: buildingCostNow });
 
+  // Your goal lists what you own as well as what you still want, so the building you own stays on it.
+  if (buildingsOn(state) && !state.freePick && f === 'goal' && state.buildings.goal && state.buildings.owned) {
+    const id = state.buildings.owned;
+    list.push({ kind: 'controlled', id, vp: controlledBuildingValue(state, id), owned: true });
+  }
   // Buildings you control are listed with the Advances you own.
   if (buildingsOn(state) && !state.freePick && (f === 'owned' || f === 'all')) {
     for (const id of state.buildings.controlled) {
