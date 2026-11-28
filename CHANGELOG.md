@@ -10,6 +10,10 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 ## [Unreleased]
 
+### Changed
+
+- The Goal tab is gone. Add Advances to your goal from an Advance’s details, and use the Goal filter on the Advances tab to see them and remove them.
+
 ## [0.7.0] - 2026-11-27
 
 ### Added
