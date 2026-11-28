@@ -449,6 +449,17 @@ describe('special buildings', () => {
     expect(victoryPoints(g)).toBe(0);
   });
 
+  it('returns to the list, and to the goal, when the building you own is sacrificed', () => {
+    const listed = (g: GameState) => visibleAdvances(g).items.some((i) => i.kind === 'building');
+    let g = reducer(withBuildings(), { type: 'toggleBuildingGoal' });
+    g = reducer(g, { type: 'toggleSpecialBuilding' });
+    g = reducer(reducer(g, { type: 'buy' }), { type: 'chooseBuilding', id: 'rome' });
+    expect(listed(reducer(g, { type: 'setView', view: { filter: 'goal' } }))).toBe(false);
+    const gone = reducer(g, { type: 'sacrificeBuilding', id: 'rome' });
+    expect(listed(reducer(gone, { type: 'setView', view: { filter: 'unowned' } }))).toBe(true);
+    expect(listed(reducer(gone, { type: 'setView', view: { filter: 'goal' } }))).toBe(true);
+  });
+
   it('can be discounted by Library, as if it were an Advance', () => {
     let g = reducer(withBuildings(), { type: 'toggleSpecialBuilding' });
     g = consider(g, 'Library');
