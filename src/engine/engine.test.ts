@@ -381,10 +381,13 @@ describe('special buildings', () => {
 
   it('is off in new games and offers each game only its own nations’ buildings', () => {
     expect(newGame('west', 5).buildings.enabled).toBe(false);
-    expect(buildingsIn('west')).toHaveLength(18);
-    expect(buildingsIn('mega')).toEqual(buildingsIn('west'));
+    expect(buildingsIn('west')).toHaveLength(9);
+    expect(buildingsIn('east')).toHaveLength(9);
+    expect(buildingsIn('mega')).toHaveLength(18);
+    expect(buildingsIn('mega')).toEqual(expect.arrayContaining([...buildingsIn('west'), ...buildingsIn('east')]));
     expect(buildingsIn('fareast').map((b) => b.civ)).toContain('Heian');
-    expect(buildingsIn('fareast')).toHaveLength(12);
+    expect(buildingsIn('fareast')).toHaveLength(11);
+    expect(buildingsIn('fareast').map((b) => b.id)).not.toContain('tibet');
     expect(buildingsIn('fareast').find((b) => b.id === 'ming')?.name).toBe('Forbidden City of Beijing');
     const fe = withBuildings('fareast');
     expect(reducer(fe, { type: 'toggleSpecialBuilding' }).buildings.considering).toBe(true);
@@ -403,9 +406,11 @@ describe('special buildings', () => {
   });
 
   it('numbers each nation by its place on the A.S.T.', () => {
-    expect(nationsByAst(buildingsIn('west')).map((b) => b.ast)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
+    expect(nationsByAst(buildingsIn('mega')).map((b) => b.ast)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
+    expect(nationsByAst(buildingsIn('west')).map((b) => b.ast)).toEqual([1, 3, 5, 7, 9, 11, 13, 15, 17]);
+    expect(nationsByAst(buildingsIn('east')).map((b) => b.ast)).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18]);
     expect(nationsByAst(buildingsIn('west'))[0].civ).toBe('Minoa');
-    expect(nationsByAst(buildingsIn('fareast')).map((b) => b.ast)).toEqual([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 20, 21]);
+    expect(nationsByAst(buildingsIn('fareast')).map((b) => b.ast)).toEqual([1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 20]);
   });
 
   it('costs 30, 40 or 50 by A.S.T. era and is bought with the Advances', () => {
