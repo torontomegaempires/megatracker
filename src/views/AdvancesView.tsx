@@ -92,7 +92,26 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
       ) : (
         <ul className="adv-list">
           {listing.advances.map((a) => (
-            <AdvanceRow key={a.name} game={game} advance={a} chainStart={listing.chainStarts.has(a.name)} onOpen={onOpen} />
+            <AdvanceRow
+              key={a.name}
+              game={game}
+              advance={a}
+              chainStart={listing.chainStarts.has(a.name)}
+              onOpen={onOpen}
+              goalMark={listing.filter !== 'goal'}
+              action={
+                listing.filter === 'goal' ? (
+                  <button
+                    type="button"
+                    className="adv-action"
+                    aria-label={`Remove ${a.name} from your goal`}
+                    onClick={() => dispatch({ type: 'toggleGoal', name: a.name })}
+                  >
+                    <Icon name="close" />
+                  </button>
+                ) : undefined
+              }
+            />
           ))}
         </ul>
       )}
@@ -103,7 +122,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
 function emptyMessage(filter: string, available: number, hasGoal: boolean) {
   if (filter === 'owned') return 'You have not bought any Advances yet.';
   if (filter === 'goal')
-    return hasGoal ? 'You own every Advance on your goal.' : 'Your goal is empty. Add Advances on the Goal tab, or from an Advance’s details.';
+    return hasGoal ? 'You own every Advance on your goal.' : 'Your goal is empty. Add Advances with “Add to goal” in an Advance’s details.';
   if ((filter === 'affordable' || filter === 'almostAffordable') && available > 0)
     return 'Nothing fits your remaining funds.';
   return 'No Advances to show.';

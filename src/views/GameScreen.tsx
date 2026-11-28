@@ -10,15 +10,13 @@ import { useGame } from '../state/store';
 import { useTheme, type Theme } from '../state/theme';
 import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version';
 import { AdvancesView, Cart } from './AdvancesView';
-import { GoalView } from './GoalView';
 import { SharedGameView } from './SharedGameView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
 import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
 
-type Tab = 'advances' | 'goal' | 'cities' | 'trade' | 'calamities' | 'specials' | 'game';
+type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'specials' | 'game';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'advances', label: 'Advances', icon: 'advances' },
-  { id: 'goal', label: 'Goal', icon: 'flag' },
   { id: 'cities', label: 'Cities', icon: 'cities' },
   { id: 'trade', label: 'Trade', icon: 'trade' },
   { id: 'calamities', label: 'Calamities', icon: 'calamities' },
@@ -65,7 +63,7 @@ export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | nul
   const clearFocusHand = useCallback(() => setFocusHand(false), []);
   const close = () => setOverlay(null);
   const summary = costSummary(game);
-  const showCart = (tab === 'advances' || tab === 'goal') && (summary.lines.length > 0 || !!summary.building);
+  const showCart = tab === 'advances' && (summary.lines.length > 0 || !!summary.building);
   const specials = specialAbilities(game).length;
 
   return (
@@ -108,7 +106,6 @@ export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | nul
             }}
           />
         )}
-        {tab === 'goal' && <GoalView onOpen={(name) => setOverlay({ kind: 'advance', name })} />}
         {tab === 'cities' && <CitiesView onPurchase={() => setTab('advances')} />}
         {tab === 'trade' && <TradeView focusHand={focusHand} onFocused={clearFocusHand} />}
         {tab === 'calamities' && <CalamitiesView onOpen={(name) => setOverlay({ kind: 'calamity', name })} />}
