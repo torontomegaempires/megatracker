@@ -1,5 +1,5 @@
 import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
-import { buildingCost, SPECIAL_BUILDING_VP, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import { buildingById, buildingCost, SPECIAL_BUILDING_VP, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, BuildingsState, FilterId, FreePick, GameState, SortId } from './game';
 
 /** Whether this game uses the Special Buildings expansion. */
@@ -293,7 +293,17 @@ export function costSummary(state: GameState): CostSummary {
 }
 
 /** What the Advances list shows: an Advance, or the Special Building you can buy alongside them. */
-export type ListItem = { kind: 'advance'; advance: Advance } | { kind: 'building'; cost: number };
+export type ListItem =
+  | { kind: 'advance'; advance: Advance }
+  | { kind: 'building'; cost: number }
+  /** A building you control: owned (in your region) or not. Its VP is what it is worth to you, and stays out of the Advances total. */
+  | { kind: 'controlled'; id: string; vp: number; owned: boolean };
+
+/** What a controlled building is worth to you: 1 for controlling it, 2 more if it is the one you own, 2 more if it is your nation's own. */
+export function controlledBuildingValue(state: GameState, id: string): number {
+  const { owned, civ } = state.buildings;
+  return 1 + (owned === id ? 2 : 0) + (civ === id ? 2 : 0);
+}
 
 export const SPECIAL_BUILDING_NAME = 'Special Building';
 
@@ -349,13 +359,20 @@ export function visibleAdvances(state: GameState): AdvanceListing {
   const list: ListItem[] = advances.map((advance) => ({ kind: 'advance', advance }));
   if (showBuilding) list.push({ kind: 'building', cost: buildingCostNow });
 
+  // Buildings you control are listed with the Advances you own.
+  if (buildingsOn(state) && !state.freePick && (f === 'owned' || f === 'all')) {
+    for (const id of state.buildings.controlled) {
+      list.push({ kind: 'controlled', id, vp: controlledBuildingValue(state, id), owned: state.buildings.owned === id });
+    }
+  }
+
   const c = (a: Advance) => cost(state, a);
   const key = {
-    name: (i: ListItem) => (i.kind === 'advance' ? i.advance.name : SPECIAL_BUILDING_NAME),
-    cost: (i: ListItem) => (i.kind === 'advance' ? c(i.advance) : i.cost),
-    price: (i: ListItem) => (i.kind === 'advance' ? i.advance.price : i.cost),
-    // The building counts as 5 VP here, though it shows 3/5.
-    vp: (i: ListItem) => (i.kind === 'advance' ? i.advance.vp : SPECIAL_BUILDING_VP.high),
+    name: (i: ListItem) => (i.kind === 'advance' ? i.advance.name : i.kind === 'controlled' ? buildingById(i.id)?.name ?? i.id : SPECIAL_BUILDING_NAME),
+    cost: (i: ListItem) => (i.kind === 'advance' ? c(i.advance) : i.kind === 'building' ? i.cost : 0),
+    price: (i: ListItem) => (i.kind === 'advance' ? i.advance.price : i.kind === 'building' ? i.cost : 0),
+    // The Special Building counts as 5 VP here, though it shows 3/5.
+    vp: (i: ListItem) => (i.kind === 'advance' ? i.advance.vp : i.kind === 'building' ? SPECIAL_BUILDING_VP.high : i.vp),
     discount: (i: ListItem) => (i.kind === 'advance' ? i.advance.price - c(i.advance) : 0),
     color: (i: ListItem) => (i.kind === 'advance' ? i.advance.color : 'grey'),
     chain: (i: ListItem) => (i.kind === 'advance' ? i.advance.chain : Infinity),

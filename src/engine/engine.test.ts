@@ -438,6 +438,17 @@ describe('special buildings', () => {
     expect(find(reducer(g, { type: 'setOwnedBuilding', id: 'rome' }))).toBe(-1);
   });
 
+  it('lists controlled buildings with Owned items, worth what they are to you but outside the Advances VP', () => {
+    let g = reducer(withBuildings(), { type: 'setBuildings', buildings: { civ: 'rome' } });
+    g = reducer(g, { type: 'setOwnedBuilding', id: 'hellas' });
+    g = control(g, 'rome', 'egypt');
+    g = reducer(g, { type: 'setView', view: { filter: 'owned' } });
+    const items = visibleAdvances(g).items.flatMap((i) => (i.kind === 'controlled' ? [[i.id, i.vp, i.owned]] : []));
+    expect(items).toEqual(expect.arrayContaining([['hellas', 3, true], ['rome', 3, false], ['egypt', 1, false]]));
+    expect(items).toHaveLength(3);
+    expect(victoryPoints(g)).toBe(0);
+  });
+
   it('can be discounted by Library, as if it were an Advance', () => {
     let g = reducer(withBuildings(), { type: 'toggleSpecialBuilding' });
     g = consider(g, 'Library');

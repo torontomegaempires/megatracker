@@ -14,6 +14,7 @@ The live version shows in the app (Menu, and About) and at `/version.json` on th
 
 - Tap the header to choose your nation (listed in AST order, in its token color) and your era, from Early Bronze Age to Late Iron Age. The header shows both.
 - With Special Buildings on, the Special Building is an item in the Advances list (3/5 VP, sorted as 5). After you buy it, pick which building it is, with your nation's already selected.
+- Buildings you control are listed with your owned Advances, with their VP to you (not added to the Advances VP total).
 
 ### Changed
 

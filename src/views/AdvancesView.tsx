@@ -94,6 +94,8 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
           {listing.items.map((item) =>
             item.kind === 'building' ? (
               <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} />
+            ) : item.kind === 'controlled' ? (
+              <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} />
             ) : (
             <AdvanceRow
               key={item.advance.name}
@@ -139,6 +141,38 @@ const GREY: CSSProperties = {
   '--on-a': '#ffffff',
   '--on-b': '#ffffff',
 } as CSSProperties;
+
+/** A building you control, listed like an owned Advance. Its VP is what it is worth to you, and is not part of the Advances total. */
+function ControlledBuildingRow({ id, vp, owned }: { id: string; vp: number; owned: boolean }) {
+  const b = buildingById(id);
+  if (!b) return null;
+  return (
+    <li className="adv owned" style={GREY}>
+      <span className="adv-field">
+        <span className="coin">
+          <Icon name="check" />
+        </span>
+      </span>
+      <div className="adv-body" style={{ cursor: 'default' }}>
+        <span className="adv-main">
+          <span className="adv-name">{b.name}</span>
+          <span className="adv-tags">
+            <span className="muted" style={{ fontSize: 13 }}>
+              {b.civ}
+            </span>
+          </span>
+        </span>
+        <span className="adv-meta">
+          <span className="adv-vp" aria-label={`${vp} victory points to you, not counted in the Advances total`}>
+            {vp}
+            <small>VP</small>
+          </span>
+          <span className="adv-price">{owned ? 'Owned' : 'Controlled'}</span>
+        </span>
+      </div>
+    </li>
+  );
+}
 
 /** The Special Building, bought with the Advances. Which building it is gets chosen after the purchase. */
 function SpecialBuildingRow({ cost: price, chainStart }: { cost: number; chainStart: boolean }) {
