@@ -1,11 +1,11 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Advance } from '../data';
 import { buildingById, COLOR_NAMES, COLORS, SPECIAL_BUILDING_VP } from '../data';
 import type { FilterId, GameState, SortId } from '../engine/game';
 import { isBarred } from '../engine/game';
 import { chainDiscount, cost, costSummary, funds, onGoal, payment, SPECIAL_BUILDING_NAME, visibleAdvances, worsenedCalamities } from '../engine/selectors';
 import { Icon } from '../components/Icon';
-import { advanceColors } from '../components/ui';
+import { advanceColors, GREY_FIELD } from '../components/ui';
 import { useGame } from '../state/store';
 import { BuildingSheet } from './Sheets';
 
@@ -95,7 +95,7 @@ export function AdvancesView({ onOpen, onFunds }: { onOpen: (name: string) => vo
         <ul className="adv-list">
           {listing.items.map((item) =>
             item.kind === 'building' ? (
-              <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} onOpen={() => setRules(true)} />
+              <SpecialBuildingRow key={SPECIAL_BUILDING_NAME} cost={item.cost} chainStart={listing.chainStarts.has(SPECIAL_BUILDING_NAME)} onOpen={() => setRules(true)} goalList={listing.filter === 'goal'} />
             ) : item.kind === 'controlled' ? (
               <ControlledBuildingRow key={item.id} id={item.id} vp={item.vp} owned={item.owned} onOpen={() => setRules(true)} />
             ) : (
@@ -137,20 +137,12 @@ function emptyMessage(filter: string, available: number, hasGoal: boolean) {
   return 'No Advances to show.';
 }
 
-/** The Special Building has no card color, so its field is grey. */
-const GREY: CSSProperties = {
-  '--swatch-a': '#7b8088',
-  '--swatch-b': '#7b8088',
-  '--on-a': '#ffffff',
-  '--on-b': '#ffffff',
-} as CSSProperties;
-
 /** A building you control, listed like an owned Advance. Its VP is what it is worth to you, and is not part of the Advances total. */
 function ControlledBuildingRow({ id, vp, owned, onOpen }: { id: string; vp: number; owned: boolean; onOpen: () => void }) {
   const b = buildingById(id);
   if (!b) return null;
   return (
-    <li className="adv owned" style={GREY}>
+    <li className="adv owned" style={GREY_FIELD}>
       <span className="adv-field">
         <span className="coin">
           <Icon name="check" />
@@ -178,19 +170,26 @@ function ControlledBuildingRow({ id, vp, owned, onOpen }: { id: string; vp: numb
 }
 
 /** The Special Building, bought with the Advances. Which building it is gets chosen after the purchase. */
-function SpecialBuildingRow({ cost: price, chainStart, onOpen }: { cost: number; chainStart: boolean; onOpen: () => void }) {
+function SpecialBuildingRow({ cost: price, chainStart, onOpen, goalList }: { cost: number; chainStart: boolean; onOpen: () => void; goalList: boolean }) {
   const { game, dispatch } = useGame();
   const picked = game.buildings.considering;
   const own = game.buildings.civ ? buildingById(game.buildings.civ) : undefined;
   const toggle = () => dispatch({ type: 'toggleSpecialBuilding' });
   return (
-    <li className={`adv${chainStart ? ' chain-start' : ''}`} style={GREY}>
+    <li className={`adv${chainStart ? ' chain-start' : ''}`} style={GREY_FIELD}>
       <button type="button" className="adv-field" aria-pressed={picked} aria-label={`${picked ? 'Remove' : 'Add'} ${SPECIAL_BUILDING_NAME}, cost ${price}`} onClick={toggle}>
         <span className="coin">{price}</span>
       </button>
       <button type="button" className="adv-body" onClick={onOpen}>
         <span className="adv-main">
-          <span className="adv-name">{SPECIAL_BUILDING_NAME}</span>
+          <span className="adv-name">
+            {game.buildings.goal && !goalList && (
+              <span className="adv-goal">
+                <Icon name="flag" label="On your goal:" />
+              </span>
+            )}
+            {SPECIAL_BUILDING_NAME}
+          </span>
           <span className="adv-tags">
             <span className="muted" style={{ fontSize: 13 }}>
               {own ? `${own.name} for ${own.civ}` : 'Choose the building after buying'}

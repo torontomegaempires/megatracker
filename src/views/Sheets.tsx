@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import type { Calamity, Credits } from '../data';
-import { buildingById, buildingCost, buildingsIn, COLOR_NAMES, COLORS, ERAS, nationsByAst, rulesFor } from '../data';
+import { buildingById, buildingCost, buildingsIn, COLOR_NAMES, COLORS, ERAS, nationsByAst, rulesFor, SPECIAL_BUILDING_VP } from '../data';
 import { choiceCanTap, choicePrompt, choiceReady, choiceTap } from '../engine/credits';
 import { isBarred, zeroCredits } from '../engine/game';
 import { calamityDescription, chainDiscount, cost, creditFor } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
 import { buildingPoints } from '../engine/selectors';
-import { advanceColors, colorNames, CreditPills, nationStyle, RulesText } from '../components/ui';
+import { advanceColors, colorNames, CreditPills, GREY_FIELD, nationStyle, RulesText } from '../components/ui';
 import { useGame } from '../state/store';
 
 // --------------------------------------------------------------- advance
@@ -389,14 +389,61 @@ function BuildingChoice() {
 
 // -------------------------------------------------------- building rules
 
-/** How special buildings score and what they do, opened from a building in the Advances list. */
+/** The Special Building's card, laid out like an Advance's: cost, effect, and goal and purchase buttons. */
 export function BuildingSheet({ onClose }: { onClose: () => void }) {
-  const { game } = useGame();
+  const { game, dispatch } = useGame();
+  const b = game.buildings;
   const points = buildingPoints(game);
-  const civ = game.buildings.civ ? buildingById(game.buildings.civ) : undefined;
+  const civ = b.civ ? buildingById(b.civ) : undefined;
+  const price = buildingCost(b.era);
+  const picked = b.considering;
+  const has = !!b.owned;
+
   return (
-    <Sheet title="Special Buildings" subtitle={points ? `${points.total} VP to you` : undefined} onClose={onClose}>
-      <div className="prose buildings-rules">
+    <Sheet
+      title="Special Building"
+      subtitle={`Special · ${SPECIAL_BUILDING_VP.low}/${SPECIAL_BUILDING_VP.high} VP · price ${price}`}
+      band={GREY_FIELD}
+      onClose={onClose}
+      footer={
+        has ? (
+          <span className="muted" style={{ margin: 'auto' }}>
+            <Icon name="check" /> You own a Special Building
+          </span>
+        ) : (
+          <>
+            <button type="button" className="btn btn-goal" aria-pressed={b.goal} onClick={() => dispatch({ type: 'toggleBuildingGoal' })}>
+              <Icon name="flag" />
+              {b.goal ? 'On goal' : 'Add to goal'}
+            </button>
+            <button
+              type="button"
+              className={`btn ${picked ? '' : 'btn-primary'}`}
+              disabled={!!game.freePick}
+              onClick={() => {
+                dispatch({ type: 'toggleSpecialBuilding' });
+                onClose();
+              }}
+            >
+              {picked ? 'Remove from purchase' : `Consider buying for ${price}`}
+            </button>
+          </>
+        )
+      }
+    >
+      {!has && (
+        <div className="section">
+          <div className="facts">
+            <div className="fact">
+              <div className="label">Your cost</div>
+              <div className="value">{price}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="section prose buildings-rules">
+        <h3>Effect</h3>
         <p>
           <b>VP:</b> 2 for owning a building{points && ` (${points.owned})`}, 1 for each you control{points && ` (${points.controlled})`}, and 2 more for
           controlling {civ ? `the ${civ.name}` : 'your civilization’s'}

@@ -30,6 +30,8 @@ export interface BuildingsState {
   controlled: string[];
   /** A Special Building is in this turn's purchase. Which one is chosen once it is bought. */
   considering: boolean;
+  /** The Special Building is on your goal. */
+  goal: boolean;
   /** Controlled buildings to sacrifice as commodity cards when buying. */
   sacrificing: string[];
 }
@@ -119,7 +121,7 @@ export function loadFunding(saved: unknown): Funding {
 }
 
 export function newBuildings(enabled = false): BuildingsState {
-  return { enabled, civ: null, era: 'eba', owned: null, controlled: [], considering: false, sacrificing: [] };
+  return { enabled, civ: null, era: 'eba', owned: null, controlled: [], considering: false, goal: false, sacrificing: [] };
 }
 
 /** An era from a saved game, which before the five eras were chosen kept only the three price bands. */
@@ -145,6 +147,7 @@ export function loadBuildings(saved: unknown, block: BlockId): BuildingsState {
     owned,
     controlled,
     considering: b.considering === true && !owned,
+    goal: b.goal === true,
     sacrificing: list(b.sacrificing).filter((id) => controlled.includes(id)),
   };
 }
@@ -210,6 +213,7 @@ export type Action =
   | { type: 'setBoard'; board: Partial<GameState['board']> }
   | { type: 'setBuildings'; buildings: Partial<Pick<BuildingsState, 'enabled' | 'civ' | 'era'>> }
   | { type: 'toggleSpecialBuilding' }
+  | { type: 'toggleBuildingGoal' }
   | { type: 'chooseBuilding'; id: string }
   | { type: 'setOwnedBuilding'; id: string }
   | { type: 'toggleControl'; id: string }
@@ -369,6 +373,8 @@ export function reducer(state: GameState, action: Action): GameState {
       if (!buildingsOn(state) || b.owned || state.freePick) return state;
       return { ...state, buildings: { ...b, considering: true } };
     }
+    case 'toggleBuildingGoal':
+      return { ...state, buildings: { ...state.buildings, goal: !state.buildings.goal } };
     case 'chooseBuilding': {
       const b = state.buildings;
       if (state.queue[0]?.kind !== 'building' || !buildingIn(state.block, action.id) || b.controlled.includes(action.id)) return state;

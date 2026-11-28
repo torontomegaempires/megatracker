@@ -24,6 +24,16 @@ export function nationStyle(color: string): CSSProperties {
   } as CSSProperties;
 }
 
+/** The Special Building has no card color, so its field is grey. */
+export const GREY_FIELD: CSSProperties = {
+  '--swatch-a': '#7b8088',
+  '--swatch-b': '#7b8088',
+  '--tint-a': 'var(--card-3)',
+  '--tint-b': 'var(--card-3)',
+  '--on-a': '#ffffff',
+  '--on-b': '#ffffff',
+} as CSSProperties;
+
 export function colorNames(a: Pick<Advance, 'colors'>): string {
   return a.colors.map((c) => COLOR_NAMES[c]).join(' / ');
 }

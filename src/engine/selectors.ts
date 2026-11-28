@@ -355,7 +355,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     buildingsOn(state) &&
     !state.buildings.owned &&
     !state.freePick &&
-    (state.buildings.considering || f === 'all' || f === 'unowned' || ((f === 'affordable' || f === 'almostAffordable') && buildingCostNow <= cap));
+    (state.buildings.considering || f === 'all' || f === 'unowned' || (f === 'goal' && state.buildings.goal) || ((f === 'affordable' || f === 'almostAffordable') && buildingCostNow <= cap));
   const list: ListItem[] = advances.map((advance) => ({ kind: 'advance', advance }));
   if (showBuilding) list.push({ kind: 'building', cost: buildingCostNow });
 

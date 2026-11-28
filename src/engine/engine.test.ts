@@ -546,7 +546,7 @@ describe('special buildings', () => {
     expect(loadBuildings({ enabled: true, owned: 'rome', controlled: ['rome', 'tang'] }, 'fareast')).toMatchObject({ owned: null, controlled: ['tang'] });
     expect(
       loadBuildings({ enabled: true, civ: 'atlantis', era: 'iron', owned: 'rome', controlled: ['rome', 'rome', 'nowhere'], considering: true, sacrificing: ['rome', 'hellas'] }, 'west'),
-    ).toEqual({ enabled: true, civ: null, era: 'eia', owned: 'rome', controlled: ['rome'], considering: false, sacrificing: ['rome'] });
+    ).toEqual({ enabled: true, civ: null, era: 'eia', owned: 'rome', controlled: ['rome'], considering: false, goal: false, sacrificing: ['rome'] });
   });
 });
 
