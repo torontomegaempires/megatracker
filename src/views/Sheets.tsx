@@ -272,10 +272,10 @@ function CreditChoice() {
 // ---------------------------------------------------------------- nation
 
 /** Choose your nation, listed in A.S.T. order, each on its token color. */
-export function NationSheet({ onClose }: { onClose: () => void }) {
+export function NationSheet({ onClose, subtitle = 'In A.S.T. order' }: { onClose?: () => void; subtitle?: string }) {
   const { game, dispatch } = useGame();
   return (
-    <Sheet title="Choose nation" subtitle="In A.S.T. order" onClose={onClose}>
+    <Sheet title="Choose nation" subtitle={subtitle} onClose={onClose}>
       <ul className="nation-list">
         {nationsByAst(buildingsIn(game.block)).map((n) => (
           <li key={n.id}>
@@ -286,7 +286,7 @@ export function NationSheet({ onClose }: { onClose: () => void }) {
               aria-pressed={game.buildings.civ === n.id}
               onClick={() => {
                 dispatch({ type: 'setBuildings', buildings: { civ: n.id } });
-                onClose();
+                onClose?.();
               }}
             >
               <span className="nation-ast num">{n.ast}</span>
@@ -340,9 +340,12 @@ function BuildingChoice() {
   const available = nationsByAst(buildingsIn(game.block)).filter((x) => !b.controlled.includes(x.id));
   const own = b.civ && available.some((x) => x.id === b.civ) ? b.civ : '';
   const [picked, setPicked] = useState('');
-  const [setting, setSetting] = useState<null | 'nation' | 'era'>(null);
+  const [settingEra, setSettingEra] = useState(false);
   const pick = picked || own;
   const civ = b.civ ? buildingById(b.civ) : undefined;
+
+  // Your nation comes first: it sets which building is suggested.
+  if (!civ) return <NationSheet subtitle="Choose your nation before you pick your building" />;
 
   return (
     <>
@@ -356,20 +359,11 @@ function BuildingChoice() {
         }
       >
         <div className="section">
-          {civ ? (
-            <p className="prose">
-              Your nation is <b>{civ.civ}</b>. Its building is selected.
-            </p>
-          ) : (
-            <p className="prose">You haven’t chosen your nation, so no building is selected.</p>
-          )}
+          <p className="prose">
+            Your nation is <b>{civ.civ}</b>.{own ? ' Its building is selected.' : ''}
+          </p>
           <div className="building-actions">
-            {!civ && (
-              <button type="button" className="btn btn-primary" onClick={() => setSetting('nation')}>
-                Choose your nation
-              </button>
-            )}
-            <button type="button" className="btn" onClick={() => setSetting('era')}>
+            <button type="button" className="btn" onClick={() => setSettingEra(true)}>
               Era: {era.abbr}. Change
             </button>
           </div>
@@ -378,7 +372,6 @@ function BuildingChoice() {
           {available.map((n) => (
             <li key={n.id}>
               <button type="button" className="nation-option" style={nationStyle(n.color)} aria-pressed={pick === n.id} onClick={() => setPicked(n.id)}>
-                <span className="nation-ast num">{n.ast}</span>
                 <span className="nation-name">
                   {n.name} <small>{n.civ}</small>
                 </span>
@@ -388,8 +381,7 @@ function BuildingChoice() {
           ))}
         </ul>
       </Sheet>
-      {setting === 'nation' && <NationSheet onClose={() => setSetting(null)} />}
-      {setting === 'era' && <EraSheet onClose={() => setSetting(null)} />}
+      {settingEra && <EraSheet onClose={() => setSettingEra(false)} />}
     </>
   );
 }
