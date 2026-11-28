@@ -450,8 +450,10 @@ export function BuildingSheet({ onClose }: { onClose: () => void }) {
           {points && ` (${points.historic})`}. Ties go first to whoever owns and controls their civilization’s building, then to whoever owns one.
         </p>
         <p>
-          <b>Tax:</b> each building you control pays tax as if it were a city. <b>Population:</b> a city with a building supports 1 more token; an area
-          without a city and a limit of 1 or 2 holds 1 more.
+          <b>Tax:</b> each building you control pays tax as if it were a city.
+        </p>
+        <p>
+          <b>Population:</b> a city with a building supports 1 more token; an area without a city and a limit of 1 or 2 holds 1 more.
         </p>
         <p>
           <b>Calamities:</b> sacrifice the building you own and control to prevent up to 10 damage, the reduction of up to 2 cities, or 1 step of
