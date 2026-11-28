@@ -1,5 +1,5 @@
-import type { BlockId, BuildingEra, Credits, ExtraCredit } from '../data';
-import { BLOCKS, buildingIn, COLORS, rulesFor } from '../data';
+import type { BlockId, Credits, Era, ExtraCredit } from '../data';
+import { BLOCKS, buildingIn, COLORS, ERAS, rulesFor } from '../data';
 import { buildingsOn, freePickMatches, payment } from './selectors';
 
 export type FilterId = 'unowned' | 'affordable' | 'almostAffordable' | 'goal' | 'owned' | 'all';
@@ -23,13 +23,13 @@ export interface BuildingsState {
   /** Your civilization: controlling its historic building is worth 2 more VP. */
   civ: string | null;
   /** Your succession marker's era on the A.S.T., which sets what a building costs. */
-  era: BuildingEra;
+  era: Era;
   /** The building in your own region. You own it whether or not you control it. */
   owned: string | null;
   /** Buildings you control (a city or token majority in their area), including your own if you do. */
   controlled: string[];
-  /** A building to construct with this turn's purchase of Advances. */
-  considering: string | null;
+  /** A Special Building is in this turn's purchase. Which one is chosen once it is bought. */
+  considering: boolean;
   /** Controlled buildings to sacrifice as commodity cards when buying. */
   sacrificing: string[];
 }
@@ -37,6 +37,7 @@ export interface BuildingsState {
 /** A pending choice of extra credits, or the face credits waiting to be added after those choices. */
 export type QueueItem =
   | { kind: 'choice'; source: string; amount: ExtraCredit; cancelable: boolean }
+  | { kind: 'building' }
   | { kind: 'face'; credits: Credits };
 
 export interface ViewSettings {
@@ -118,7 +119,15 @@ export function loadFunding(saved: unknown): Funding {
 }
 
 export function newBuildings(enabled = false): BuildingsState {
-  return { enabled, civ: null, era: 'bronze', owned: null, controlled: [], considering: null, sacrificing: [] };
+  return { enabled, civ: null, era: 'eba', owned: null, controlled: [], considering: false, sacrificing: [] };
+}
+
+/** An era from a saved game, which before the five eras were chosen kept only the three price bands. */
+function loadEra(saved: unknown, fallback: Era): Era {
+  if (saved === 'bronze') return 'eba';
+  if (saved === 'lateBronze') return 'lba';
+  if (saved === 'iron') return 'eia';
+  return ERAS.some((e) => e.id === saved) ? (saved as Era) : fallback;
 }
 
 /** Special buildings from a saved game, dropping anything unknown; games saved before them start with the expansion off. */
@@ -132,10 +141,10 @@ export function loadBuildings(saved: unknown, block: BlockId): BuildingsState {
   return {
     enabled: b.enabled === true,
     civ: known(b.civ) ? b.civ : null,
-    era: b.era === 'lateBronze' || b.era === 'iron' ? b.era : fresh.era,
+    era: loadEra(b.era, fresh.era),
     owned,
     controlled,
-    considering: !owned && known(b.considering) && !controlled.includes(b.considering) ? b.considering : null,
+    considering: b.considering === true && !owned,
     sacrificing: list(b.sacrificing).filter((id) => controlled.includes(id)),
   };
 }
@@ -200,7 +209,8 @@ export type Action =
   | { type: 'activateSpecial'; activation: 'gain10' | '10for10' | 'oneVPAdvance'; source: string }
   | { type: 'setBoard'; board: Partial<GameState['board']> }
   | { type: 'setBuildings'; buildings: Partial<Pick<BuildingsState, 'enabled' | 'civ' | 'era'>> }
-  | { type: 'considerBuilding'; id: string | null }
+  | { type: 'toggleSpecialBuilding' }
+  | { type: 'chooseBuilding'; id: string }
   | { type: 'setOwnedBuilding'; id: string }
   | { type: 'toggleControl'; id: string }
   | { type: 'toggleSacrifice'; id: string }
@@ -231,7 +241,7 @@ function buy(state: GameState): GameState {
   const rules = rulesFor(state.block);
   const purchases = state.considering.map((n) => rules.byName.get(n)!).filter(Boolean);
   const on = buildingsOn(state);
-  const building = on ? state.buildings.considering : null;
+  const building = on && state.buildings.considering;
   if (purchases.length === 0 && !building) return state;
 
   const owned = [...state.owned, ...purchases.map((a) => a.name)];
@@ -261,13 +271,7 @@ function buy(state: GameState): GameState {
     const gone = buildings.sacrificing.filter((id) => buildings.controlled.includes(id));
     const controlled = buildings.controlled.filter((id) => !gone.includes(id));
     const owned = buildings.owned && gone.includes(buildings.owned) ? null : buildings.owned;
-    buildings = {
-      ...buildings,
-      owned: building ?? owned,
-      controlled: building ? [...controlled, building] : controlled,
-      considering: null,
-      sacrificing: [],
-    };
+    buildings = { ...buildings, owned, controlled, considering: false, sacrificing: [] };
   }
 
   return drainQueue({
@@ -277,7 +281,7 @@ function buy(state: GameState): GameState {
     considering: [],
     funding: { hand, held: [], treasury },
     freePick,
-    queue: [...state.queue, ...choices, { kind: 'face', credits: face }],
+    queue: [...state.queue, ...choices, ...(building ? [{ kind: 'building' as const }] : []), { kind: 'face', credits: face }],
     view: { ...state.view, filter },
   });
 }
@@ -350,31 +354,37 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'setBoard':
       return { ...state, board: { ...state.board, ...action.board } };
     case 'setBuildings': {
-      const { civ } = action.buildings;
+      const { civ, era } = action.buildings;
       if (civ != null && !buildingIn(state.block, civ)) return state;
+      if (era != null && !ERAS.some((e) => e.id === era)) return state;
       const buildings = { ...state.buildings, ...action.buildings };
       // Nothing is planned while the expansion is off.
-      if (!buildings.enabled) Object.assign(buildings, { considering: null, sacrificing: [] });
+      if (!buildings.enabled) Object.assign(buildings, { considering: false, sacrificing: [] });
       return { ...state, buildings };
     }
-    case 'considerBuilding': {
+    case 'toggleSpecialBuilding': {
       const b = state.buildings;
-      const { id } = action;
-      if (id === null) return { ...state, buildings: { ...b, considering: null } };
-      // One building in your own region, built from those still in the supply, not as a free pick.
-      if (!buildingsOn(state) || b.owned || state.freePick || !buildingIn(state.block, id) || b.controlled.includes(id)) return state;
-      return { ...state, buildings: { ...b, considering: id } };
+      if (b.considering) return { ...state, buildings: { ...b, considering: false } };
+      // One building in your own region, and not as a free pick.
+      if (!buildingsOn(state) || b.owned || state.freePick) return state;
+      return { ...state, buildings: { ...b, considering: true } };
+    }
+    case 'chooseBuilding': {
+      const b = state.buildings;
+      if (state.queue[0]?.kind !== 'building' || !buildingIn(state.block, action.id) || b.controlled.includes(action.id)) return state;
+      const buildings = { ...b, owned: action.id, controlled: [...b.controlled, action.id] };
+      return drainQueue({ ...state, buildings, queue: state.queue.slice(1) });
     }
     case 'setOwnedBuilding': {
       // A building already standing in your region, for games tracked from partway through.
       const b = state.buildings;
       if (!buildingsOn(state) || b.owned || !buildingIn(state.block, action.id)) return state;
       const controlled = b.controlled.includes(action.id) ? b.controlled : [...b.controlled, action.id];
-      return { ...state, buildings: { ...b, owned: action.id, controlled, considering: null } };
+      return { ...state, buildings: { ...b, owned: action.id, controlled, considering: false } };
     }
     case 'toggleControl': {
       const b = state.buildings;
-      if (!buildingIn(state.block, action.id) || b.considering === action.id) return state;
+      if (!buildingIn(state.block, action.id)) return state;
       if (b.controlled.includes(action.id)) {
         const controlled = b.controlled.filter((id) => id !== action.id);
         return { ...state, buildings: { ...b, controlled, sacrificing: b.sacrificing.filter((id) => id !== action.id) } };

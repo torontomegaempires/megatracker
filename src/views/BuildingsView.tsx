@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { SpecialBuilding } from '../data';
-import { BUILDING_ERAS, buildingById, buildingCost, buildingsIn } from '../data';
-import type { BuildingEra } from '../data';
+import { buildingById, buildingCost, buildingsIn, ERAS, nationsByAst } from '../data';
+import type { Era } from '../data';
 import { buildingPoints } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { NationSwatch, Segmented } from '../components/ui';
@@ -41,9 +41,9 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
               onChange={(e) => dispatch({ type: 'setBuildings', buildings: { civ: e.target.value || null } })}
             >
               <option value="">Choose</option>
-              {buildingsIn(game.block).map((x) => (
+              {nationsByAst(buildingsIn(game.block)).map((x) => (
                 <option key={x.id} value={x.id}>
-                  {x.civ}
+                  {x.ast}. {x.civ}
                 </option>
               ))}
             </select>
@@ -55,11 +55,11 @@ export function BuildingsView({ onPurchase }: { onPurchase: () => void }) {
             Your era on the A.S.T.
             <span className="hint">Sets what a building costs: 30, 40 or 50</span>
           </label>
-          <Segmented<BuildingEra>
+          <Segmented<Era>
             label="Your era on the A.S.T."
             value={b.era}
             onChange={(era) => dispatch({ type: 'setBuildings', buildings: { era } })}
-            options={BUILDING_ERAS.map((e) => ({ value: e.id, label: e.label }))}
+            options={ERAS.map((e) => ({ value: e.id, label: e.abbr }))}
           />
         </div>
       </div>
@@ -134,21 +134,16 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
   }
 
   if (b.considering) {
-    const considering = buildingById(b.considering)!;
     return (
       <ul className="rows">
         <li className="trade-row">
           <div className="row-main">
-            <div className="row-title">{considering.name}</div>
+            <div className="row-title">Special Building</div>
             <div className="row-meta">
-              <span className="badge">
-                <NationSwatch nation={considering.civ} />
-                {considering.civ}
-              </span>
               <span className="badge">In your purchase · {cost}</span>
             </div>
           </div>
-          <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'considerBuilding', id: null })}>
+          <button type="button" className="btn btn-quiet" onClick={() => dispatch({ type: 'toggleSpecialBuilding' })}>
             Remove
           </button>
         </li>
@@ -161,7 +156,7 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
       <div className="field stack">
         <label htmlFor="building-pick">
           Build one
-          <span className="hint">With your Advances, if one of your cities is in your own region</span>
+          <span className="hint">Add it to your purchase and choose the building afterwards, or pick the one already standing in your region and tap Already built.</span>
         </label>
         <span className="select-wrap">
           <select id="building-pick" value={pick} onChange={(e) => setPick(e.target.value)}>
@@ -178,9 +173,9 @@ function OwnBuilding({ onPurchase }: { onPurchase: () => void }) {
           <button
             type="button"
             className="btn btn-primary"
-            disabled={!chosen || !!game.freePick}
+            disabled={!!game.freePick}
             onClick={() => {
-              dispatch({ type: 'considerBuilding', id: pick });
+              dispatch({ type: 'toggleSpecialBuilding' });
               onPurchase();
             }}
           >
@@ -199,7 +194,7 @@ function OtherBuildings() {
   const { game, dispatch } = useGame();
   const b = game.buildings;
   const others = b.controlled.filter((id) => id !== b.owned).map((id) => buildingById(id)!);
-  const addable = buildingsIn(game.block).filter((x) => !b.controlled.includes(x.id) && x.id !== b.owned && x.id !== b.considering);
+  const addable = buildingsIn(game.block).filter((x) => !b.controlled.includes(x.id) && x.id !== b.owned);
 
   return (
     <>

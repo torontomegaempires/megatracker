@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import type { Calamity, Credits } from '../data';
-import { COLOR_NAMES, COLORS, rulesFor } from '../data';
+import { buildingById, buildingCost, buildingsIn, COLOR_NAMES, COLORS, ERAS, nationsByAst, rulesFor } from '../data';
 import { choiceCanTap, choicePrompt, choiceReady, choiceTap } from '../engine/credits';
 import { isBarred, zeroCredits } from '../engine/game';
 import { calamityDescription, chainDiscount, cost, creditFor } from '../engine/selectors';
 import { Icon } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
-import { advanceColors, colorNames, CreditPills, RulesText } from '../components/ui';
+import { advanceColors, colorNames, CreditPills, nationStyle, RulesText } from '../components/ui';
 import { useGame } from '../state/store';
 
 // --------------------------------------------------------------- advance
@@ -213,6 +213,7 @@ export function CalamitySheet({ name, onClose, onOpenAdvance }: { name: string; 
 export function CreditChoiceSheet() {
   const { game } = useGame();
   const head = game.queue[0];
+  if (head?.kind === 'building') return <BuildingChoice key={`building:${game.queue.length}`} />;
   if (head?.kind !== 'choice') return null;
   // Keyed so each queued choice starts from a clean slate.
   return <CreditChoice key={`${game.queue.length}:${head.source}`} />;
@@ -265,5 +266,130 @@ function CreditChoice() {
         ))}
       </div>
     </Sheet>
+  );
+}
+
+// ---------------------------------------------------------------- nation
+
+/** Choose your nation, listed in A.S.T. order, each on its token color. */
+export function NationSheet({ onClose }: { onClose: () => void }) {
+  const { game, dispatch } = useGame();
+  return (
+    <Sheet title="Choose nation" subtitle="In A.S.T. order" onClose={onClose}>
+      <ul className="nation-list">
+        {nationsByAst(buildingsIn(game.block)).map((n) => (
+          <li key={n.id}>
+            <button
+              type="button"
+              className="nation-option"
+              style={nationStyle(n.color)}
+              aria-pressed={game.buildings.civ === n.id}
+              onClick={() => {
+                dispatch({ type: 'setBuildings', buildings: { civ: n.id } });
+                onClose();
+              }}
+            >
+              <span className="nation-ast num">{n.ast}</span>
+              <span className="nation-name">{n.civ}</span>
+              {game.buildings.civ === n.id && <Icon name="check" />}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Sheet>
+  );
+}
+
+// ------------------------------------------------------------------- era
+
+export function EraSheet({ onClose }: { onClose: () => void }) {
+  const { game, dispatch } = useGame();
+  return (
+    <Sheet title="Choose era" subtitle="Where your marker is on the A.S.T." onClose={onClose}>
+      <ul className="nation-list">
+        {ERAS.map((e) => (
+          <li key={e.id}>
+            <button
+              type="button"
+              className="nation-option era-option"
+              aria-pressed={game.buildings.era === e.id}
+              onClick={() => {
+                dispatch({ type: 'setBuildings', buildings: { era: e.id } });
+                onClose();
+              }}
+            >
+              <span className="nation-ast">{e.abbr}</span>
+              <span className="nation-name">{e.name}</span>
+              <span className="muted num">Special Building {e.cost}</span>
+              {game.buildings.era === e.id && <Icon name="check" />}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Sheet>
+  );
+}
+
+// -------------------------------------------------------- building choice
+
+/** After buying the Special Building: which one it is, with your own nation's selected. */
+function BuildingChoice() {
+  const { game, dispatch } = useGame();
+  const b = game.buildings;
+  const era = ERAS.find((e) => e.id === b.era)!;
+  const available = nationsByAst(buildingsIn(game.block)).filter((x) => !b.controlled.includes(x.id));
+  const own = b.civ && available.some((x) => x.id === b.civ) ? b.civ : '';
+  const [picked, setPicked] = useState('');
+  const [setting, setSetting] = useState<null | 'nation' | 'era'>(null);
+  const pick = picked || own;
+  const civ = b.civ ? buildingById(b.civ) : undefined;
+
+  return (
+    <>
+      <Sheet
+        title="Choose your Special Building"
+        subtitle={`Paid ${buildingCost(b.era)} in the ${era.name}`}
+        footer={
+          <button type="button" className="btn btn-primary" disabled={!pick} onClick={() => dispatch({ type: 'chooseBuilding', id: pick })}>
+            Build it
+          </button>
+        }
+      >
+        <div className="section">
+          {civ ? (
+            <p className="prose">
+              Your nation is <b>{civ.civ}</b>. Its building is selected.
+            </p>
+          ) : (
+            <p className="prose">You haven’t chosen your nation, so no building is selected.</p>
+          )}
+          <div className="building-actions">
+            {!civ && (
+              <button type="button" className="btn btn-primary" onClick={() => setSetting('nation')}>
+                Choose your nation
+              </button>
+            )}
+            <button type="button" className="btn" onClick={() => setSetting('era')}>
+              Era: {era.abbr}. Change
+            </button>
+          </div>
+        </div>
+        <ul className="nation-list">
+          {available.map((n) => (
+            <li key={n.id}>
+              <button type="button" className="nation-option" style={nationStyle(n.color)} aria-pressed={pick === n.id} onClick={() => setPicked(n.id)}>
+                <span className="nation-ast num">{n.ast}</span>
+                <span className="nation-name">
+                  {n.name} <small>{n.civ}</small>
+                </span>
+                {pick === n.id && <Icon name="check" />}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
+      {setting === 'nation' && <NationSheet onClose={() => setSetting(null)} />}
+      {setting === 'era' && <EraSheet onClose={() => setSetting(null)} />}
+    </>
   );
 }

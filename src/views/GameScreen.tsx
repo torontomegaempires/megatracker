@@ -1,10 +1,10 @@
-import { useCallback, useState, type CSSProperties } from 'react';
-import { BLOCKS, buildingById, COLOR_NAMES, COLORS, contrastRatio, nationByName } from '../data';
+import { useCallback, useState } from 'react';
+import { BLOCKS, buildingById, COLOR_NAMES, COLORS, ERAS, nationByName } from '../data';
 import type { AstMode } from '../engine/game';
 import { astStatus, buildingsOn, costSummary, specialAbilities, victoryPoints } from '../engine/selectors';
 import { GitHubIcon, Icon, type IconName } from '../components/Icon';
 import { Sheet } from '../components/Sheet';
-import { Segmented } from '../components/ui';
+import { nationStyle, Segmented } from '../components/ui';
 import { useShared } from '../state/shared';
 import { useGame } from '../state/store';
 import { useTheme, type Theme } from '../state/theme';
@@ -12,7 +12,7 @@ import { APP_BUILT_AT, APP_COMMIT, APP_VERSION, versionLabel } from '../version'
 import { AdvancesView, Cart } from './AdvancesView';
 import { SharedGameView } from './SharedGameView';
 import { CalamitiesView, CitiesView, SpecialsView, TradeView } from './OtherViews';
-import { AdvanceSheet, CalamitySheet, CreditChoiceSheet } from './Sheets';
+import { AdvanceSheet, CalamitySheet, CreditChoiceSheet, EraSheet, NationSheet } from './Sheets';
 
 type Tab = 'advances' | 'cities' | 'trade' | 'calamities' | 'specials' | 'game';
 const TABS: { id: Tab; label: string; icon: IconName }[] = [
@@ -24,36 +24,46 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
   { id: 'game', label: 'Game', icon: 'standings' },
 ];
 
-/** Text on a nation pill: white or near-black (as on yellow Advance cards), whichever contrasts more. */
-const ON_LIGHT = '#1d1a0c';
-const ON_DARK = '#ffffff';
-
 /**
- * The game's name, or your nation's name on a pill in its token color: the nation you joined a
- * shared game as, or else the civilization you picked for Special Buildings.
+ * Your nation on a pill in its token color: the nation you joined a shared game as, or else the
+ * one you chose. Tap to choose (or change) it.
  */
-function BrandName() {
+function NationButton({ onClick }: { onClick: () => void }) {
   const { game } = useGame();
   const { seat, view } = useShared();
   const seated = seat && view?.code === seat.code ? view.standings.find((r) => r.seatId === seat.seatId)?.nation : undefined;
-  const civ = buildingsOn(game) && game.buildings.civ ? buildingById(game.buildings.civ)?.civ : undefined;
-  const nation = seated || civ;
-  if (!nation) return <span className="brand-name">{BLOCKS[game.block].name}</span>;
-  const color = nationByName(nation)?.color;
-  const style = color
-    ? ({
-        '--nation': color,
-        '--on-nation': contrastRatio(color, ON_DARK) >= contrastRatio(color, ON_LIGHT) ? ON_DARK : ON_LIGHT,
-      } as CSSProperties)
-    : undefined;
+  const chosen = game.buildings.civ ? buildingById(game.buildings.civ)?.civ : undefined;
+  const nation = seated || chosen;
+  const color = nation ? nationByName(nation)?.color : undefined;
   return (
-    <span className={`brand-name${color ? ' brand-nation' : ''}`} style={style} title={BLOCKS[game.block].name}>
-      {nation}
-    </span>
+    <button
+      type="button"
+      className={`brand-name${color ? ' brand-nation' : ' brand-choose'}`}
+      style={color ? nationStyle(color) : undefined}
+      title={BLOCKS[game.block].name}
+      aria-label={nation ? `Your nation is ${nation}. Change it` : 'Choose nation'}
+      onClick={onClick}
+    >
+      {nation ?? 'Choose Nation'}
+    </button>
   );
 }
 
-type Overlay = null | { kind: 'menu' } | { kind: 'about' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
+/** Your era on the A.S.T., in the middle of the header: the full name where it fits, else three letters. */
+function EraButton({ onClick }: { onClick: () => void }) {
+  const { game } = useGame();
+  const era = ERAS.find((e) => e.id === game.buildings.era)!;
+  return (
+    <button type="button" className="era-btn" aria-label={`Your era is ${era.name}. Change it`} onClick={onClick}>
+      <span className="era-full">{era.name}</span>
+      <span className="era-abbr" aria-hidden>
+        {era.abbr}
+      </span>
+    </button>
+  );
+}
+
+type Overlay = null | { kind: 'nation' } | { kind: 'era' } | { kind: 'menu' } | { kind: 'about' } | { kind: 'advance'; name: string } | { kind: 'calamity'; name: string };
 
 export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | null; onJoinHandled: () => void }) {
   const { game } = useGame();
@@ -74,8 +84,10 @@ export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | nul
             <Icon name="menu" />
           </button>
           <div className="brand">
-            <BrandName />
+            <NationButton onClick={() => setOverlay({ kind: 'nation' })} />
           </div>
+          <div className="topbar-spacer" />
+          <EraButton onClick={() => setOverlay({ kind: 'era' })} />
           <div className="topbar-spacer" />
           <span className="vp-label" aria-hidden>
             Advances
@@ -132,6 +144,8 @@ export function GameScreen({ joinCode, onJoinHandled }: { joinCode: string | nul
       {overlay?.kind === 'calamity' && (
         <CalamitySheet name={overlay.name} onClose={close} onOpenAdvance={(name) => setOverlay({ kind: 'advance', name })} />
       )}
+      {overlay?.kind === 'nation' && <NationSheet onClose={close} />}
+      {overlay?.kind === 'era' && <EraSheet onClose={close} />}
       {overlay?.kind === 'menu' && <MenuSheet onClose={close} onAbout={() => setOverlay({ kind: 'about' })} />}
       {overlay?.kind === 'about' && <AboutSheet onClose={close} />}
       <CreditChoiceSheet />

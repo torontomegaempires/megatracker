@@ -1,5 +1,5 @@
-import type { Advance, Calamity, Commodity, RuleData, SpecialBuilding, TradePower } from '../data';
-import { buildingById, buildingCost, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
+import type { Advance, Calamity, Commodity, RuleData, TradePower } from '../data';
+import { buildingCost, SPECIAL_BUILDING_VP, commoditiesFor, commodityById, rulesFor, setValue } from '../data';
 import type { AstMode, BuildingsState, FilterId, FreePick, GameState, SortId } from './game';
 
 /** Whether this game uses the Special Buildings expansion. */
@@ -265,7 +265,7 @@ export interface CostSummary {
   lines: CostLine[];
   libraryDiscount: number;
   /** A special building being constructed in the same purchase. */
-  building: { building: SpecialBuilding; cost: number } | null;
+  building: { cost: number } | null;
   total: number;
 }
 
@@ -285,16 +285,22 @@ export function costSummary(state: GameState): CostSummary {
     else maxOther = Math.max(maxOther, c);
     return { advance: a, cost: c, free };
   });
-  const considered = buildingsOn(state) && state.buildings.considering ? buildingById(state.buildings.considering) : undefined;
-  const building = considered ? { building: considered, cost: buildingCost(state.buildings.era) } : null;
+  const building = buildingsOn(state) && state.buildings.considering ? { cost: buildingCost(state.buildings.era) } : null;
   // A building is bought as if it were an Advance, so Library can discount it too.
   const libraryDiscount = hasLibrary ? Math.min(Math.max(maxOther, building?.cost ?? 0), 40) : 0;
   const total = lines.reduce((t, l) => t + (l.free ? 0 : l.cost), 0) - libraryDiscount + (building?.cost ?? 0);
   return { lines, libraryDiscount, building, total };
 }
 
+/** What the Advances list shows: an Advance, or the Special Building you can buy alongside them. */
+export type ListItem = { kind: 'advance'; advance: Advance } | { kind: 'building'; cost: number };
+
+export const SPECIAL_BUILDING_NAME = 'Special Building';
+
 export interface AdvanceListing {
   advances: Advance[];
+  /** The Advances plus the Special Building, in the chosen order. */
+  items: ListItem[];
   /** Names of advances that start a new strategic chain (shown with a divider). */
   chainStarts: Set<string>;
   sort: SortId | 'revCost';
@@ -314,7 +320,7 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     if (costliest < 40) cap += 40 - costliest;
   }
 
-  const list = rules.advances.filter((a) => {
+  const advances = rules.advances.filter((a) => {
     const isOwned = owns(state, a.name);
     if (f === 'all') return true;
     if (f === 'owned') return isOwned;
@@ -333,37 +339,67 @@ export function visibleAdvances(state: GameState): AdvanceListing {
     }
   });
 
+  // The Special Building sits among the Advances until you own one.
+  const buildingCostNow = buildingCost(state.buildings.era);
+  const showBuilding =
+    buildingsOn(state) &&
+    !state.buildings.owned &&
+    !state.freePick &&
+    (state.buildings.considering || f === 'all' || f === 'unowned' || ((f === 'affordable' || f === 'almostAffordable') && buildingCostNow <= cap));
+  const list: ListItem[] = advances.map((advance) => ({ kind: 'advance', advance }));
+  if (showBuilding) list.push({ kind: 'building', cost: buildingCostNow });
+
   const c = (a: Advance) => cost(state, a);
+  const key = {
+    name: (i: ListItem) => (i.kind === 'advance' ? i.advance.name : SPECIAL_BUILDING_NAME),
+    cost: (i: ListItem) => (i.kind === 'advance' ? c(i.advance) : i.cost),
+    price: (i: ListItem) => (i.kind === 'advance' ? i.advance.price : i.cost),
+    // The building counts as 5 VP here, though it shows 3/5.
+    vp: (i: ListItem) => (i.kind === 'advance' ? i.advance.vp : SPECIAL_BUILDING_VP.high),
+    discount: (i: ListItem) => (i.kind === 'advance' ? i.advance.price - c(i.advance) : 0),
+    color: (i: ListItem) => (i.kind === 'advance' ? i.advance.color : 'grey'),
+    chain: (i: ListItem) => (i.kind === 'advance' ? i.advance.chain : Infinity),
+  };
   const chainStarts = new Set<string>();
   switch (s) {
     case 'cost':
-      list.sort((a, b) => c(a) - c(b));
+      list.sort((a, b) => key.cost(a) - key.cost(b));
       break;
     case 'revCost':
-      list.sort((a, b) => b.price - a.price);
+      list.sort((a, b) => key.price(b) - key.price(a));
       break;
     case 'vp':
-      list.sort((a, b) => b.vp - a.vp || c(a) - c(b));
+      list.sort((a, b) => key.vp(b) - key.vp(a) || key.cost(a) - key.cost(b));
       break;
     case 'economy':
-      list.sort((a, b) => c(a) / a.vp - c(b) / b.vp || c(a) - c(b));
+      list.sort((a, b) => key.cost(a) / key.vp(a) - key.cost(b) / key.vp(b) || key.cost(a) - key.cost(b));
       break;
     case 'color':
-      list.sort((a, b) => a.color.localeCompare(b.color));
+      list.sort((a, b) => key.color(a).localeCompare(key.color(b)));
       break;
     case 'discount':
-      list.sort((a, b) => b.price - c(b) - (a.price - c(a)));
+      list.sort((a, b) => key.discount(b) - key.discount(a));
       break;
     case 'chains':
-      list.sort((a, b) => a.chain - b.chain || a.price - b.price);
+      list.sort((a, b) => (key.chain(a) === key.chain(b) ? 0 : key.chain(a) - key.chain(b)) || key.price(a) - key.price(b));
       list.forEach((a, i) => {
-        if (i > 0 && list[i - 1].chain !== a.chain) chainStarts.add(a.name);
+        if (i > 0 && key.chain(list[i - 1]) !== key.chain(a)) chainStarts.add(key.name(a));
       });
       break;
-    case 'alpha':
+    case 'alpha': {
+      // Advances keep their listed order; the building goes in by name.
+      const at = list.findIndex((i) => i.kind === 'advance' && i.advance.name.localeCompare(SPECIAL_BUILDING_NAME) > 0);
+      if (showBuilding && at >= 0) list.splice(at, 0, list.pop()!);
       break;
+    }
   }
-  return { advances: list, chainStarts, sort: s, filter: f };
+  return {
+    advances: list.flatMap((i) => (i.kind === 'advance' ? [i.advance] : [])),
+    items: list,
+    chainStarts,
+    sort: s,
+    filter: f,
+  };
 }
 
 // ---------------------------------------------------------------------------
